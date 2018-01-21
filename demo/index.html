@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>embed-page demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../embed-page.html">
+
+    <link rel="import" href="../../paper-radio-group/paper-radio-group.html">
+
+    <custom-style>
+        <style is="custom-style" include="demo-pages-shared-styles">
+        </style>
+    </custom-style>
+</head>
+<body>
+<div class="vertical-section-container centered">
+    <h3>Basic embed-page demo</h3>
+    <label>URL:
+        <select onchange="document.getElementsByTagName('embed-page')[0].src=this.value">
+            <option value="page-with-js.html" selected="selected"           >page-with-js.html          </option>
+            <option value="/listings-search/"                               >local listings             </option>
+            <option value="https://www.cahousefinder.com/listings-search/"  >cahousefinder.com listings </option>
+        </select>
+    </label>
+    <demo-snippet>
+        <template>
+            <embed-page src="page-with-js.html"></embed-page>
+        </template>
+    </demo-snippet>
+</div>
+</body>
+</html>

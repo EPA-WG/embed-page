@@ -1,0 +1,105 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../imported-template/imported-template.html">
+<dom-module id="embed-page">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+        </style>
+        <h2>from [[src]]</h2>
+        <hr/>
+        <div id="framed" ></div>
+
+    </template>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" type="application/javascript"></script>
+    <script>
+( function( window, document, $ )
+{
+    /**
+     * `embed-page`
+     * embed page in iframe fashion
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class EmbedPage extends Polymer.Element
+    {
+        static get is() { return 'embed-page'; }
+
+        static get properties()
+        {
+            return  {   src:    {   type: String
+                                ,   value: 'embed-page'
+                                ,   observer: 'fetch'
+                                }
+                    };
+        }
+        // ready(){   super.ready(); this.fetch() } - no need as observer performs fetch
+        fetch()
+        {   const f = this.$.framed;
+            this.$f = $(f);
+
+            this.onBeforeFetch();
+            fetch( this.src )
+            .then( response => response.text() )
+            .then( t =>
+            {   let el = document.createElement('div');
+                el.innerHTML =  t;
+                // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
+                let $s = $( scriptsSelector, el ).detach();
+                f.appendChild( el );
+                this.runScripts( $s );
+            }, err => f.innerHTML =  "Technical error" );
+        }
+        onBeforeFetch(){ this.$f.addClass   ( 'loading') }
+        onAfterFetch (){ this.$f.removeClass( 'loading') }
+
+        get context()
+        {   const f = this.$.framed;
+            return  {   window      : window
+                    ,   document    : { getElementById:  id => $( '#'+id, f )[0]
+                                      }
+                    ,   head        : document.head
+                    ,   body        : document.body
+                    }
+        }
+
+        runScripts( /** @type {!NodeList} */ pageScripts, { window, document, head, body } = this.context )
+        {
+            forEach( pageScripts, currentScript =>
+            {   if( currentScript.src )
+                    fetch( currentScript.src ).then( response => response.text() ).then( runScript );
+                else
+                    runScript( currentScript.text )
+                function runScript( txt )
+                {
+                    eval(txt); // todo src map
+                }
+            });
+
+        }
+        runScriptsRaw( { window, document, head, body } = this.context )
+        {
+            forEach( content.querySelectorAll(scriptsSelector), currentScript =>
+            {   const clone = /** @type {!HTMLScriptElement} */( script.ownerDocument.createElement('script') );
+                forEach(script.attributes, attr => clone.setAttribute(attr.name, attr.value));
+                clone.textContent = script.textContent;
+                script.parentNode.insertBefore(clone, script);
+                script.parentNode.removeChild(script);
+            });
+        }
+    }
+    const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
+    let forEach = (arr,cb)=>[...arr].forEach(cb);
+    //function forEach(arr,cb){[...arr].forEach(cb)}
+
+    function addClass( el, className  ){ el.className = className } // todo
+    function removeClass( el, className  ){ el.className = '' } // todo
+
+    window.customElements.define( EmbedPage.is, EmbedPage );
+
+})( window, document, jQuery );
+    </script>
+</dom-module>
