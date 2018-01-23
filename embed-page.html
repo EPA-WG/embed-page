@@ -12,9 +12,8 @@
         <div id="framed" ></div>
 
     </template>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" type="application/javascript"></script>
     <script>
-( function( window, document, $ )
+( function( win, doc )
 {
     /**
      * `embed-page`
@@ -38,47 +37,39 @@
         }
         // ready(){   super.ready(); this.fetch() } - no need as observer performs fetch
         fetch()
-        {   const f = this.$.framed;
-            this.$f = $(f);
-
+        {   const f = this.$f = this.$.framed;
             this.onBeforeFetch();
             fetch( this.src )
             .then( response => response.text() )
             .then( t =>
-            {   let el = document.createElement('div');
+            {   let el = doc.createElement('div');
                 el.innerHTML =  t;
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
-                let $s = $( scriptsSelector, el ).detach();
+                let $s = $( scriptsSelector, el );//.detach();
                 f.appendChild( el );
                 this.runScripts( $s );
+                this.onAfterFetch();
             }, err => f.innerHTML =  "Technical error" );
         }
-        onBeforeFetch(){ this.$f.addClass   ( 'loading') }
-        onAfterFetch (){ this.$f.removeClass( 'loading') }
+        onBeforeFetch(){ addClass   ( this.$f,'loading') }
+        onAfterFetch (){ removeClass( this.$f,'loading') }
 
         get context()
         {   const f = this.$.framed;
-            return  {   window      : window
-                    ,   document    : { getElementById:  id => $( '#'+id, f )[0]
-                                      }
-                    ,   head        : document.head
-                    ,   body        : document.body
+            return  {   window      : win
+                    ,   document    :   {   getElementById:  id => $( '#'+id, f )[0]
+                                        ,   getElementsByTagName: x => $( x, f )
+                                        ,   createElement: x=> doc.createElement(x)
+                                        ,   location: { protocol : doc.location.protocol }
+                                        }
+                    ,   head        : doc.head
+                    ,   body        : doc.body
                     }
         }
 
-        runScripts( /** @type {!NodeList} */ pageScripts, { window, document, head, body } = this.context )
-        {
-            forEach( pageScripts, currentScript =>
-            {   if( currentScript.src )
-                    fetch( currentScript.src ).then( response => response.text() ).then( runScript );
-                else
-                    runScript( currentScript.text )
-                function runScript( txt )
-                {
-                    eval(txt); // todo src map
-                }
-            });
-
+        runScripts( /** @type {!NodeList} */ pageScripts, { win, document, head, body } = this.context )
+        {   const env = this.context;
+            forEach( pageScripts, currentScript => EPA_runScript( currentScript, env ));
         }
         runScriptsRaw( { window, document, head, body } = this.context )
         {
@@ -92,14 +83,32 @@
         }
     }
     const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
-    let forEach = (arr,cb)=>[...arr].forEach(cb);
-    //function forEach(arr,cb){[...arr].forEach(cb)}
 
-    function addClass( el, className  ){ el.className = className } // todo
-    function removeClass( el, className  ){ el.className = '' } // todo
+    function forEach(arr,cb){[...arr].forEach(cb)}
+    function $( css, el = doc ){ return el.querySelectorAll( css ) }
+    function addClass   ( el, className  ){ el.className += ' '+className    }
+    function removeClass( el, className  ){ el.className = el.className.split(' ').map(s=>s===className?'':s).join(' ') }
 
-    window.customElements.define( EmbedPage.is, EmbedPage );
+    // outside of class to avoid strict mode
+    function EPA_runScript( currentScript, { window, document, head, body } )
+    {
+        console.debug( "embed-page", currentScript.src || currentScript.text );
+        if( currentScript.src )
+            fetch( currentScript.src )
+                .then( response => response.text() )
+                .then( txt => runScript( txt + "//# sourceURL=" + currentScript.src ) );
+        else
+            runScript( currentScript.text );// todo src map
 
-})( window, document, jQuery );
+        function runScript( txt )
+        {   try
+            {   eval(txt);
+            }catch(ex){ console.error(ex) }
+        }
+    }
+
+    win.customElements.define( EmbedPage.is, EmbedPage );
+})( window, document );
+
     </script>
 </dom-module>

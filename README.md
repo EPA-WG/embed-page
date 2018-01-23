@@ -13,7 +13,7 @@ Then run `polymer serve --open` to serve your element locally.
 ## Viewing Your Element
 
 ```
-$ polymer serve
+$ polymer serve --open
 ```
 
 ## Running Tests
