@@ -59,7 +59,9 @@
             return  {   window      : win
                     ,   document    :   {   getElementById:  id => $( '#'+id, f )[0]
                                         ,   getElementsByTagName: x => $( x, f )
-                                        ,   createElement: x=> doc.createElement(x)
+                                        ,   createElement   : x=> doc.createElement(x)
+                                        ,   querySelectorAll: x=> f.querySelectorAll(x)
+                                        ,   querySelector   : x=> f.querySelector(x)
                                         ,   location: { protocol : doc.location.protocol }
                                         }
                     ,   head        : doc.head
@@ -69,6 +71,7 @@
 
         runScripts( /** @type {!NodeList} */ pageScripts, { win, document, head, body } = this.context )
         {   const env = this.context;
+            // todo sequential execution
             forEach( pageScripts, currentScript => EPA_runScript( currentScript, env ));
         }
         runScriptsRaw( { window, document, head, body } = this.context )
