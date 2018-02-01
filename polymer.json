@@ -1,5 +1,5 @@
-{
-  "lint": {
+{	"basePath":"/EPA-WG/POC-01"
+,	"lint": {
     "rules": [
       "polymer-2"
     ]

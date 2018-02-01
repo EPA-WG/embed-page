@@ -33,19 +33,21 @@
                                 ,   value: 'embed-page'
                                 ,   observer: 'fetch'
                                 }
+                    ,   redirects:  {   type: Array
+                                    ,   value:  ()=>[]
+                                    }
                     };
         }
         // ready(){   super.ready(); this.fetch() } - no need as observer performs fetch
         fetch()
         {   const f = this.$f = this.$.framed;
             this.onBeforeFetch();
-            fetch( this.src )
-            .then( response => response.text() )
+            ajax( this.src )
             .then( t =>
             {   let el = doc.createElement('div');
                 el.innerHTML =  t;
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
-                let $s = $( scriptsSelector, el );//.detach();
+                let $s = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
                 f.appendChild( el );
                 this.runScripts( $s );
                 this.onAfterFetch();
@@ -71,8 +73,7 @@
 
         runScripts( /** @type {!NodeList} */ pageScripts, { win, document, head, body } = this.context )
         {   const env = this.context;
-            // todo sequential execution
-            forEach( pageScripts, currentScript => EPA_runScript( currentScript, env ));
+            EPA_runScript( [...pageScripts], env, this.redirects );
         }
         runScriptsRaw( { window, document, head, body } = this.context )
         {
@@ -87,30 +88,92 @@
     }
     const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
 
+    //ajax('https://www.cahousefinder.com/wp-includes/js/jquery/jquery.js?ver=1.11.0','GET').then(
+    //    x=>{
+    //        debugger;
+    //    },
+    //    err=>{
+    //        debugger;
+    //    }
+    //);
+
+    //if ('serviceWorker' in navigator)
+    //    //navigator.serviceWorker.register('https://cdn.xml4jquery.com/ajax/poc/sw.js' // not allowed as page has different origin
+    //    navigator.serviceWorker.register('sw.js'
+    //            , { scope: 'https://www.cahousefinder.com/' }) // not allowed as scope should have same origin as service worker js
+    //    .then(function(sw) {
+    //      log('ServiceWorker registration successful with scope: ',    sw.scope, sw);
+    //      log("You should get a different response when you refresh");
+    //    }).catch(function(err) {
+    //      log("Error", err);
+    //    });
+
+    //fetch( 'https://www.cahousefinder.com/wp-includes/js/jquery/jquery.js?ver=1.11.0', { mode: 'no-cors' } )
+    //.then( r => r.text() )
+    //.then(
+    //    x=>{
+    //        debugger;
+    //    },
+    //    err=>{
+    //        debugger;
+    //    }
+    //);
+
+    win.customElements.define( EmbedPage.is, EmbedPage );
+
+    return;
+
+    function log( ...args  ){ console.log(...args); }
     function forEach(arr,cb){[...arr].forEach(cb)}
     function $( css, el = doc ){ return el.querySelectorAll( css ) }
     function addClass   ( el, className  ){ el.className += ' '+className    }
     function removeClass( el, className  ){ el.className = el.className.split(' ').map(s=>s===className?'':s).join(' ') }
 
     // outside of class to avoid strict mode
-    function EPA_runScript( currentScript, { window, document, head, body } )
-    {
+    function EPA_runScript( arr, env, redirects )
+    {   let { window, document, head, body } = env;
+        let currentScript = arr.shift();
+        if( !currentScript )
+            return;
         console.debug( "embed-page", currentScript.src || currentScript.text );
         if( currentScript.src )
-            fetch( currentScript.src )
-                .then( response => response.text() )
+        {
+            let url = currentScript.src;
+
+            let m = redirects.find( m => url.startsWith( m.from ) );
+            if( m )
+                url = m.to + url.substring( m.from.length );
+            ajax( url )
                 .then( txt => runScript( txt + "//# sourceURL=" + currentScript.src ) );
-        else
+        }else
             runScript( currentScript.text );// todo src map
 
         function runScript( txt )
         {   try
             {   eval(txt);
             }catch(ex){ console.error(ex) }
+            setTimeout( x=> EPA_runScript( arr, env, redirects ), 0 );
         }
     }
 
-    win.customElements.define( EmbedPage.is, EmbedPage );
+    function ajax( url, method = "GET", headers = {}, body = undefined )
+    {
+        return new Promise( ( resolve, reject ) =>
+        {   const xhr = new XMLHttpRequest();
+            xhr.open( method, url );
+            headers && Object.keys( headers ).forEach( key => xhr.setRequestHeader( key, headers[ key ] ) );
+
+            xhr.onload  = () =>
+            {   if( xhr.status >= 200 && xhr.status < 300 )
+                    resolve( xhr.response );
+                else
+                    reject( xhr.statusText );
+            };
+            xhr.onerror = () => reject( url + 'failed' +xhr.statusText );
+            xhr.send( body );
+        })
+    }
+
 })( window, document );
 
     </script>

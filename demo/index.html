@@ -32,7 +32,12 @@
     </label>
     <demo-snippet>
         <template>
-            <embed-page src="page-with-js.html"></embed-page>
+            <embed-page src="page-with-js.html"
+                        redirects=' [    { "from": "https://www.cahousefinder.com/listings-search/", "to":"/listings-search/"}
+                                    ,    { "from": "https://www.cahousefinder.com/wp-includes/", "to":"/wp-includes/"}
+                                    ,    { "from": "https://www.cahousefinder.com/wp-content/", "to":"/wp-content/"}
+                                    ]'
+            ></embed-page>
         </template>
     </demo-snippet>
 </div>
