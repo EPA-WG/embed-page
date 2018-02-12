@@ -7,8 +7,6 @@
                 display: block;
             }
         </style>
-        <h2>from <a href="[[src]]" target="_blank">[[src]]</a></h2>
-        <hr/>
         <div id="framed" ></div>
 
     </template>
@@ -48,6 +46,7 @@
                 el.innerHTML =  t;
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
                 let $s = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
+                f.innerHTML='';
                 f.appendChild( el );
                 this.runScripts( $s );
                 this.onAfterFetch();
@@ -61,6 +60,7 @@
             return  {   window      : win
                     ,   document    :   {   getElementById:  id => $( '#'+id, f )[0]
                                         ,   getElementsByTagName: x => $( x, f )
+                                        ,   getElementsByClassName: x => f.getElementsByClassName( x )
                                         ,   createElement   : x=> doc.createElement(x)
                                         ,   querySelectorAll: x=> f.querySelectorAll(x)
                                         ,   querySelector   : x=> f.querySelector(x)

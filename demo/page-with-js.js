@@ -1,1 +1,0 @@
-document.getElementById("external-check").checked=true;

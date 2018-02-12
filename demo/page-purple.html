@@ -1,0 +1,10 @@
+<style> h1{color: purple; font-size: large} </style>
+<h1>Purple header</h1>
+Embedded and external script inclusion sample
+<ul><li>    <input   id="embedded" class="embedded" type="checkbox" >
+            <button for="embedded">Toggle</button> checked by embedded script. </li>
+    <li>    <input   id="external" class="external" type="checkbox" >
+            <button for="external">Toggle</button> checked by external script  </li>
+</ul><br/>
+<script>document.getElementById("embedded").checked=true;</script>
+<script src="page.js" ></script>

@@ -15,31 +15,104 @@
 
     <link rel="import" href="../../paper-radio-group/paper-radio-group.html">
 
+    <link rel="stylesheet" href="../../codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="../../codemirror/theme/abcdef.css">
+    <script src="../../codemirror/lib/codemirror.js"></script>
+
+    <script src="../../codemirror/addon/selection/selection-pointer.js"></script>
+    <script src="../../codemirror/mode/xml/xml.js"></script>
+    <script src="../../codemirror/mode/javascript/javascript.js"></script>
+    <script src="../../codemirror/mode/css/css.js"></script>
+    <script src="../../codemirror/mode/vbscript/vbscript.js"></script>
+    <script src="../../codemirror/mode/htmlmixed/htmlmixed.js"></script>
+
     <custom-style>
-        <style is="custom-style" include="demo-pages-shared-styles">
-        </style>
+        <style is="custom-style" include="demo-pages-shared-styles"></style>
     </custom-style>
+    <style>iframe{width: 100%;}
+        .CodeMirror{height: auto;}
+        fieldset{display: inline-block; border-bottom: none; border-right: none;}
+        embed-page{ box-shadow: inset 0 0 2em #000000; }
+         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
+    </style>
+    <script>
+        window.addEventListener('load', x=>
+            [...document.getElementsByTagName('code') ].forEach( ta =>
+            {   const src = ta.getAttribute('src');
+                src && fetch(src).then( r=>r.text() )
+                .then( txt => CodeMirror( ta, { mode: src.includes('.js') ? "javascript" : "htmlmixed", value:txt, theme:'abcdef' } ) );
+            })
+        );
+    </script>
 </head>
 <body>
-<div class="vertical-section-container centered">
+
+<div class="">
     <h3>Basic embed-page demo</h3>
-    <label>URL:
-        <select onchange="document.getElementsByTagName('embed-page')[0].src=this.value">
-            <option value="page-with-js.html" selected="selected"           >page-with-js.html          </option>
-            <option value="/listings-search/"                               >local listings             </option>
-            <option value="https://www.cahousefinder.com/listings-search/"  >cahousefinder.com listings </option>
+    <label>Change <var>src</var> attribute :
+        <select onchange="document.getElementById('embed-page-0').src=this.value">
+            <option value="page-violet.html" selected="selected"           >page-violet.html            </option>
+            <option value="page-purple.html"                               >page-purple.html            </option>
         </select>
     </label>
     <demo-snippet>
         <template>
-            <embed-page src="page-with-js.html"
-                        redirects=' [    { "from": "https://www.cahousefinder.com/listings-search/", "to":"/listings-search/"}
-                                    ,    { "from": "https://www.cahousefinder.com/wp-includes/", "to":"/wp-includes/"}
-                                    ,    { "from": "https://www.cahousefinder.com/wp-content/", "to":"/wp-content/"}
-                                    ]'
-            ></embed-page>
+            <embed-page src="page-violet.html" id="embed-page-0"></embed-page>
         </template>
     </demo-snippet>
+
+    <fieldset>
+        <legend><a href="page-purple.html" target="_blank">page-purple.html</a> </legend>
+        <legend>as <code>&lt;embed-page&gt;</code></legend>
+        <embed-page src="page-purple.html" ></embed-page>
+        <legend> in IFRAME</legend>
+        <iframe src="page-purple.html"></iframe>
+        <legend>View source </legend>
+
+        <code src="./page-purple.html"></code>
+    </fieldset>
+
+    <fieldset>
+        <legend><a href="page-violet.html" target="_blank">page-violet.html</a> </legend>
+        <legend>as <code>&lt;embed-page&gt;</code></legend>
+        <embed-page src="page-violet.html" ></embed-page>
+        <legend> in IFRAME</legend>
+        <iframe src="page-violet.html"></iframe>
+        <legend>View source </legend>
+
+        <code src="./page-violet.html"></code>
+    </fieldset>
+    <br/>
+    <fieldset>
+        <legend>Demo(this) page </legend>
+        <div style="display: inline-block">
+            <h1>Default style header</h1>
+            The content this section, page-violet.html, page-purple.html is identical.<br/>
+            Scripts and CSS rules are operating with same IDs and class names.
+            <ul><li>    <input   id="embedded" class="embedded" type="checkbox" >
+                        <button for="embedded">Toggle</button> UNchecked by default.         </li>
+                <li>    <input   id="external" class="external" type="checkbox" >
+                        <button for="external">Toggle</button> checked by <var>page.js</var> </li>
+            </ul>
+            <script src="page.js" ></script>
+            <h3>Visual demo</h3>
+<pre>
+CSS
+    1. The header above should be intact(default) in color and text size.
+    2. Colors in demo components and IFRAMEs should match the page name: purple, violet.
+JS
+    1. Checkboxes on page should not be affected by <var>embed-page</var> content.
+    2. Operating the page content here should not affect the component` intestines.
+</pre>
+        </div>
+        <div style="display: inline-block">
+            <legend><a href="page.  js" target="_blank">page.js</a> </legend>
+            <code src="./page.js"></code>
+            When used from <var>embed-page</var>, the <var>document</var> is wrapped to reflect component instance scope.<br/>
+            The click will trigger just own instance checkbox.
+        </div>
+    </fieldset>
 </div>
+
 </body>
 </html>
