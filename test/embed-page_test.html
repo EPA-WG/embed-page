@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
@@ -10,40 +10,41 @@
     <script src="../../web-component-tester/browser.js"></script>
 
     <link rel="import" href="../embed-page.html">
-  </head>
-  <body>
+</head>
+<body>
 
-    <test-fixture id="BasicTestFixture">
-      <template>
+<test-fixture id="BasicTestFixture">
+    <template>
         <embed-page>Hello embed-page!</embed-page>
-      </template>
-    </test-fixture>
+    </template>
+</test-fixture>
 
-    <test-fixture id="SlotFilled">
-      <template>
+<test-fixture id="SlotFilled">
+    <template>
         <embed-page>Hello embed-page!</embed-page>
-      </template>
-    </test-fixture>
+    </template>
+</test-fixture>
 
-    <test-fixture id="srcDefined">
-      <template>
+<test-fixture id="srcDefined">
+    <template>
         <embed-page src="page-dom-api.html"></embed-page>
-      </template>
-    </test-fixture>
+    </template>
+</test-fixture>
 
-    <script>
-      suite('embed-page', () => {
+<script>
+    suite( 'embed-page', () =>
+    {
+        test( 'instantiating the element with default properties, src is blank', () =>
+        {   const element = fixture( 'BasicTestFixture' );
+            assert.equal( element.src, '' );
+        } );
 
-        test('instantiating the element with default properties, src is blank', () => {
-          const element = fixture('BasicTestFixture');
-          assert.equal(element.src, '');
-        });
-
-        test('filled slot', () => {
-          const element = fixture('BasicTestFixture');
-          const slot = element.shadowRoot.querySelector('slot');
-          assert.equal( slot.assignedNodes()[0].textContent, 'Hello embed-page!' );
-        });
+        test( 'filled slot', () =>
+        {
+            const element = fixture( 'BasicTestFixture' );
+            const slot    = element.shadowRoot.querySelector( 'slot' );
+            assert.equal( slot.assignedNodes()[ 0 ].textContent, 'Hello embed-page!' );
+        } );
 
         //test('instantiate with src defined ', (done) => {
         //  const element = fixture('srcDefined');
@@ -65,8 +66,11 @@
         //  assert.equal(elementHeader.innerHTML, 'Hello new-prop1!');
         //});
 
-      });
-    </script>
+        // todo tests
+        // src assignment and success/failure
+        // css, dom, js insulation
+    } );
+</script>
 
-  </body>
+</body>
 </html>
