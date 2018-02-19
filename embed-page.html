@@ -7,7 +7,7 @@
                 display: block;
             }
         </style>
-        <div id="framed" ></div>
+        <div id="framed" ><slot></slot></div>
 
     </template>
     <script>
@@ -15,7 +15,7 @@
 {
     /**
      * `embed-page`
-     * embed page in iframe fashion
+     * embeds page in iframe fashion but using shadow dom for CSS and dom insulation and closure for JS jailing.
      *
      * @customElement
      * @polymer
@@ -28,7 +28,7 @@
         static get properties()
         {
             return  {   src:    {   type: String
-                                ,   value: 'embed-page'
+                                ,   value: ''
                                 ,   observer: 'fetch'
                                 }
                     ,   redirects:  {   type: Array
@@ -40,7 +40,7 @@
         fetch()
         {   const f = this.$f = this.$.framed;
             this.onBeforeFetch();
-            ajax( this.src )
+            this.src && ajax( this.src )
             .then( t =>
             {   let el = doc.createElement('div');
                 el.innerHTML =  t;

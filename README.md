@@ -1,4 +1,4 @@
-# \<embed-page\>
+# \<embed-page/\>
 Proof of concept for Embeddable Progressive Application - WebComponent acting as IFRAME.
 
 The scope insulation for DOM and CSS is done by WebComponet shadow dom, API for JS 
@@ -35,6 +35,6 @@ Then run `polymer serve --open` to serve your element locally.
 $ polymer test
 ```
 
-Your application is set up to be tested via 
+Application is set up to be tested via 
 [web-component-tester](https://github.com/Polymer/web-component-tester). 
 Run `polymer test` to run your application's test suite locally.

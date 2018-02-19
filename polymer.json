@@ -1,4 +1,4 @@
-{	"basePath":"/EPA-WG/POC-01"
+{	"basePath":"/embed-page/"
 ,	"lint": {
     "rules": [
       "polymer-2"

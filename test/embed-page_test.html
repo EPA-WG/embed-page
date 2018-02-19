@@ -15,35 +15,55 @@
 
     <test-fixture id="BasicTestFixture">
       <template>
-        <embed-page></embed-page>
+        <embed-page>Hello embed-page!</embed-page>
       </template>
     </test-fixture>
 
-    <test-fixture id="ChangedPropertyTestFixture">
+    <test-fixture id="SlotFilled">
       <template>
-        <embed-page prop1="new-prop1"></embed-page>
+        <embed-page>Hello embed-page!</embed-page>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="srcDefined">
+      <template>
+        <embed-page src="page-dom-api.html"></embed-page>
       </template>
     </test-fixture>
 
     <script>
       suite('embed-page', () => {
 
-        test('instantiating the element with default properties works', () => {
+        test('instantiating the element with default properties, src is blank', () => {
           const element = fixture('BasicTestFixture');
-          assert.equal(element.prop1, 'embed-page');
-          const elementShadowRoot = element.shadowRoot;
-          const elementHeader = elementShadowRoot.querySelector('h2');
-          assert.equal(elementHeader.innerHTML, 'Hello embed-page!');
+          assert.equal(element.src, '');
         });
 
-        test('setting a property on the element works', () => {
-          // Create a test fixture
-          const element = fixture('ChangedPropertyTestFixture');
-          assert.equal(element.prop1, 'new-prop1');
-          const elementShadowRoot = element.shadowRoot;
-          const elementHeader = elementShadowRoot.querySelector('h2');
-          assert.equal(elementHeader.innerHTML, 'Hello new-prop1!');
+        test('filled slot', () => {
+          const element = fixture('BasicTestFixture');
+          const slot = element.shadowRoot.querySelector('slot');
+          assert.equal( slot.assignedNodes()[0].textContent, 'Hello embed-page!' );
         });
+
+        //test('instantiate with src defined ', (done) => {
+        //  const element = fixture('srcDefined');
+        //  assert.equal(element.src, 'page-dom-api.html');
+        //
+        //  still needs callback/event/Promice property defined
+        //  return element.ready().then();
+        //  const elementShadowRoot = element.shadowRoot;
+        //  const elementHeader = elementShadowRoot.querySelector('h2');
+        //  assert.equal(elementHeader.innerHTML, 'Hello new-prop1!');
+        //});
+
+
+        //test('setting a property on the element works', () => {
+        //  const element = fixture('ChangedPropertyTestFixture');
+        //  assert.equal(element.src, 'new-prop1');
+        //  const elementShadowRoot = element.shadowRoot;
+        //  const elementHeader = elementShadowRoot.querySelector('h2');
+        //  assert.equal(elementHeader.innerHTML, 'Hello new-prop1!');
+        //});
 
       });
     </script>
