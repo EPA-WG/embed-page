@@ -1,5 +1,7 @@
 # \<embed-page/\>
-Proof of concept for Embeddable Progressive Application - WebComponent acting as IFRAME.
+Proof of concept for 
+[Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept) - 
+WebComponent acting as IFRAME.
 
 The scope insulation for DOM and CSS is done by WebComponet shadow dom, API for JS 
 are insulated by closure for global objects with wrappers limiting the dom access root 
@@ -7,7 +9,8 @@ to component content. Similar approach will be applied for url, storage, cookies
 
 
 ## To see in action 
-Run
+Check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
+ or locally run
 ```
 $ polymer serve --open
 ```
