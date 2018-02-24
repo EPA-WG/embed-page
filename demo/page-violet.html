@@ -1,10 +1,27 @@
-<style> h1{color: violet; font-size: large} </style>
+<style> h1{color: violet; font-size: large} fieldset{display: inline-block}</style>
 <h1>Violet header</h1>
 Embedded and external script inclusion sample
 <ul><li>    <input   id="embedded" class="embedded" type="checkbox" >
             <button for="embedded">Toggle</button> UNchecked by embedded script. </li>
     <li>    <input   id="external" class="external" type="checkbox" >
             <button for="external">Toggle</button> checked by external script    </li>
-</ul><br/>
+</ul>
+<a href="page-purple.html">Link to page-purple.html</a><br/>
+
+<fieldset>
+    <legend>Form</legend>
+    <form action="page-purple.html" >
+        <label>from: <input name="from" value="violet"/> </label>
+        <input type="submit" value="Submit" />
+    </form>
+</fieldset>
+<fieldset>
+    <legend>Form</legend>
+    <form action="page-purple.html"  method="post">
+        <label>from: <input name="from" value="violet"/> </label>
+        <input type="submit" value="Submit" />
+    </form>
+</fieldset>
+
 <script>document.getElementById("embedded").checked=false;</script>
 <script src="page.js" ></script>
