@@ -32,7 +32,7 @@
     <style>iframe{width: 100%;}
         .CodeMirror{height: auto;}
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
-        embed-page{ box-shadow: inset 0 0 2em #000000; }
+        embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
          @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
     </style>
     <script>
@@ -48,16 +48,18 @@
 <body>
 
 <div class="">
-    <h3>Basic embed-page demo</h3>
-    <label>Change <var>src</var> attribute :
-        <select onchange="document.getElementById('embed-page-0').src=this.value">
+    <h3>Basic embed-page demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
+    <p>The <code>&lt;embed-page/&gt;</code> web component is acting as IFRAME. Its content is insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).  </p>
+    <p>Unlike IFRAME it is embedded inline into parent page DOM and automatically resizing parent node. </p>
+    <label>Change <var>src</var> attribute to
+        <select onchange="document.getElementsByTagName('embed-page')[0].src=this.value">
             <option value="page-violet.html" selected="selected"           >page-violet.html            </option>
             <option value="page-purple.html"                               >page-purple.html            </option>
         </select>
     </label>
     <demo-snippet>
         <template>
-            <embed-page src="page-violet.html" id="embed-page-0"></embed-page>
+            <embed-page src="page-violet.html" ></embed-page>
         </template>
     </demo-snippet>
 
@@ -76,6 +78,7 @@
         <legend><a href="page-violet.html" target="_blank">page-violet.html</a> </legend>
         <legend>as <code>&lt;embed-page&gt;</code></legend>
         <embed-page src="page-violet.html" ></embed-page>
+        <p>&nbsp;</p>
         <legend> in IFRAME</legend>
         <iframe src="page-violet.html"></iframe>
         <legend>View source </legend>
@@ -103,6 +106,10 @@ CSS
 JS
     1. Checkboxes on page should not be affected by <var>embed-page</var> content.
     2. Operating the page content here should not affect the component` intestines.
+Links
+    1. Click on link will replace the component content with page from <var>href</var> attribute.
+Form
+    1. GET and POST will replace content according to FORM <var>action</var> attribute.
 </pre>
         </div>
         <div style="display: inline-block">

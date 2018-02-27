@@ -6,6 +6,7 @@
             :host {
                 display: block;
             }
+            iframe{display: none;}
         </style>
         <div id="framed" ><slot></slot></div>
         <!--base target="target-frame"/-->
@@ -16,7 +17,7 @@
 {
     const   FRAME_HASH_PREFIX   = '#embed-page='
     ,       FRAME_BLANK         = "about:blank";
-    let     GBL_counter         = 0;
+    let     GBL_InstancesCount  = 0;
 
     /**
      * `embed-page`
@@ -43,9 +44,9 @@
         }
         constructor()
         {   super();
-            this._counter = GBL_counter++;
+            this._InstanceNum = GBL_InstancesCount++;
         }
-        getInstanceNum(){ return this._counter }
+        getInstanceNum(){ return this._InstanceNum }
 
         fetch()
         {   const f = this.$f = this.$.framed;
