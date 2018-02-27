@@ -9,13 +9,15 @@
         </style>
         <div id="framed" ><slot></slot></div>
         <!--base target="target-frame"/-->
-        <iframe id="target-frame" name="target-frame" on-load="onTargetLoad" src=""></iframe>
+        <iframe id="targetframe" name$="target-frame[[getInstanceNum()]]" on-load="onTargetLoad" src=""></iframe>
     </template>
     <script>
 ( function( win, doc )
 {
     const   FRAME_HASH_PREFIX   = '#embed-page='
     ,       FRAME_BLANK         = "about:blank";
+    let     GBL_counter         = 0;
+
     /**
      * `embed-page`
      * embeds page in iframe fashion but using shadow dom for CSS and dom insulation and closure for JS jailing.
@@ -26,7 +28,7 @@
      */
     class EmbedPage extends Polymer.Element
     {
-        static get is() { return 'embed-page'; }
+        static get is() { return 'embed-page' }
 
         static get properties()
         {
@@ -39,7 +41,12 @@
                                     }
                     };
         }
-        // ready(){   super.ready(); this.fetch() } - no need as observer performs fetch
+        constructor()
+        {   super();
+            this._counter = GBL_counter++;
+        }
+        getInstanceNum(){ return this._counter }
+
         fetch()
         {   const f = this.$f = this.$.framed;
             this.onBeforeFetch();
@@ -89,12 +96,11 @@
             });
         }
         ready()
-        {
-            super.ready();
+        {   super.ready();
             this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
         }
         url2hash( el, attr )
-        {   el.target = 'target-frame';
+        {   el.target = this.$.targetframe.getAttribute( 'name' );
             if( !el[attr].includes(FRAME_HASH_PREFIX) )
                 el[attr] = FRAME_HASH_PREFIX+encodeURIComponent( el[attr] )
         }
@@ -104,6 +110,7 @@
             {   const a = { A:'href', FORM:'action'}[ el.tagName ];
                 if( a )
                     return this.url2hash( el, a );
+                // todo POST handling
             }
         }
         onTargetLoad(ev)
