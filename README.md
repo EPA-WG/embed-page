@@ -3,6 +3,7 @@ Proof of concept for
 [Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept) - 
 WebComponent acting as IFRAME.
 
+[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page)
 
 The scope insulation for DOM and CSS is done by WebComponet shadow dom, API for JS 
 are insulated by closure for global objects with wrappers limiting the dom access root 
