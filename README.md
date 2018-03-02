@@ -5,6 +5,9 @@ WebComponent acting as IFRAME.
 
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page)
 
+## Security
+* General browser and application [security improvements overview](security.md).
+ 
 The scope insulation for DOM and CSS is done by WebComponet shadow dom, API for JS 
 are insulated by closure for global objects with wrappers limiting the dom access root 
 to component content. Similar approach will be applied for url, storage, cookies, etc. 
@@ -18,8 +21,8 @@ The content could be set either by **src** attribute or by Polymer {{data}} bind
 ```
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.3/embed-page/demo/index.html)
-, or check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.4/embed-page/demo/index.html)
+, check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash
 $ polymer serve --open

@@ -19,6 +19,31 @@
     ,       FRAME_BLANK         = "about:blank";
     let     GBL_InstancesCount  = 0;
 
+    class EpaLocationHolder
+    {
+        constructor( app, a )
+        {
+            this.getLocation = x=> a;
+            this.setLocation = v=> app.src = v;
+        }
+        get location( ){ return this.getLocation() }
+        set location(v){ return this.setLocation( v ) }
+    }
+    class EpaDocument extends EpaLocationHolder
+    {
+        constructor( app, f, a )
+        {
+            super( app, a );
+            Object.assign( this,
+            {   getElementById         : x=> $( '#'+x, f )[0]
+            ,   getElementsByTagName   : x=> $( x, f )
+            ,   getElementsByClassName : x=> f.getElementsByClassName( x )
+            ,   createElement          : x=> doc.createElement(x)
+            ,   querySelectorAll       : x=> f.querySelectorAll(x)
+            ,   querySelector          : x=> f.querySelector(x)
+            })
+        }
+    }
     /**
      * `embed-page`
      * embeds page in iframe fashion but using shadow dom for CSS and dom insulation and closure for JS jailing.
@@ -29,6 +54,7 @@
      */
     class EmbedPage extends Polymer.Element
     {
+
         static get is() { return 'embed-page' }
 
         static get properties()
@@ -66,17 +92,15 @@
         onBeforeFetch(){ addClass   ( this.$f,'loading') }
         onAfterFetch (){ removeClass( this.$f,'loading') }
 
+
         get context()
-        {   const f = this.$.framed;
-            return  {   window      : win
-                    ,   document    :   {   getElementById:  id => $( '#'+id, f )[0]
-                                        ,   getElementsByTagName: x => $( x, f )
-                                        ,   getElementsByClassName: x => f.getElementsByClassName( x )
-                                        ,   createElement   : x=> doc.createElement(x)
-                                        ,   querySelectorAll: x=> f.querySelectorAll(x)
-                                        ,   querySelector   : x=> f.querySelector(x)
-                                        ,   location: { protocol : doc.location.protocol }
-                                        }
+        {   const f = this.$.framed
+            ,     a = doc.createElement('a');
+            a.href  = this.src;
+            a.toString = function(){ return this.href }
+
+            return  {   window      :   new EpaLocationHolder(this,a)
+                    ,   document    :   new EpaDocument(this,f,a)
                     ,   head        : doc.head
                     ,   body        : doc.body
                     }
@@ -128,15 +152,6 @@
     }
     const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
 
-    //ajax('https://www.cahousefinder.com/wp-includes/js/jquery/jquery.js?ver=1.11.0','GET').then(
-    //    x=>{
-    //        debugger;
-    //    },
-    //    err=>{
-    //        debugger;
-    //    }
-    //);
-
     //if ('serviceWorker' in navigator)
     //    //navigator.serviceWorker.register('https://cdn.xml4jquery.com/ajax/poc/sw.js' // not allowed as page has different origin
     //    navigator.serviceWorker.register('sw.js'
@@ -148,16 +163,7 @@
     //      log("Error", err);
     //    });
 
-    //fetch( 'https://www.cahousefinder.com/wp-includes/js/jquery/jquery.js?ver=1.11.0', { mode: 'no-cors' } )
-    //.then( r => r.text() )
-    //.then(
-    //    x=>{
-    //        debugger;
-    //    },
-    //    err=>{
-    //        debugger;
-    //    }
-    //);
+
 
     win.customElements.define( EmbedPage.is, EmbedPage );
 

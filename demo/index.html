@@ -29,7 +29,8 @@
     <custom-style>
         <style is="custom-style" include="demo-pages-shared-styles"></style>
     </custom-style>
-    <style>iframe{width: 100%;}
+    <style>@import "page.css";
+        iframe{width: 100%;}
         .CodeMirror{height: auto;}
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
         embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
@@ -97,7 +98,12 @@
                 <li>    <input   id="external" class="external" type="checkbox" >
                         <button for="external">Toggle</button> checked by <var>page.js</var> </li>
             </ul>
-            <script src="page.js" ></script>
+            <br/><label>window.location:   <input class="win-location" />
+                <input type="button" value="get"/><input type="button" value="set"/> </label>
+            <br/><label>document.location: <input class="doc-location" />
+                <input type="button" value="get"/><input type="button" value="set"/> </label>
+
+           <script src="page.js" ></script>
             <h3>Visual demo</h3>
 <pre>
 CSS
@@ -110,6 +116,12 @@ Links
     1. Click on link will replace the component content with page from <var>href</var> attribute.
 Form
     1. GET and POST will replace content according to FORM <var>action</var> attribute.
+window.location & document.location
+    1. page in component populates text box with value matching SRC attribute of component.
+    2. clear the text box, click on GET. The full URL matching SRC attribute
+       should be placed in text box
+    3. change text box to <var>page-purple.html</var>, click on SET. The content of component
+       should load the page
 </pre>
         </div>
         <div style="display: inline-block">

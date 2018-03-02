@@ -22,6 +22,13 @@ Embedded and external script inclusion sample
         <input type="submit" value="POST" />
     </form>
 </fieldset>
-<p>Extra line to show the DOM resizing when switching the pages within &lt;embed-page /&gt; component.</p>
+<br/><label>window.location:   <input class="win-location" />
+    <input type="button" value="get"/><input type="button" value="set"/> </label>
+<br/><label>document.location: <input class="doc-location" />
+    <input type="button" value="get"/><input type="button" value="set"/> </label>
+
 <script>document.getElementById("embedded").checked=true;</script>
 <script src="page.js" ></script>
+<style>@import "page.css";</style>
+
+<p>Extra line to show the DOM resizing when switching the pages within &lt;embed-page /&gt; component.</p>
