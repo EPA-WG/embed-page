@@ -17,4 +17,18 @@ document.querySelector('.win-location~*[value=get]').onclick = x => winLocation.
 document.querySelector('.doc-location~*[value=get]').onclick = x => docLocation.value = document.location;
 document.querySelector('.win-location~*[value=set]').onclick = x => window.location   = winLocation.value ;
 document.querySelector('.doc-location~*[value=set]').onclick = x => document.location = docLocation.value ;
+document.querySelector('*[value=href-get]').onclick = x => winLocation.value    = window.location.href ;
+document.querySelector('*[value=href-set]').onclick = x => window.location.href = winLocation.value ;
+document.querySelector('*[value="other properties"]').onclick = x => winLocation.value = JSON.stringify(
+    {   protocol    : window.location.protocol
+    ,   host        : window.location.host
+    ,   hostname    : window.location.hostname
+    ,   port        : window.location.port
+    ,   pathname    : window.location.pathname
+    ,   search      : window.location.search
+    ,   hash        : window.location.hash
+    ,   username    : window.location.username
+    ,   password    : window.location.password
+    ,   origin      : window.location.origin
+    });
 

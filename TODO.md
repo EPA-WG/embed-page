@@ -1,5 +1,8 @@
-* A link 
+* window.location, its properties, methods
 * history
-* window.location & its properties
-* form get/post
+* cookies
+* [Extend HTMLElement](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements) instead of Polymer.Element  
+* bower & npm publish
+* instructions to use
+* form post
 * **iframe.contentWindow** protection to 

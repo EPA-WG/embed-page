@@ -19,11 +19,33 @@
     ,       FRAME_BLANK         = "about:blank";
     let     GBL_InstancesCount  = 0;
 
-    class EpaLocationHolder
+    class EpaHrefLocationHolder
     {
         constructor( app, a )
         {
-            this.getLocation = x=> a;
+            this.getHref    = x=> a.href;
+            this.setHref    = v=> app.src = v;
+            this.toString   = x=>a.href;
+            this.getProp    = p=>a[p];
+        }
+        get href( ){ return this.getHref( ) }
+        set href(v){ return this.setHref(v) }
+        get protocol(){ return this.getProp('protocol'  )}
+        get host    (){ return this.getProp('host'      )}
+        get hostname(){ return this.getProp('hostname'  )}
+        get port    (){ return this.getProp('port'      )}
+        get pathname(){ return this.getProp('pathname'  )}
+        get search  (){ return this.getProp('search'    )}
+        get hash    (){ return this.getProp('hash'      )}
+        get username(){ return this.getProp('username'  )}
+        get password(){ return this.getProp('password'  )}
+        get origin  (){ return this.getProp('origin'    )}
+    }
+    class EpaLocationHolder
+    {
+        constructor( app, a )
+        {   const h = new EpaHrefLocationHolder(app,a);
+            this.getLocation = x=> h;
             this.setLocation = v=> app.src = v;
         }
         get location( ){ return this.getLocation() }

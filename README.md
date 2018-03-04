@@ -1,7 +1,6 @@
 # \<embed-page/\>
-Proof of concept for 
-[Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept) - 
-WebComponent acting as IFRAME.
+Polymer widget acting as responsive IFRAME, proof of concept for 
+[Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept).
 
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page)
 
@@ -12,6 +11,7 @@ The scope insulation for DOM and CSS is done by WebComponet shadow dom, API for 
 are insulated by closure for global objects with wrappers limiting the dom access root 
 to component content. Similar approach will be applied for url, storage, cookies, etc. 
 
+##Use
 The content could be set either by **src** attribute or by Polymer {{data}} binding of content.
 ```html
     <embed-page src="abc.html" />
@@ -20,8 +20,13 @@ The content could be set either by **src** attribute or by Polymer {{data}} bind
     <embed-page>[[htmlContent]]</embed-page>
 ```
 
+At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the 
+[change request](https://github.com/EPA-WG/embed-page/issues) if need other or no framework compatibility.
+
+
+
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.4/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.5/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash
@@ -35,16 +40,17 @@ The host page document is not available from embedded content, which is validate
 same DOM selectors as in host page as in instances of  ``` <embed-page> ```.
 
 
-## Preparing project
+## Project
+### Preparing
 ```bash
 $ bower install
 ```
-## Install the Polymer-CLI
+### Install the Polymer-CLI
 
 First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. 
 Then run `polymer serve --open` to serve your element locally.
 
-## Running Tests
+### Running Tests
 
 ```bash
 $ polymer test
