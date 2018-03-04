@@ -67,7 +67,7 @@
     <fieldset>
         <legend><a href="page-purple.html" target="_blank">page-purple.html</a> </legend>
         <legend>as <code>&lt;embed-page&gt;</code></legend>
-        <embed-page src="page-purple.html" ></embed-page>
+        <embed-page src="page-purple.html?a=b#c" ></embed-page>
         <legend> in IFRAME</legend>
         <iframe src="page-purple.html"></iframe>
         <legend>View source </legend>
@@ -78,7 +78,7 @@
     <fieldset>
         <legend><a href="page-violet.html" target="_blank">page-violet.html</a> </legend>
         <legend>as <code>&lt;embed-page&gt;</code></legend>
-        <embed-page src="page-violet.html" ></embed-page>
+        <embed-page src="page-violet.html?d=e#f" ></embed-page>
         <p>&nbsp;</p>
         <legend> in IFRAME</legend>
         <iframe src="page-violet.html"></iframe>
@@ -100,7 +100,7 @@
             </ul>
             <br/><label>window.location:   <input class="win-location" />
                 <input type="button" value="get"/><input type="button" value="set"/><br/>
-                <input type="button" value="href-get"/> <input type="button" value="href-set"/>
+                <input type="button" value="href-get"/><input type="button" value="href-set"/>
                 <input type="button" value="other properties"/><br/>
 
                 <input type="button" value="assign()"/>
@@ -129,6 +129,11 @@ window.location & document.location
        should be placed in text box
     3. change text box to <var>page-purple.html</var>, click on SET. The content of component
        should load the page
+    4. repeat step 1-3 with 'href-get' and 'href-set'
+    5. add URL properties like hash, port#, query parameters, user, password. 'other properties'
+       should place matching key-value in text box.
+    6. change URL in text box, press 'assign()' or 'replace(), matching content should be fetched.
+    7. 'reload()' should re-fetch and re-render content. See it in network and UI.
 </pre>
         </div>
         <div style="display: inline-block">

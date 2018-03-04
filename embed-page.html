@@ -40,6 +40,9 @@
         get username(){ return this.getProp('username'  )}
         get password(){ return this.getProp('password'  )}
         get origin  (){ return this.getProp('origin'    )}
+        assign      (v){ return this.setHref( v ) }
+        replace     (v){ return this.setHref( v ) }
+        reload(){ this.setHref(''); return this.setHref( this.getHref() ) }
     }
     class EpaLocationHolder
     {
@@ -173,19 +176,6 @@
         }
     }
     const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
-
-    //if ('serviceWorker' in navigator)
-    //    //navigator.serviceWorker.register('https://cdn.xml4jquery.com/ajax/poc/sw.js' // not allowed as page has different origin
-    //    navigator.serviceWorker.register('sw.js'
-    //            , { scope: 'https://www.cahousefinder.com/' }) // not allowed as scope should have same origin as service worker js
-    //    .then(function(sw) {
-    //      log('ServiceWorker registration successful with scope: ',    sw.scope, sw);
-    //      log("You should get a different response when you refresh");
-    //    }).catch(function(err) {
-    //      log("Error", err);
-    //    });
-
-
 
     win.customElements.define( EmbedPage.is, EmbedPage );
 

@@ -32,3 +32,6 @@ document.querySelector('*[value="other properties"]').onclick = x => winLocation
     ,   origin      : window.location.origin
     });
 
+document.querySelector('*[value="assign()"]' ).onclick = x => window.location.assign ( winLocation.value );
+document.querySelector('*[value="replace()"]').onclick = x => window.location.replace( winLocation.value );
+document.querySelector('*[value="reload()"]' ).onclick = x => window.location.reload() ;
