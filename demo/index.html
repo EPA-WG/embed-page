@@ -99,7 +99,9 @@
                         <button for="external">Toggle</button> checked by <var>page.js</var> </li>
             </ul>
             <br/><label>window.location:   <input class="win-location" />
-                <input type="button" value="get"/><input type="button" value="set"/><br/>
+                <input type="button" value="get"/><input type="button" value="set"/>
+                <input type="button" value="location get"/>
+                <input type="button" value="location set"/><br/>
                 <input type="button" value="href-get"/><input type="button" value="href-set"/>
                 <input type="button" value="other properties"/><br/>
 
@@ -107,6 +109,7 @@
                 <input type="button" value="reload()"/>
                 <input type="button" value="replace()"/><br/>
                 <input type="button" value="location-win-doc" />
+                <input type="button" value="this===window" />
             </label>
             <br/><label>document.location: <input class="doc-location" />
                 <input type="button" value="get"/><input type="button" value="set"/> </label>
@@ -124,19 +127,20 @@ Links
     1. Click on link will replace the component content with page from <var>href</var> attribute.
 Form
     1. GET and POST will replace content according to FORM <var>action</var> attribute.
-window.location & document.location
+location & window.location & document.location
     1. page in component populates text box with value matching SRC attribute of component.
     2. clear the text box, click on GET. The full URL matching SRC attribute
        should be placed in text box
     3. change text box to <var>page-purple.html</var>, click on SET. The content of component
        should load the page
-    4. repeat step 1-3 with 'href-get' and 'href-set'
+    4. repeat step 1-3 with 'href-get', 'href-set', 'location get', 'location set'
     5. add URL properties like hash, port#, query parameters, user, password. 'other properties'
        should place matching key-value in text box.
     6. change URL in text box, press 'assign()' or 'replace(), matching content should be fetched.
     7. 'reload()' should re-fetch and re-render content. See it in network and UI.
     8. 'location-win-doc' should give true for identical 'location', 'window.location'
        , and 'document.location'
+    9. 'this===window' should give true
 
 </pre>
         </div>

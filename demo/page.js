@@ -15,8 +15,10 @@ winLocation.value = window.location;
 docLocation.value = document.location;
 document.querySelector('.win-location~*[value=get]').onclick = x => winLocation.value = window.location;
 document.querySelector('.doc-location~*[value=get]').onclick = x => docLocation.value = document.location;
-document.querySelector('.win-location~*[value=set]').onclick = x => window.location   = winLocation.value ;
-document.querySelector('.doc-location~*[value=set]').onclick = x => document.location = docLocation.value ;
+document.querySelector('.win-location~*[value=set]').onclick = x => window.location   = winLocation.value;
+document.querySelector('.doc-location~*[value=set]').onclick = x => document.location = docLocation.value;
+document.querySelector('*[value="location get"]'   ).onclick = x => winLocation.value = window.location;
+document.querySelector('*[value="location set"]'   ).onclick = x => location          = winLocation.value;
 document.querySelector('*[value=href-get]').onclick = x => winLocation.value    = window.location.href ;
 document.querySelector('*[value=href-set]').onclick = x => window.location.href = winLocation.value ;
 document.querySelector('*[value="other properties"]').onclick = x => winLocation.value = JSON.stringify(
@@ -35,9 +37,5 @@ document.querySelector('*[value="other properties"]').onclick = x => winLocation
 document.querySelector('*[value="assign()"]' ).onclick = x => window.location.assign ( winLocation.value );
 document.querySelector('*[value="replace()"]').onclick = x => window.location.replace( winLocation.value );
 document.querySelector('*[value="reload()"]' ).onclick = x => window.location.reload() ;
-document.querySelector('*[value=location-win-doc]' ).onclick = ZZ;
-
-    function ZZ()
-{   debugger;
-    winLocation.value =  location === window.location && location === document.location ;
-}
+document.querySelector('*[value=location-win-doc]').onclick = x=> winLocation.value =  location === window.location && location === document.location ;
+document.querySelector('*[value="this===window"]' ).onclick = x=> winLocation.value = window === this;

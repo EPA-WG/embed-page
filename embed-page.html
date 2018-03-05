@@ -54,11 +54,10 @@
         get location( ){ return this.getLocation() }
         set location(v){ return this.setLocation( v ) }
     }
-    class EpaDocument extends EpaLocationHolder
+    class EpaDocument
     {
-        constructor( app, f, a )
+        constructor( app, f, w )
         {
-            super( app, a );
             Object.assign( this,
             {   getElementById         : x=> $( '#'+x, f )[0]
             ,   getElementsByTagName   : x=> $( x, f )
@@ -66,8 +65,12 @@
             ,   createElement          : x=> doc.createElement(x)
             ,   querySelectorAll       : x=> f.querySelectorAll(x)
             ,   querySelector          : x=> f.querySelector(x)
-            })
+            ,   getLocation : x=> w.getLocation()
+            ,   setLocation : v=> w.setLocation(v)
+            });
         }
+        get location( ){ return this.getLocation() }
+        set location(v){ return this.setLocation( v ) }
     }
     /**
      * `embed-page`
@@ -79,7 +82,6 @@
      */
     class EmbedPage extends Polymer.Element
     {
-
         static get is() { return 'embed-page' }
 
         static get properties()
@@ -122,10 +124,10 @@
         {   const f = this.$.framed
             ,     a = doc.createElement('a');
             a.href  = this.src;
-            a.toString = function(){ return this.href }
-
-            return  {   window      :   new EpaLocationHolder(this,a)
-                    ,   document    :   new EpaDocument(this,f,a)
+            a.toString = function(){ return this.href };
+            const win = new EpaLocationHolder(this,a);
+            return  {   window      :   win
+                    ,   document    :   new EpaDocument(this,f,win)
                     ,   head        : doc.head
                     ,   body        : doc.body
                     }
@@ -169,7 +171,7 @@
             ,       url = fr.contentWindow.location.href;
             if( url.includes(FRAME_BLANK) )
                 return;
-            console.log("onTargetLoad:"+url);
+
             const decoded = decodeURIComponent( url.substring( url.indexOf(FRAME_HASH_PREFIX)+FRAME_HASH_PREFIX.length ) );
             fr.src = FRAME_BLANK;
             this.src = decoded;
@@ -203,13 +205,16 @@
             if( m )
                 url = m.to + url.substring( m.from.length );
             ajax( url )
-                .then( txt => runScript( txt + "//# sourceURL=" + currentScript.src ) );
+                .then( txt => runScript.call( window, txt + "//# sourceURL=" + currentScript.src ) );
         }else
-            runScript( currentScript.text );// todo src map
+            runScript.call( window, currentScript.text );// todo src map
 
         function runScript( txt )
         {   try
-            {   eval(txt);
+            {   with( window )
+                {
+                    eval(txt);
+                }
             }catch(ex){ console.error(ex) }
             setTimeout( x=> EPA_runScript( arr, env, redirects ), 0 );
         }
