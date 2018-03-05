@@ -105,7 +105,8 @@
 
                 <input type="button" value="assign()"/>
                 <input type="button" value="reload()"/>
-                <input type="button" value="replace()"/>
+                <input type="button" value="replace()"/><br/>
+                <input type="button" value="location-win-doc" />
             </label>
             <br/><label>document.location: <input class="doc-location" />
                 <input type="button" value="get"/><input type="button" value="set"/> </label>
@@ -134,6 +135,9 @@ window.location & document.location
        should place matching key-value in text box.
     6. change URL in text box, press 'assign()' or 'replace(), matching content should be fetched.
     7. 'reload()' should re-fetch and re-render content. See it in network and UI.
+    8. 'location-win-doc' should give true for identical 'location', 'window.location'
+       , and 'document.location'
+
 </pre>
         </div>
         <div style="display: inline-block">

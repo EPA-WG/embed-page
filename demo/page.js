@@ -35,3 +35,9 @@ document.querySelector('*[value="other properties"]').onclick = x => winLocation
 document.querySelector('*[value="assign()"]' ).onclick = x => window.location.assign ( winLocation.value );
 document.querySelector('*[value="replace()"]').onclick = x => window.location.replace( winLocation.value );
 document.querySelector('*[value="reload()"]' ).onclick = x => window.location.reload() ;
+document.querySelector('*[value=location-win-doc]' ).onclick = ZZ;
+
+    function ZZ()
+{   debugger;
+    winLocation.value =  location === window.location && location === document.location ;
+}
