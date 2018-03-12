@@ -1,2 +1,4 @@
 .win-location,
-.doc-location{width: 100%;}
+.doc-location,
+.doc-cookie{width: 100%;}
+.doc-cookie{height: 4em;}

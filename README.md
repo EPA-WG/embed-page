@@ -26,7 +26,7 @@ At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the
 
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.5/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.6/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash

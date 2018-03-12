@@ -54,10 +54,16 @@
         get location( ){ return this.getLocation() }
         set location(v){ return this.setLocation( v ) }
     }
+    class EpaCookie
+    {
+        set(v){}
+        toString(){ return "" }
+        // todo combine window.localStorage & sessionStorage( no expires or "cookiename=value; expires=0; path=/";) to proxy cookies
+    }
     class EpaDocument
     {
         constructor( app, f, w )
-        {
+        {   this._cookie = new EpaCookie();
             Object.assign( this,
             {   getElementById         : x=> $( '#'+x, f )[0]
             ,   getElementsByTagName   : x=> $( x, f )
@@ -71,6 +77,8 @@
         }
         get location( ){ return this.getLocation() }
         set location(v){ return this.setLocation( v ) }
+        get cookie(){ return this._cookie.toString() }
+        set cookie(v){ this._cookie.set(v) }
     }
     /**
      * `embed-page`

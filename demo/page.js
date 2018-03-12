@@ -8,7 +8,8 @@ function ToggleCb( b )
 }
 const   $ = css => document.querySelector(css)
 ,       winLocation = $('.win-location')
-,       docLocation = $('.doc-location');
+,       docLocation = $('.doc-location')
+,       docCookie   = $('.doc-cookie'  );
 
 
 winLocation.value = window.location;
@@ -37,5 +38,13 @@ document.querySelector('*[value="other properties"]').onclick = x => winLocation
 document.querySelector('*[value="assign()"]' ).onclick = x => window.location.assign ( winLocation.value );
 document.querySelector('*[value="replace()"]').onclick = x => window.location.replace( winLocation.value );
 document.querySelector('*[value="reload()"]' ).onclick = x => window.location.reload() ;
-document.querySelector('*[value=location-win-doc]').onclick = x=> winLocation.value =  location === window.location && location === document.location ;
+document.querySelector('*[value=location-win-doc]').onclick = x=> winLocation.value =
+                                        location === window.location && location === document.location ;
 document.querySelector('*[value="this===window"]' ).onclick = x=> winLocation.value = window === this;
+
+document.querySelector('.doc-cookie~*[value=get]').onclick = x => docCookie.value = document.cookie.split(';').join(';\n');
+document.querySelector('.doc-cookie~*[value=set]').onclick = x => document.cookie = docCookie.value;
+
+const pgc = 'lastpage='+window.location.pathname.split('/').pop();
+docCookie.value = pgc;
+document.cookie = pgc;

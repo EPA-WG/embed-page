@@ -50,7 +50,8 @@
 
 <div class="">
     <h3>Basic embed-page demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
-    <p>The <code>&lt;embed-page/&gt;</code> web component is acting as IFRAME. Its content is insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).  </p>
+    <p> The <code>&lt;embed-page/&gt;</code> web component is acting as IFRAME.
+        Its content is insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).  </p>
     <p>Unlike IFRAME it is embedded inline into parent page DOM and automatically resizing parent node. </p>
     <label>Change <var>src</var> attribute to
         <select onchange="document.getElementsByTagName('embed-page')[0].src=this.value">
@@ -113,6 +114,8 @@
             </label>
             <br/><label>document.location: <input class="doc-location" />
                 <input type="button" value="get"/><input type="button" value="set"/> </label>
+            <br/><label>document.cookie: <textarea class="doc-cookie" ></textarea>
+                <input type="button" value="get"/><input type="button" value="set"/> </label>
 
            <script src="page.js" ></script>
             <h3>Visual demo</h3>
@@ -134,13 +137,19 @@ location & window.location & document.location
     3. change text box to <var>page-purple.html</var>, click on SET. The content of component
        should load the page
     4. repeat step 1-3 with 'href-get', 'href-set', 'location get', 'location set'
-    5. add URL properties like hash, port#, query parameters, user, password. 'other properties'
-       should place matching key-value in text box.
-    6. change URL in text box, press 'assign()' or 'replace(), matching content should be fetched.
+    5. add URL properties like hash, port#, query parameters, user, password.
+       'other properties' should place matching key-value in text box.
+    6. change URL in text box, press 'assign()' or 'replace(), matching content
+       should be fetched.
     7. 'reload()' should re-fetch and re-render content. See it in network and UI.
     8. 'location-win-doc' should give true for identical 'location', 'window.location'
        , and 'document.location'
     9. 'this===window' should give true
+Cookies
+    1. set cookies <var>a=b</var>, set cookies <var>c=d</var>
+    2. get cookie should have both key/values presented
+    3. refresh page, get cookies should have both key/values presented
+
 
 </pre>
         </div>
