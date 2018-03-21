@@ -54,9 +54,45 @@
         get location( ){ return this.getLocation() }
         set location(v){ return this.setLocation( v ) }
     }
+    class EpaCookieRecord
+    {
+        static parse( str )
+        {   // inspired by https://github.com/jshttp/cookie/blob/master/index.js
+            let pk, obj = {},   pairs = str.split( /; */ );
+
+            for( let i = 0; i < pairs.length; i++ )
+            {
+                const pair   = pairs[ i ]
+                ,     eq_idx = pair.indexOf( '=' );
+
+                if( eq_idx < 0 ) // skip things that don't look like key=value
+                    continue;
+
+                let key = pair.substr( 0, eq_idx ).trim()
+                ,   val = pair.substr( ++eq_idx, pair.length ).trim();
+
+                if( !pk )
+                    pk = key;
+
+                if( '"' == val[ 0 ] ) // quoted values
+                    val = val.slice( 1, -1 );
+
+                if( undefined == obj[ key ] ) // only assign once
+                    obj[ key ] = tryDecode( val );
+            }
+            obj.pk = pk;
+
+            return obj;
+
+                function
+            tryDecode( str )
+            {   try{        return decodeURIComponent( str ) }
+                catch( e ){ return str }
+    }   }   }
+
     class EpaCookie
     {
-        set(v){}
+        set(v){ EpaCookieRecord.parse(v).forEach( r=> this.setRecord(r) ) }
         toString(){ return "" }
         // todo combine window.localStorage & sessionStorage( no expires or "cookiename=value; expires=0; path=/";) to proxy cookies
     }
@@ -73,6 +109,7 @@
             ,   querySelector          : x=> f.querySelector(x)
             ,   getLocation : x=> w.getLocation()
             ,   setLocation : v=> w.setLocation(v)
+            ,   write       : x=> console.error( 'document.write() is not supported yet.')
             });
         }
         get location( ){ return this.getLocation() }
