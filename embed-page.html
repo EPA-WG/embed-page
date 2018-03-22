@@ -44,43 +44,75 @@
         replace     (v){ return this.setHref( v ) }
         reload(){ this.setHref(''); return this.setHref( this.getHref() ) }
     }
-    class EpaLocationHolder
+    class EpaStorageWrapper
+    {
+        constructor( /** Storage */ storage, /** EpaWindow */ win )
+        {
+
+        }
+    }
+    class EpaWindow
     {
         constructor( app, a )
         {   const h = new EpaHrefLocationHolder(app,a);
             this.getLocation = x=> h;
             this.setLocation = v=> app.src = v;
+            
+            const ls = new EpaStorageWrapper( win.localStorage  , this )
+            ,     ss = new EpaStorageWrapper( win.sessionStorage, this );
+            this.getSessionStorage = x=> ls;
+            this.getLocalStorage   = x=> ss;
         }
         get location( ){ return this.getLocation() }
         set location(v){ return this.setLocation( v ) }
+        get sessionStorage() { return this.getSessionStorage() }
+        get localStorage  () { return this.getLocalStorage  () }
     }
-    class EpaCookieRecord
-    {
+
+    class EpaCookie
+    {   // todo combine window.localStorage & sessionStorage( no expires or "cookiename=value; expires=0; path=/";) to proxy cookies
+        constructor( /** EpaWindow */ loc )
+        {
+            this.loc = loc;
+        }
+        set(v)
+        {   const   c = EpaCookie.parse(v)
+            ,     key = `EpaCookie-${c.key}`
+            ,     val = JSON.stringify(c)
+            ,       p = ( !c.attr.expires || '0' == c.attr.expires )
+            ,     sto = p ? this.loc.sessionStorage : this.loc.localStorage
+            ,     alt = p ? this.loc.localStorage   : this.loc.sessionStorage;
+            sto.setItem( key, val );
+            alt.removeItem( key );
+            // todo remove cookie if expires is in past
+        }
+        toString(){ return "" }// todo
+
         static parse( str )
         {   // inspired by https://github.com/jshttp/cookie/blob/master/index.js
-            let pk, obj = {},   pairs = str.split( /; */ );
+            let obj = { attr:{} },   pairs = str.split( /; */ );
 
-            for( let i = 0; i < pairs.length; i++ )
+            pairs.map( ()=>
             {
-                const pair   = pairs[ i ]
-                ,     eq_idx = pair.indexOf( '=' );
+                let pair = pairs[ i ]
+                ,    eqi = pair.indexOf( '=' );
 
-                if( eq_idx < 0 ) // skip things that don't look like key=value
-                    continue;
+                if( eqi < 0 )
+                    return { key: pair.trim() };
 
-                let key = pair.substr( 0, eq_idx ).trim()
-                ,   val = pair.substr( ++eq_idx, pair.length ).trim();
-
-                if( !pk )
-                    pk = key;
+                let key = pair.substr( 0, eqi ).trim()
+                ,   val = pair.substr( ++eqi, pair.length ).trim();
 
                 if( '"' == val[ 0 ] ) // quoted values
                     val = val.slice( 1, -1 );
-
-                if( undefined == obj[ key ] ) // only assign once
-                    obj[ key ] = tryDecode( val );
-            }
-            obj.pk = pk;
+                return { key:key, val:val };
+            }).map( (kw,i)=>
+            {   if( i )
+                {   if( undefined == obj[ key ] ) // only assign once
+                        obj.attr[ key ] = tryDecode( val );
+                }else
+                    Object.assign( obj, kw )
+            });
 
             return obj;
 
@@ -90,16 +122,10 @@
                 catch( e ){ return str }
     }   }   }
 
-    class EpaCookie
-    {
-        set(v){ EpaCookieRecord.parse(v).forEach( r=> this.setRecord(r) ) }
-        toString(){ return "" }
-        // todo combine window.localStorage & sessionStorage( no expires or "cookiename=value; expires=0; path=/";) to proxy cookies
-    }
     class EpaDocument
     {
         constructor( app, f, w )
-        {   this._cookie = new EpaCookie();
+        {   this._cookie = new EpaCookie(this);
             Object.assign( this,
             {   getElementById         : x=> $( '#'+x, f )[0]
             ,   getElementsByTagName   : x=> $( x, f )
@@ -117,6 +143,7 @@
         get cookie(){ return this._cookie.toString() }
         set cookie(v){ this._cookie.set(v) }
     }
+    
     /**
      * `embed-page`
      * embeds page in iframe fashion but using shadow dom for CSS and dom insulation and closure for JS jailing.
@@ -170,7 +197,7 @@
             ,     a = doc.createElement('a');
             a.href  = this.src;
             a.toString = function(){ return this.href };
-            const win = new EpaLocationHolder(this,a);
+            const win = new EpaWindow(this,a);
             return  {   window      :   win
                     ,   document    :   new EpaDocument(this,f,win)
                     ,   head        : doc.head
