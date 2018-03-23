@@ -55,16 +55,18 @@
     {
         constructor( app, a )
         {   const h = new EpaHrefLocationHolder(app,a);
-            this.getLocation = x=> h;
-            this.setLocation = v=> app.src = v;
+            defProperty( this, 'location', x=> h, v=> app.src = v );
+
+            //this.getLocation = x=> h;
+            //this.setLocation = v=> app.src = v;
             
             const ls = new EpaStorageWrapper( win.localStorage  , this )
             ,     ss = new EpaStorageWrapper( win.sessionStorage, this );
             this.getSessionStorage = x=> ls;
             this.getLocalStorage   = x=> ss;
         }
-        get location( ){ return this.getLocation() }
-        set location(v){ return this.setLocation( v ) }
+        //get location( ){ return this.getLocation() }
+        //set location(v){ return this.setLocation( v ) }
         get sessionStorage() { return this.getSessionStorage() }
         get localStorage  () { return this.getLocalStorage  () }
     }
@@ -92,10 +94,9 @@
         {   // inspired by https://github.com/jshttp/cookie/blob/master/index.js
             let obj = { attr:{} },   pairs = str.split( /; */ );
 
-            pairs.map( ()=>
+            pairs.map( pair =>
             {
-                let pair = pairs[ i ]
-                ,    eqi = pair.indexOf( '=' );
+                let  eqi = pair.indexOf( '=' );
 
                 if( eqi < 0 )
                     return { key: pair.trim() };
@@ -125,7 +126,7 @@
     class EpaDocument
     {
         constructor( app, f, w )
-        {   this._cookie = new EpaCookie(this);
+        {   const cookie = new EpaCookie(this);
             Object.assign( this,
             {   getElementById         : x=> $( '#'+x, f )[0]
             ,   getElementsByTagName   : x=> $( x, f )
@@ -133,20 +134,19 @@
             ,   createElement          : x=> doc.createElement(x)
             ,   querySelectorAll       : x=> f.querySelectorAll(x)
             ,   querySelector          : x=> f.querySelector(x)
-            ,   getLocation : x=> w.getLocation()
-            ,   setLocation : v=> w.setLocation(v)
             ,   write       : x=> console.error( 'document.write() is not supported yet.')
             });
+
+            defProperty( this, 'sessionStorage' , x=> win.sessionStorage );
+            defProperty( this, 'localStorage'   , x=> win.localStorage   );
+            defProperty( this, 'location'       , x=> w.location        , v=> w.location = v );
+            defProperty( this, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
         }
-        get location( ){ return this.getLocation() }
-        set location(v){ return this.setLocation( v ) }
-        get cookie(){ return this._cookie.toString() }
-        set cookie(v){ this._cookie.set(v) }
     }
     
     /**
      * `embed-page`
-     * embeds page in iframe fashion but using shadow dom for CSS and dom insulation and closure for JS jailing.
+     * embeds page in iframe fashion but using shadow dom for CSS, dom insulation, and closure for JS jailing.
      *
      * @customElement
      * @polymer
@@ -308,6 +308,10 @@
             xhr.onerror = () => reject( url + 'failed' +xhr.statusText );
             xhr.send( body );
         })
+    }
+    function defProperty( obj, name, getter, setter=getter  )
+    {
+        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: true, configurable:false } )
     }
 
 })( window, document );
