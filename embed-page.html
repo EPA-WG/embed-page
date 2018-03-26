@@ -46,9 +46,111 @@
     }
     class EpaStorageWrapper
     {
+        /**
+         *
+         * @param storage
+         * @param win
+         */
+        // todo Window.onstorage event handler that fires when a storage area changes
         constructor( /** Storage */ storage, /** EpaWindow */ win )
         {
+            // on init hook to StorageEvent
+            // in StorageEvent pass through only own
 
+
+            var aKeys = [], oStorage = {};
+/*
+
+readonly attribute unsigned long length;
+DOMString? key(unsigned long index);
+getter DOMString? getItem(DOMString key);
+setter void setItem(DOMString key, DOMString value);
+deleter void removeItem(DOMString key);
+void clear();
+*/
+
+            function prefix(){ return win.location.hostname+'-EPA' }
+            function eachKey( cb )
+            {
+                let p = prefix()
+                ,   i = storage.length-1;
+                for( ; i>=0; i-- )
+                    if( !storage.key(i).indexOf(p) )
+                        cb( storage.key(i).substring( p.length ) )
+            }
+
+            defProperty( this, 'length', x =>
+            {   let ret = 0;
+                eachKey( x=> ret++ );
+                return ret;
+            });
+            defProperty( this, 'key'    , idx =>
+            {   let i=0; ret = null;
+                eachKey( k => i === idx ? ( (ret = k), i++ ) : i++ );
+                return ret;
+            });
+            defProperty( this, 'getItem', k => storage.getItem( prefix()+k ) );
+
+            Object.defineProperty(oStorage, "key", {
+              value: function (nKeyId) { return aKeys[nKeyId]; },
+              writable: false,
+              configurable: false,
+              enumerable: false
+            });
+            Object.defineProperty(oStorage, "setItem", {
+              value: function (sKey, sValue) {
+                if(!sKey) { return; }
+                document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
+              },
+              writable: false,
+              configurable: false,
+              enumerable: false
+            });
+            Object.defineProperty(oStorage, "length", {
+              get: function () { return aKeys.length; },
+              configurable: false,
+              enumerable: false
+            });
+            Object.defineProperty(oStorage, "removeItem", {
+              value: function (sKey) {
+                if(!sKey) { return; }
+                document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+              },
+              writable: false,
+              configurable: false,
+              enumerable: false
+            });
+            Object.defineProperty(oStorage, "clear", {
+              value: function () {
+                if(!aKeys.length) { return; }
+                for (var sKey in aKeys) {
+                  document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+                }
+              },
+              writable: false,
+              configurable: false,
+              enumerable: false
+            });
+            this.get = function () {
+              var iThisIndx;
+              for (var sKey in oStorage) {
+                iThisIndx = aKeys.indexOf(sKey);
+                if (iThisIndx === -1) { oStorage.setItem(sKey, oStorage[sKey]); }
+                else { aKeys.splice(iThisIndx, 1); }
+                delete oStorage[sKey];
+              }
+              for (aKeys; aKeys.length > 0; aKeys.splice(0, 1)) { oStorage.removeItem(aKeys[0]); }
+              for (var aCouple, iKey, nIdx = 0, aCouples = document.cookie.split(/\s*;\s*/); nIdx < aCouples.length; nIdx++) {
+                aCouple = aCouples[nIdx].split(/\s*=\s*/);
+                if (aCouple.length > 1) {
+                  oStorage[iKey = unescape(aCouple[0])] = unescape(aCouple[1]);
+                  aKeys.push(iKey);
+                }
+              }
+              return oStorage;
+            };
+            this.configurable = false;
+            this.enumerable = true;
         }
     }
     class EpaWindow
@@ -311,7 +413,7 @@
     }
     function defProperty( obj, name, getter, setter=getter  )
     {
-        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: true, configurable:false } )
+        Object.defineProperty( obj, name,{ get: getter, set: setter, writable: false, enumerable: false, configurable:false } )
     }
 
 })( window, document );
