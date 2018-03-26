@@ -264,6 +264,10 @@ void clear();
                                 ,   value: ''
                                 ,   observer: 'fetch'
                                 }
+                    ,   html:   {   type: String
+                                ,   value: ''
+                                ,   observer: 'onHtmlChange'
+                                }
                     ,   redirects:  {   type: Array
                                     ,   value:  ()=>[]
                                     }
@@ -275,24 +279,37 @@ void clear();
         }
         getInstanceNum(){ return this._InstanceNum }
 
+        connectedCallback()
+        {   super.connectedCallback();
+            this.html || this.src || this._loadHtml( this.innerHTML);
+        }
+        _loadHtml( html )
+        {   const f = this.$f = this.$.framed;
+            let el = doc.createElement('div');
+            el.innerHTML =  html;
+            // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
+            let $s = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
+            f.innerHTML='';
+            f.appendChild( el );
+            this.runScripts( $s );
+        }
         fetch()
         {   const f = this.$f = this.$.framed;
-            this.onBeforeFetch();
+            this.onBeforeLoad();
             this.src && ajax( this.src )
             .then( t =>
-            {   let el = doc.createElement('div');
-                el.innerHTML =  t;
-                // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
-                let $s = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
-                f.innerHTML='';
-                f.appendChild( el );
-                this.runScripts( $s );
-                this.onAfterFetch();
+            {   this._loadHtml(t);
+                this.onAfterLoad();
             }, err => f.innerHTML =  "Technical error" );
         }
-        onBeforeFetch(){ addClass   ( this.$f,'loading') }
-        onAfterFetch (){ removeClass( this.$f,'loading') }
+        onBeforeLoad(){ addClass   ( this.$f,'loading') }
+        onAfterLoad (){ removeClass( this.$f,'loading') }
 
+        onHtmlChange()
+        {   this.onBeforeLoad(); 
+            this._loadHtml( this.html );
+            this.onAfterLoad();
+        }
 
         get context()
         {   const f = this.$.framed
@@ -413,7 +430,7 @@ void clear();
     }
     function defProperty( obj, name, getter, setter=getter  )
     {
-        Object.defineProperty( obj, name,{ get: getter, set: setter, writable: false, enumerable: false, configurable:false } )
+        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:false } )
     }
 
 })( window, document );

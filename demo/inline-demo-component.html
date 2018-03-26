@@ -1,0 +1,22 @@
+<link rel="import" href="../../polymer/polymer-element.html">
+<link rel="import" href="../../iron-ajax/iron-ajax.html">
+<link rel="import" href="../../imported-template/imported-template.html">
+<dom-module id="inline-demo-component">
+    <template>
+        <iron-ajax
+               auto
+               url="page-purple.html"
+               handle-as="text"
+               last-response="{{htmlContent}}"
+               >
+        </iron-ajax>
+        <embed-page html="[[htmlContent]]">Loading...</embed-page>
+    </template>
+    <script>
+        class InlineDemoComponent extends Polymer.Element
+        {
+            static get is() { return 'inline-demo-component'; }
+        }
+        customElements.define(InlineDemoComponent.is, InlineDemoComponent);
+    </script>
+</dom-module>
