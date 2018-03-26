@@ -7,14 +7,37 @@
     <title>embed-page demo - inline html</title>
 
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
 
     <link rel="import" href="../embed-page.html">
     <link rel="import" href="inline-demo-component.html">
 </head>
 <body>
     <h1>embed-page demo - inline html</h1>
-    <embed-page><h2>H2 content</h2></embed-page>
+    <demo-snippet>
+        <template>
+            <embed-page><h2>H2 content</h2></embed-page>
+        </template>
+    </demo-snippet>
+
     <hr/>
-    <inline-demo-component>Loading...</inline-demo-component>
+    <h1><a href="inline-demo-component.html">inline-demo-component.html</a> - binding via <b>iron-ajax</b> </h1>
+    <demo-snippet>
+        <template>
+            <inline-demo-component>Loading...</inline-demo-component>
+
+            <template>
+                <iron-ajax
+                       auto
+                       url="page-purple.html"
+                       handle-as="text"
+                       last-response="{{htmlContent}}"
+                       >
+                </iron-ajax>
+                <embed-page html="[[htmlContent]]">Loading...</embed-page>
+            </template>
+        </template>
+    </demo-snippet>
 </body>
 </html>
