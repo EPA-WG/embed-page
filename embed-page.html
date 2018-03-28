@@ -281,7 +281,7 @@ void clear();
 
         connectedCallback()
         {   super.connectedCallback();
-            this.html || this.src || this._loadHtml( this.innerHTML);
+            new MutationObserver( mutationsList => this.onHtmlChange() ).observe( this, { attributes: false, childList: true });
         }
         _loadHtml( html )
         {   const f = this.$f = this.$.framed;
@@ -293,6 +293,7 @@ void clear();
             f.appendChild( el );
             this.runScripts( $s );
         }
+
         fetch()
         {   const f = this.$f = this.$.framed;
             this.onBeforeLoad();
@@ -306,8 +307,11 @@ void clear();
         onAfterLoad (){ removeClass( this.$f,'loading') }
 
         onHtmlChange()
-        {   this.onBeforeLoad(); 
-            this._loadHtml( this.html );
+        {   this.onBeforeLoad();
+            if( this.html )
+                this._loadHtml( this.html );
+            else
+                this._loadHtml( this.innerHTML.trim().replace('<template>','').replace('</template>','') );
             this.onAfterLoad();
         }
 

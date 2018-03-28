@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>embed-page demo - inline html</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <link rel="import" href="../embed-page.html">
+    <link rel="import" href="inline-demo-component.html">
+    <style>textarea { height: 3em; width:32em;}</style>
+</head>
+<body>
+    <h1>embed-page demo - dynamic Polymer binding</h1>
+
+todo evaluate the use of slotchange, attachedCallback/detachedCallback on SLOT tag
+
+    <h1><a href="inline-demo-component.html">inline-demo-component.html</a> shows dynamic binding via <b>iron-ajax</b> </h1>
+    <demo-snippet>
+        <template>
+            <inline-demo-component>Loading...</inline-demo-component>
+            <!-- inline-demo-component uses: -->
+            <template>
+                <iron-ajax auto url="page-purple.html" handle-as="text" last-response="{{htmlContent}}" ></iron-ajax>
+                <embed-page html="[[htmlContent]]"><slot></slot></embed-page>
+            </template>
+        </template>
+    </demo-snippet>
+</body>
+</html>

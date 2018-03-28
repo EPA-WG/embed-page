@@ -1,5 +1,5 @@
 # \<embed-page/\>
-Polymer widget acting as responsive IFRAME, proof of concept for 
+Polymer widget acting as responsive IFRAME, a proof of concept for 
 [Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept).
 
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page)
@@ -7,17 +7,24 @@ Polymer widget acting as responsive IFRAME, proof of concept for
 ## Security
 * General browser and application [security improvements overview](security.md).
  
+Briefly, increases security by jailing 3rd party content and JS, a secure alternative to directly including of 3rd party 
+JS into page.
+ 
 The scope insulation for DOM and CSS is done by WebComponet shadow dom, API for JS 
 are insulated by closure for global objects with wrappers limiting the dom access root 
-to component content. Similar approach will be applied for url, storage, cookies, etc. 
+to component content. Similar approach is applied for url, storage, cookies, etc. 
 
 ##Use
 The content could be set either by **src** attribute or by Polymer {{data}} binding of content.
 ```html
     <embed-page src="abc.html" />
     
+    
     <iron-ajax  last-response="{{htmlContent}}" url="abc.html" auto ></iron-ajax>
-    <embed-page>[[htmlContent]]</embed-page>
+    <embed-page html="[[htmlContent]]"></embed-page>
+    
+    <!-- not ready yet, use html attribute instead 
+        embed-page><style>h3{font-family:Courier}</style><h3>Insulated HTML</h3></embed-page-->
 ```
 
 At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the 
@@ -26,7 +33,7 @@ At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the
 
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.6/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.7/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash
