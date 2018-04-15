@@ -1,6 +1,460 @@
+//export default
 ( function( win, doc )
 {
-    customElements.define('embed-page0', class extends HTMLElement
+    const   FRAME_HASH_PREFIX   = '#embed-page='
+    ,       FRAME_BLANK         = "about:blank";
+    let     GBL_InstancesCount  = 0;
+
+    class EpaHrefLocationHolder
+    {
+        constructor( app, a )
+        {
+            this.getHref    = x=> a.href;
+            this.setHref    = v=> app.src = v;
+            this.toString   = x=>a.href;
+            this.getProp    = p=>a[p];
+        }
+        get href( ){ return this.getHref( ) }
+        set href(v){ return this.setHref(v) }
+        get protocol(){ return this.getProp('protocol'  )}
+        get host    (){ return this.getProp('host'      )}
+        get hostname(){ return this.getProp('hostname'  )}
+        get port    (){ return this.getProp('port'      )}
+        get pathname(){ return this.getProp('pathname'  )}
+        get search  (){ return this.getProp('search'    )}
+        get hash    (){ return this.getProp('hash'      )}
+        get username(){ return this.getProp('username'  )}
+        get password(){ return this.getProp('password'  )}
+        get origin  (){ return this.getProp('origin'    )}
+        assign      (v){ return this.setHref( v ) }
+        replace     (v){ return this.setHref( v ) }
+        reload(){ this.setHref(''); return this.setHref( this.getHref() ) }
+    }
+    class EpaStorageWrapper
+    {
+        /**
+         *
+         * @param storage
+         * @param win
+         */
+        // todo Window.onstorage event handler that fires when a storage area changes
+        constructor( /** Storage */ storage, /** EpaWindow */ win )
+        {
+            // on init hook to StorageEvent
+            // in StorageEvent pass through only own
+
+
+            var aKeys = [], oStorage = {};
+            /*
+
+            readonly attribute unsigned long length;
+            DOMString? key(unsigned long index);
+            getter DOMString? getItem(DOMString key);
+            setter void setItem(DOMString key, DOMString value);
+            deleter void removeItem(DOMString key);
+            void clear();
+            */
+
+            function prefix(){ return win.location.hostname+'-EPA' }
+            function eachKey( cb )
+            {
+                let p = prefix()
+                    ,   i = storage.length-1;
+                for( ; i>=0; i-- )
+                    if( !storage.key(i).indexOf(p) )
+                        cb( storage.key(i).substring( p.length ) )
+            }
+
+            defProperty( this, 'length', x =>
+            {   let ret = 0;
+                eachKey( x=> ret++ );
+                return ret;
+            });
+            defProperty( this, 'key'    , idx =>
+            {   let i=0; ret = null;
+                eachKey( k => i === idx ? ( (ret = k), i++ ) : i++ );
+                return ret;
+            });
+            defProperty( this, 'getItem', k => storage.getItem( prefix()+k ) );
+
+            Object.defineProperty(oStorage, "key", {
+                value: function (nKeyId) { return aKeys[nKeyId]; },
+                writable: false,
+                configurable: false,
+                enumerable: false
+            });
+            Object.defineProperty(oStorage, "setItem", {
+                value: function (sKey, sValue) {
+                    if(!sKey) { return; }
+                    document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
+                },
+                writable: false,
+                configurable: false,
+                enumerable: false
+            });
+            Object.defineProperty(oStorage, "length", {
+                get: function () { return aKeys.length; },
+                configurable: false,
+                enumerable: false
+            });
+            Object.defineProperty(oStorage, "removeItem", {
+                value: function (sKey) {
+                    if(!sKey) { return; }
+                    document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+                },
+                writable: false,
+                configurable: false,
+                enumerable: false
+            });
+            Object.defineProperty(oStorage, "clear", {
+                value: function () {
+                    if(!aKeys.length) { return; }
+                    for (var sKey in aKeys) {
+                        document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+                    }
+                },
+                writable: false,
+                configurable: false,
+                enumerable: false
+            });
+            this.get = function () {
+                var iThisIndx;
+                for (var sKey in oStorage) {
+                    iThisIndx = aKeys.indexOf(sKey);
+                    if (iThisIndx === -1) { oStorage.setItem(sKey, oStorage[sKey]); }
+                    else { aKeys.splice(iThisIndx, 1); }
+                    delete oStorage[sKey];
+                }
+                for (aKeys; aKeys.length > 0; aKeys.splice(0, 1)) { oStorage.removeItem(aKeys[0]); }
+                for (var aCouple, iKey, nIdx = 0, aCouples = document.cookie.split(/\s*;\s*/); nIdx < aCouples.length; nIdx++) {
+                    aCouple = aCouples[nIdx].split(/\s*=\s*/);
+                    if (aCouple.length > 1) {
+                        oStorage[iKey = unescape(aCouple[0])] = unescape(aCouple[1]);
+                        aKeys.push(iKey);
+                    }
+                }
+                return oStorage;
+            };
+            this.configurable = false;
+            this.enumerable = true;
+        }
+    }
+    class EpaWindow
+    {
+        constructor( app, a )
+        {   const h = new EpaHrefLocationHolder(app,a);
+            defProperty( this, 'location', x=> h, v=> app.src = v );
+
+            //this.getLocation = x=> h;
+            //this.setLocation = v=> app.src = v;
+
+            const ls = new EpaStorageWrapper( win.localStorage  , this )
+                ,     ss = new EpaStorageWrapper( win.sessionStorage, this );
+            this.getSessionStorage = x=> ls;
+            this.getLocalStorage   = x=> ss;
+        }
+        //get location( ){ return this.getLocation() }
+        //set location(v){ return this.setLocation( v ) }
+        get sessionStorage() { return this.getSessionStorage() }
+        get localStorage  () { return this.getLocalStorage  () }
+    }
+
+    class EpaCookie
+    {   // todo combine window.localStorage & sessionStorage( no expires or "cookiename=value; expires=0; path=/";) to proxy cookies
+        constructor( /** EpaWindow */ loc )
+        {
+            this.loc = loc;
+        }
+        set(v)
+        {   const   c = EpaCookie.parse(v)
+            ,     key = `EpaCookie-${c.key}`
+            ,     val = JSON.stringify(c)
+            ,       p = ( !c.attr.expires || '0' == c.attr.expires )
+            ,     sto = p ? this.loc.sessionStorage : this.loc.localStorage
+            ,     alt = p ? this.loc.localStorage   : this.loc.sessionStorage;
+            sto.setItem( key, val );
+            alt.removeItem( key );
+            // todo remove cookie if expires is in past
+        }
+        toString(){ return "" }// todo
+
+        static parse( str )
+        {   // inspired by https://github.com/jshttp/cookie/blob/master/index.js
+            let obj = { attr:{} },   pairs = str.split( /; */ );
+
+            pairs.map( pair =>
+                       {
+                           let  eqi = pair.indexOf( '=' );
+
+                           if( eqi < 0 )
+                               return { key: pair.trim() };
+
+                           let key = pair.substr( 0, eqi ).trim()
+                               ,   val = pair.substr( ++eqi, pair.length ).trim();
+
+                           if( '"' == val[ 0 ] ) // quoted values
+                               val = val.slice( 1, -1 );
+                           return { key:key, val:val };
+                       }).map( (kw,i)=>
+                               {   if( i )
+                               {   if( undefined == obj[ key ] ) // only assign once
+                                   obj.attr[ key ] = tryDecode( val );
+                               }else
+                                   Object.assign( obj, kw )
+                               });
+
+            return obj;
+
+            function
+            tryDecode( str )
+            {   try{        return decodeURIComponent( str ) }
+            catch( e ){ return str }
+            }   }   }
+
+    class EpaDocument
+    {
+        constructor( app, f, w )
+        {   const cookie = new EpaCookie(this);
+            Object.assign( this,
+                           {   getElementById         : x=> $( '#'+x, f )[0]
+                               ,   getElementsByTagName   : x=> $( x, f )
+                               ,   getElementsByClassName : x=> f.getElementsByClassName( x )
+                               ,   createElement          : x=> doc.createElement(x)
+                               ,   querySelectorAll       : x=> f.querySelectorAll(x)
+                               ,   querySelector          : x=> f.querySelector(x)
+                               ,   write       : x=> console.error( 'document.write() is not supported yet.')
+                           });
+
+            defProperty( this, 'sessionStorage' , x=> win.sessionStorage );
+            defProperty( this, 'localStorage'   , x=> win.localStorage   );
+            defProperty( this, 'location'       , x=> w.location        , v=> w.location = v );
+            defProperty( this, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
+        }
+    }
+
+    /**
+     * `embed-page`
+     * embeds page in iframe fashion but using shadow dom for CSS, dom insulation, and closure for JS jailing.
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class EmbedPage extends Polymer.Element
+    {
+        static get is() { return 'embed-page' }
+
+        static get properties()
+        {
+            return  {   src:    {   type: String
+                                ,   value: ''
+                                ,   observer: 'fetch'
+                                }
+                    ,   html:   {   type: String
+                                ,   value: ''
+                                ,   observer: 'onHtmlAttrChange'
+                                }
+                    ,redirects: {   type: Array
+                                ,   value:  ()=>[]
+                                }
+                    };
+        }
+        static get template() {
+            return Polymer.html`
+                <style>
+                    :host { display: block; }
+                    iframe{display: none;}
+                </style>
+                <div id="framed" ><slot name="slotted" id="slotted">~<slot>...</slot>~</slot></div>
+                <!--base target="target-frame"/-->
+                <iframe id="targetframe" name$="target-frame[[getInstanceNum()]]" on-load="onTargetLoad" src=""></iframe>`;
+        }
+        constructor()
+        {   super();
+            this._InstanceNum = GBL_InstancesCount++;
+        }
+        getInstanceNum(){ return this._InstanceNum }
+
+        connectedCallback()
+        {   super.connectedCallback();
+            new MutationObserver( mutationsList => this.onHtmlChange() ).observe( this, { attributes: false, childList: true });
+        }
+
+        _loadHtml( html )
+        {   const f = this.$f = this.$.framed;
+            let el = doc.createElement('div');
+            el.innerHTML =  html;
+            // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
+            let $s = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
+            f.innerHTML='';
+            f.appendChild( el );
+            this.runScripts( $s );
+        }
+
+        fetch()
+        {   const f = this.$f = this.$.framed;
+            this.onBeforeLoad();
+            this.src && ajax( this.src )
+                .then( t =>
+                       {   this._loadHtml(t);
+                           this.onAfterLoad();
+                       }, err => f.innerHTML =  "Technical error" );
+        }
+        onBeforeLoad(){ addClass   ( this.$f,'loading') }
+        onAfterLoad (){ removeClass( this.$f,'loading') }
+
+        onHtmlChange()
+        {   debugger;
+            this.onBeforeLoad();
+            if( this.html )
+                this._loadHtml( this.html );
+            else
+                this._loadHtml( this.innerHTML.trim().replace('<template>','').replace('</template>','') );
+            this.onAfterLoad();
+        }
+        onHtmlAttrChange()
+        {   this.onBeforeLoad();
+            if( this.html )
+                this._loadHtml( this.html );
+            else
+                this._loadHtml( this.innerHTML.trim().replace('<template>','').replace('</template>','') );
+            this.onAfterLoad();
+        }
+        onSlotChanged()
+        {
+            console.log("onSlotChanged");
+        }
+        get context()
+        {   const f = this.$.framed
+            ,     a = doc.createElement('a');
+            a.href  = this.src;
+            a.toString = function(){ return this.href };
+            const win = new EpaWindow(this,a);
+            return  {   window      :   win
+                ,   document    :   new EpaDocument(this,f,win)
+                ,   head        : doc.head
+                ,   body        : doc.body
+            }
+        }
+
+        runScripts( /** @type {!NodeList} */ pageScripts, { win, document, head, body } = this.context )
+        {   const env = this.context;
+            EPA_runScript( [...pageScripts], env, this.redirects );
+        }
+        runScriptsRaw( { window, document, head, body } = this.context )
+        {
+            forEach( content.querySelectorAll(scriptsSelector), currentScript =>
+            {   const clone = /** @type {!HTMLScriptElement} */( script.ownerDocument.createElement('script') );
+                forEach(script.attributes, attr => clone.setAttribute(attr.name, attr.value));
+                clone.textContent = script.textContent;
+                script.parentNode.insertBefore(clone, script);
+                script.parentNode.removeChild(script);
+            });
+        }
+        ready()
+        {   super.ready();
+            this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
+
+            let sh= this.$.slotted;
+
+            const slot = sh.querySelector('slot');
+            slot.addEventListener('slotchange', e => {
+                console.log('light dom children changed!',slot);
+                setTimeout( ()=>  this.onSlotChanged(), 0 )
+            });
+            //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
+        }
+        url2hash( el, attr )
+        {   el.target = this.$.targetframe.getAttribute( 'name' );
+            if( !el[attr].includes(FRAME_HASH_PREFIX) )
+                el[attr] = FRAME_HASH_PREFIX+encodeURIComponent( el[attr] )
+        }
+        _onClick(ev)
+        {   const $f = this.$.framed;
+            for( let el = ev.target; el && el!==$f ; el = el.parentElement )
+            {   const a = { A:'href', FORM:'action'}[ el.tagName ];
+                if( a )
+                    return this.url2hash( el, a );
+                // todo POST handling
+            }
+        }
+        onTargetLoad(ev)
+        {
+            const   fr  = ev.target
+                ,       url = fr.contentWindow.location.href;
+            if( url.includes(FRAME_BLANK) )
+                return;
+
+            const decoded = decodeURIComponent( url.substring( url.indexOf(FRAME_HASH_PREFIX)+FRAME_HASH_PREFIX.length ) );
+            fr.src = FRAME_BLANK;
+            this.src = decoded;
+        }
+    }
+    const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
+
+    win.customElements.define( EmbedPage.is, EmbedPage );
+
+    return EmbedPage;
+
+    function log( ...args  ){ console.log(...args); }
+    function forEach(arr,cb){[...arr].forEach(cb)}
+    function $( css, el = doc ){ return el.querySelectorAll( css ) }
+    function addClass   ( el, className  ){ el.className += ' '+className    }
+    function removeClass( el, className  ){ el.className = el.className.split(' ').map(s=>s===className?'':s).join(' ') }
+
+
+    // outside of class to avoid strict mode
+    function EPA_runScript( arr, env, redirects )
+    {   let { window, document, head, body } = env;
+        let currentScript = arr.shift();
+        if( !currentScript )
+            return;
+        console.debug( "embed-page", currentScript.src || currentScript.text );
+        if( currentScript.src )
+        {
+            let url = currentScript.src;
+
+            let m = redirects.find( m => url.startsWith( m.from ) );
+            if( m )
+                url = m.to + url.substring( m.from.length );
+            ajax( url )
+                .then( txt => runScript.call( window, txt + "//# sourceURL=" + currentScript.src ) );
+        }else
+            runScript.call( window, currentScript.text );// todo src map
+
+        function runScript( txt )
+        {   try
+        {   with( window )
+        {
+            eval(txt);
+        }
+        }catch(ex){ console.error(ex) }
+            setTimeout( x=> EPA_runScript( arr, env, redirects ), 0 );
+        }
+    }
+
+    function ajax( url, method = "GET", headers = {}, body = undefined )
+    {
+        return new Promise( ( resolve, reject ) =>
+                            {   const xhr = new XMLHttpRequest();
+                                xhr.open( method, url );
+                                headers && Object.keys( headers ).forEach( key => xhr.setRequestHeader( key, headers[ key ] ) );
+
+                                xhr.onload  = () =>
+                                {   if( xhr.status >= 200 && xhr.status < 300 )
+                                    resolve( xhr.response );
+                                else
+                                    reject( xhr.statusText );
+                                };
+                                xhr.onerror = () => reject( url + 'failed' +xhr.statusText );
+                                xhr.send( body );
+                            })
+    }
+    function defProperty( obj, name, getter, setter=getter  )
+    {
+        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:false } )
+    }
+    class EmbedPage0 extends HTMLElement
     {
         constructor()
         {
@@ -9,7 +463,7 @@
             shadowRoot.innerHTML = `<div id="framed" >
                                         <div id="content"></div>
                                         <div name="slotted" id="slotted">
-                                            ~<slot>...</slot>~
+                                            <slot>...</slot>
                                         </div>
                                     </div>`;
             addObservers( this, "this");
@@ -30,16 +484,7 @@
             //const t = this.firstElementChild && "TEMPLATE" === this.firstElementChild.nodeName && this.firstElementChild.innerHTML;
             //t && setContent( t );
         }
-    });
-    function addObservers( node, caseName )
-    {
-        "DOMSubtreeModified DOMCharacterDataModified DOMNodeInsertedIntoDocument DOMNodeRemovedFromDocument DOMNodeInserted DOMNodeRemoved"
-            .split(' ').map( evName => node.addEventListener( evName   , e =>  console.log(evName,e) ) );
-
-        Polymer.dom(node).observeNodes( info =>
-                                     {   console.log (caseName+' Added nodes: '  , info.addedNodes);
-                                         console.log (caseName+' Removed nodes: ', info.removedNodes);
-                                     });
-        new MutationObserver( x => console.log( caseName+' MutationObserver', node.textContent ) ).observe( node, { attributes: false, childList: true } );
     }
-})( window, document );
+    customElements.define('embed-page0', EmbedPage0);
+    return EmbedPage;
+})( window||globals, document );

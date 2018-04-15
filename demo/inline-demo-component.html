@@ -5,26 +5,25 @@
 <link rel="import" href="../../iron-ajax/iron-ajax.html">
 <link rel="import" href="../../imported-template/imported-template.html">
 <link rel="import" href="../../vaadin-combo-box/vaadin-combo-box.html">
-<link rel="import" href="../embed-page.html">
 
+<link rel="import" href="../embed-page.html">
+<!-- or alternatively
 <script src="../embed-page.js"></script>
+-->
+
 <dom-module id="inline-demo-component">
     <template>
         <paper-listbox attr-for-selected="page" selected="{{url}}" fallback-selection="page-violet.html"
                        style="display: inline-block; box-shadow: 1px 1px 0.5em 0.3em grey;"
-        >
+            >
             <paper-item page="page-violet.html">violet</paper-item>
             <paper-item page="page-purple.html">purple</paper-item>
         </paper-listbox>
         selected:[[url]]
 
-        <iron-ajax id="ajax"
-                   auto
-                   url="[[url]]"
-                   handle-as="text"
+        <iron-ajax url="[[url]]"    handle-as="text" auto
                    last-response="{{htmlContent}}"
-        >
-        </iron-ajax>
+        ></iron-ajax>
 
         <!--<embed-page0><template>[[htmlContent]]</template></embed-page0>-->
         <embed-page html="[[htmlContent]]"></embed-page>

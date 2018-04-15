@@ -1,5 +1,5 @@
 # \<embed-page/\>
-Polymer widget acting as responsive IFRAME, a proof of concept for 
+Web Component acting as responsive IFRAME, a proof of concept for 
 [Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept).
 
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page)
@@ -15,6 +15,10 @@ are insulated by closure for global objects with wrappers limiting the dom acces
 to component content. Similar approach is applied for url, storage, cookies, etc. 
 
 ##Use
+1. Add to project via npm, bower, or simply placing `embed-page.js` into project tree
+2. Import into page/module either by webcomponent `link rel="import"`, AMD require, ES6 import, or simple SCRIPT tag
+3. Add some useful 3rd party [microapplication](https://github.com/EPA-WG/EPA-concept/blob/master/microapplication.md) into your page.
+
 The content could be set either by **src** attribute or by Polymer {{data}} binding of content;
 including the insulated content in TEMPLATE; or binding content via **html** attribute.
 ```html
@@ -24,7 +28,7 @@ including the insulated content in TEMPLATE; or binding content via **html** att
     <embed-page>
          <template>
              <style>h1{color:chocolate;}</style>
-             <h1> In chocolate only itself </h1>
+             <h1> In chocolate only itself, no fumes spread. </h1>
          <template>
     </embed-page>
 
@@ -36,10 +40,12 @@ including the insulated content in TEMPLATE; or binding content via **html** att
 At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the 
 [change request](https://github.com/EPA-WG/embed-page/issues) if need other or no framework compatibility.
 
+### Dependencies
+There is no dependencies in run time. Polymer is used for demo and is not required to use \<embed-page/\>
 
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.7/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.8/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash
