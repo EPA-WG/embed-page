@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>embed-page POC dynamic binding</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <link rel="import" href="../../polymer/polymer-element.html">
+    <link rel="import" href="../../paper-listbox/paper-listbox.html">
+    <link rel="import" href="../../paper-item/paper-item.html">
+
+    <link rel="import" href="../../iron-ajax/iron-ajax.html">
+    <link rel="import" href="../../imported-template/imported-template.html">
+    <link rel="import" href="../../vaadin-combo-box/vaadin-combo-box.html">
+</head>
+<body>
+
+<h1>embed-page POC dynamic binding</h1>
+
+<embed-page-poc-dynamic-binding></embed-page-poc-dynamic-binding>
+
+    <script>
+    ( function( win, doc )
+    {
+        customElements.define('embed-page-poc-dynamic-binding', class extends HTMLElement
+        {
+            constructor()
+            {
+                super();
+                const shadowRoot     = this._shadowRoot = this.attachShadow( { mode: 'open' } );
+                shadowRoot.innerHTML = `<div id="framed" >
+                                        <div id="content"></div>
+                                        <div name="slotted" id="slotted">
+                                            ~<slot>...</slot>~
+                                        </div>
+                                    </div>`;
+                addObservers( this, "this");
+            }
+            connectedCallback()
+            {   //super.connectedCallback();
+                console.log( "connectedCallback" );
+                const shadowRoot = this._shadowRoot
+                    ,           slot = shadowRoot.querySelector('#slotted slot');
+
+                addObservers( slot, "slot");
+                slot.addEventListener('slotchange', e =>
+                {
+                    console.log( 'slotchange', slot );
+                    let newContent = slot.assignedNodes()[0];
+                    addObservers( newContent, "slot.assignedNodes");
+                });
+                //const t = this.firstElementChild && "TEMPLATE" === this.firstElementChild.nodeName && this.firstElementChild.innerHTML;
+                //t && setContent( t );
+            }
+        });
+        function addObservers( node, caseName )
+        {
+            "DOMSubtreeModified DOMCharacterDataModified DOMNodeInsertedIntoDocument DOMNodeRemovedFromDocument DOMNodeInserted DOMNodeRemoved"
+                .split(' ').map( evName => node.addEventListener( evName   , e =>  console.log(evName,e) ) );
+
+            Polymer.dom(node).observeNodes( info =>
+                                            {   console.log (caseName+' Added nodes: '  , info.addedNodes);
+                                                console.log (caseName+' Removed nodes: ', info.removedNodes);
+                                            });
+            new MutationObserver( x => console.log( caseName+' MutationObserver', node.textContent ) ).observe( node, { attributes: false, childList: true } );
+        }
+    })( window, document );
+</script>
+</body>
+</html>

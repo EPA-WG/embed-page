@@ -1,33 +1,45 @@
-// todo UMD
-(function()
+( function( win, doc )
 {
-    class EmbedPage extends HTMLDivElement
+    customElements.define('embed-page0', class extends HTMLElement
     {
-        constructor() { super(); }
-
-        createdCallback()
+        constructor()
         {
-            // This element uses Shadow DOM.
-            this.createShadowRoot().innerHTML = `
-      <style>
-        :host {
-          display: block;
+            super();
+            const shadowRoot     = this._shadowRoot = this.attachShadow( { mode: 'open' } );
+            shadowRoot.innerHTML = `<div id="framed" >
+                                        <div id="content"></div>
+                                        <div name="slotted" id="slotted">
+                                            ~<slot>...</slot>~
+                                        </div>
+                                    </div>`;
+            addObservers( this, "this");
         }
-      </style>
-      <div id="quotes"><div>
-    `;
-
-            // Update the ticker prices.
-            this.updateQuotes(); // We'll define this later.
-        }
-
         connectedCallback()
-        {
-            let div = document.createElement( 'div' );
-            Render( div );
-            this.appendChild( div );
-        }
-    }
+        {   //super.connectedCallback();
+            console.log( "connectedCallback" );
+            const shadowRoot = this._shadowRoot
+            ,           slot = shadowRoot.querySelector('#slotted slot');
 
-    window.customElements.define( 'embed-page', EmbedPage );
-})();
+            addObservers( slot, "slot");
+            slot.addEventListener('slotchange', e =>
+            {
+                console.log( 'slotchange', slot );
+                let newContent = slot.assignedNodes()[0];
+                addObservers( newContent, "slot.assignedNodes");
+            });
+            //const t = this.firstElementChild && "TEMPLATE" === this.firstElementChild.nodeName && this.firstElementChild.innerHTML;
+            //t && setContent( t );
+        }
+    });
+    function addObservers( node, caseName )
+    {
+        "DOMSubtreeModified DOMCharacterDataModified DOMNodeInsertedIntoDocument DOMNodeRemovedFromDocument DOMNodeInserted DOMNodeRemoved"
+            .split(' ').map( evName => node.addEventListener( evName   , e =>  console.log(evName,e) ) );
+
+        Polymer.dom(node).observeNodes( info =>
+                                     {   console.log (caseName+' Added nodes: '  , info.addedNodes);
+                                         console.log (caseName+' Removed nodes: ', info.removedNodes);
+                                     });
+        new MutationObserver( x => console.log( caseName+' MutationObserver', node.textContent ) ).observe( node, { attributes: false, childList: true } );
+    }
+})( window, document );

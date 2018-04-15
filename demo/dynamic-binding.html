@@ -10,23 +10,36 @@
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
 
-    <link rel="import" href="../embed-page.html">
     <link rel="import" href="inline-demo-component.html">
-    <style>textarea { height: 3em; width:32em;}</style>
+    <link rel="import" href="../embed-page.html">
+    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
 </head>
 <body>
     <h1>embed-page demo - dynamic Polymer binding</h1>
+    <demo-snippet>
+        <template>
+            <embed-page>
+                <template>
+                    <style>h1{color:chocolate;}</style>
+                    <h1> 1st instance - chocolate defined within embed-page inline. </h1>
+                    Note the TEMPLATE wrapper which prevents execution of code
+                    within EMBED-PAGE in page context
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
 
-todo evaluate the use of slotchange, attachedCallback/detachedCallback on SLOT tag
+    <h3><a href="inline-demo-component.html">inline-demo-component-html.html</a> shows dynamic binding via <b>iron-ajax</b>
+        and <i>[[ ]]</i> binding in body.</h3>
 
-    <h1><a href="inline-demo-component.html">inline-demo-component.html</a> shows dynamic binding via <b>iron-ajax</b> </h1>
     <demo-snippet>
         <template>
             <inline-demo-component>Loading...</inline-demo-component>
             <!-- inline-demo-component uses: -->
             <template>
+                <paper-listbox selected="{{url}}">...</paper-listbox>
                 <iron-ajax auto url="page-purple.html" handle-as="text" last-response="{{htmlContent}}" ></iron-ajax>
-                <embed-page html="[[htmlContent]]"><slot></slot></embed-page>
+                <embed-page html="[[htmlContent]]"></embed-page>
             </template>
         </template>
     </demo-snippet>

@@ -5,14 +5,16 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
     "imported-template": "juicy/imported-template#^3.1.1",
-    "paper-radio-group": "polymerelements/paper-radio-group#^2.0.0",
-    "codemirror": "^5.34.0"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
     "iron-component-page": "^3.0.1"
+    "paper-radio-group": "polymerelements/paper-radio-group#^2.0.0",
+    "codemirror": "^5.34.0",
+    "paper-listbox": "polymerelements/paper-listbox#^2.1.0",
+    "paper-item": "polymerelements/paper-item#^2.1.0"
   },
   "resolutions": {
     "polymer": "^2.0.0"
