@@ -15,16 +15,22 @@ are insulated by closure for global objects with wrappers limiting the dom acces
 to component content. Similar approach is applied for url, storage, cookies, etc. 
 
 ##Use
-The content could be set either by **src** attribute or by Polymer {{data}} binding of content.
+The content could be set either by **src** attribute or by Polymer {{data}} binding of content;
+including the insulated content in TEMPLATE; or binding content via **html** attribute.
 ```html
     <embed-page src="abc.html" />
     
-    
+
+    <embed-page>
+         <template>
+             <style>h1{color:chocolate;}</style>
+             <h1> In chocolate only itself </h1>
+         <template>
+    </embed-page>
+
+
     <iron-ajax  last-response="{{htmlContent}}" url="abc.html" auto ></iron-ajax>
-    <embed-page html="[[htmlContent]]"></embed-page>
-    
-    <!-- not ready yet, use html attribute instead 
-        embed-page><style>h3{font-family:Courier}</style><h3>Insulated HTML</h3></embed-page-->
+    <embed-page html="[[htmlContent]]"></embed-page>    
 ```
 
 At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the 
