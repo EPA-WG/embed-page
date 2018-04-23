@@ -41,30 +41,16 @@
         constructor( /** Storage */ storage, /** EpaWindow */ win )
         {
             // on init hook to StorageEvent
-            // in StorageEvent pass through only own
-
-
-            var aKeys = [], oStorage = {};
-            /*
-
-            readonly attribute unsigned long length;
-            DOMString? key(unsigned long index);
-            getter DOMString? getItem(DOMString key);
-            setter void setItem(DOMString key, DOMString value);
-            deleter void removeItem(DOMString key);
-            void clear();
-            */
+            // in StorageEvent pass through only own to `win` object
 
             function prefix(){ return win.location.hostname+'-EPA' }
             function eachKey( cb )
-            {
-                let p = prefix()
-                    ,   i = storage.length-1;
+            {   let p = prefix()
+                ,   i = storage.length-1;
                 for( ; i>=0; i-- )
                     if( !storage.key(i).indexOf(p) )
                         cb( storage.key(i).substring( p.length ) )
             }
-
             defProperty( this, 'length', x =>
             {   let ret = 0;
                 eachKey( x=> ret++ );
@@ -75,68 +61,12 @@
                 eachKey( k => i === idx ? ( (ret = k), i++ ) : i++ );
                 return ret;
             });
-            defProperty( this, 'getItem', k => storage.getItem( prefix()+k ) );
-
-            Object.defineProperty(oStorage, "key", {
-                value: function (nKeyId) { return aKeys[nKeyId]; },
-                writable: false,
-                configurable: false,
-                enumerable: false
-            });
-            Object.defineProperty(oStorage, "setItem", {
-                value: function (sKey, sValue) {
-                    if(!sKey) { return; }
-                    document.cookie = escape(sKey) + "=" + escape(sValue) + "; expires=Tue, 19 Jan 2038 03:14:07 GMT; path=/";
-                },
-                writable: false,
-                configurable: false,
-                enumerable: false
-            });
-            Object.defineProperty(oStorage, "length", {
-                get: function () { return aKeys.length; },
-                configurable: false,
-                enumerable: false
-            });
-            Object.defineProperty(oStorage, "removeItem", {
-                value: function (sKey) {
-                    if(!sKey) { return; }
-                    document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-                },
-                writable: false,
-                configurable: false,
-                enumerable: false
-            });
-            Object.defineProperty(oStorage, "clear", {
-                value: function () {
-                    if(!aKeys.length) { return; }
-                    for (var sKey in aKeys) {
-                        document.cookie = escape(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-                    }
-                },
-                writable: false,
-                configurable: false,
-                enumerable: false
-            });
-            this.get = function () {
-                var iThisIndx;
-                for (var sKey in oStorage) {
-                    iThisIndx = aKeys.indexOf(sKey);
-                    if (iThisIndx === -1) { oStorage.setItem(sKey, oStorage[sKey]); }
-                    else { aKeys.splice(iThisIndx, 1); }
-                    delete oStorage[sKey];
-                }
-                for (aKeys; aKeys.length > 0; aKeys.splice(0, 1)) { oStorage.removeItem(aKeys[0]); }
-                for (var aCouple, iKey, nIdx = 0, aCouples = document.cookie.split(/\s*;\s*/); nIdx < aCouples.length; nIdx++) {
-                    aCouple = aCouples[nIdx].split(/\s*=\s*/);
-                    if (aCouple.length > 1) {
-                        oStorage[iKey = unescape(aCouple[0])] = unescape(aCouple[1]);
-                        aKeys.push(iKey);
-                    }
-                }
-                return oStorage;
-            };
-            this.configurable = false;
-            this.enumerable = true;
+            defProperty( this, 'getItem'    , k     => storage.getItem( prefix()+k ) );
+            defProperty( this, 'setItem'    , (k,v) => k && storage.setItem( prefix()+k, v ) );
+            defProperty( this, 'removeItem' , k     => k && storage.removeItem( prefix()+k ) );
+            defProperty( this, 'clear'      , x=>eachKey( k => storage.removeItem( prefix()+k ) ) );
+            defProperty( this, 'configurable',x=>false);
+            defProperty( this, 'enumerable'  ,x=>true );
         }
     }
     class EpaWindow
@@ -149,7 +79,7 @@
             //this.setLocation = v=> app.src = v;
 
             const ls = new EpaStorageWrapper( win.localStorage  , this )
-                ,     ss = new EpaStorageWrapper( win.sessionStorage, this );
+            ,     ss = new EpaStorageWrapper( win.sessionStorage, this );
             this.getSessionStorage = x=> ls;
             this.getLocalStorage   = x=> ss;
         }
@@ -157,6 +87,7 @@
         //set location(v){ return this.setLocation( v ) }
         get sessionStorage() { return this.getSessionStorage() }
         get localStorage  () { return this.getLocalStorage  () }
+        // todo events API
     }
 
     class EpaCookie

@@ -14,7 +14,7 @@ The scope insulation for DOM and CSS is done by WebComponet shadow dom, API for 
 are insulated by closure for global objects with wrappers limiting the dom access root 
 to component content. Similar approach is applied for url, storage, cookies, etc. 
 
-##Use
+## Use
 1. Add to project via npm, bower, or simply placing `embed-page.js` into project tree
 2. Import into page/module either by webcomponent `link rel="import"`, AMD require, ES6 import, or simple SCRIPT tag
 3. Add some useful 3rd party [microapplication](https://github.com/EPA-WG/EPA-concept/blob/master/microapplication.md) into your page.
@@ -45,7 +45,7 @@ There is no dependencies in run time. Polymer is used for demo and is not requir
 
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.8/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.9/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash
