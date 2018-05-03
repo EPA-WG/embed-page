@@ -32,11 +32,6 @@
     }
     class EpaStorageWrapper
     {
-        /**
-         *
-         * @param storage
-         * @param win
-         */
         // todo Window.onstorage event handler that fires when a storage area changes
         constructor( /** Storage */ storage, /** EpaWindow */ win )
         {
@@ -49,7 +44,7 @@
                 ,   i = storage.length-1;
                 for( ; i>=0; i-- )
                     if( !storage.key(i).indexOf(p) )
-                        cb( storage.key(i).substring( p.length ) )
+                        cb( storage.key(i).substring( p.length ) );
             }
             defProperty( this, 'length', x =>
             {   let ret = 0;
@@ -58,10 +53,10 @@
             });
             defProperty( this, 'key'    , idx =>
             {   let i=0; ret = null;
-                eachKey( k => i === idx ? ( (ret = k), i++ ) : i++ );
+                eachKey( k => i++ === idx && ( ret = k ) );
                 return ret;
             });
-            defProperty( this, 'getItem'    , k     => storage.getItem( prefix()+k ) );
+            defProperty( this, 'getItem'    , k => storage.getItem( prefix()+k ) );
             defProperty( this, 'setItem'    , (k,v) => k && storage.setItem( prefix()+k, v ) );
             defProperty( this, 'removeItem' , k     => k && storage.removeItem( prefix()+k ) );
             defProperty( this, 'clear'      , x=>eachKey( k => storage.removeItem( prefix()+k ) ) );
@@ -74,19 +69,9 @@
         constructor( app, a )
         {   const h = new EpaHrefLocationHolder(app,a);
             defProperty( this, 'location', x=> h, v=> app.src = v );
-
-            //this.getLocation = x=> h;
-            //this.setLocation = v=> app.src = v;
-
-            const ls = new EpaStorageWrapper( win.localStorage  , this )
-            ,     ss = new EpaStorageWrapper( win.sessionStorage, this );
-            this.getSessionStorage = x=> ls;
-            this.getLocalStorage   = x=> ss;
+            defProperty( this, 'localStorage'  ,x=> new EpaStorageWrapper( win.localStorage  , this ) );
+            defProperty( this, 'sessionStorage',x=> new EpaStorageWrapper( win.sessionStorage, this ) );
         }
-        //get location( ){ return this.getLocation() }
-        //set location(v){ return this.setLocation( v ) }
-        get sessionStorage() { return this.getSessionStorage() }
-        get localStorage  () { return this.getLocalStorage  () }
         // todo events API
     }
 
@@ -355,11 +340,11 @@
 
         function runScript( txt )
         {   try
-        {   with( window )
-        {
-            eval(txt);
-        }
-        }catch(ex){ console.error(ex) }
+            {   with( window )
+                {
+                    eval(txt);
+                }
+            }catch(ex){ console.error(ex) }
             setTimeout( x=> EPA_runScript( arr, env, redirects ), 0 );
         }
     }
@@ -385,6 +370,11 @@
     {
         Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:false } )
     }
+    function defMethod( obj, name, method  )
+    {
+        defProperty( obj, name, x=>method  );
+    }
+
     class EmbedPage0 extends HTMLElement
     {
         constructor()

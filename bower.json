@@ -5,7 +5,11 @@
   "main": "embed-page.html",
   "dependencies": {
     "imported-template": "juicy/imported-template#^3.1.1",
-    "polymer": "^2.6.0"
+    "polymer": "^2.6.0",
+    "app-storage": "^2.1.1",
+    "vaadin-material-theme": "^0.3.0",
+    "vaadin-button": "^2.0.0",
+    "vaadin-text-field": "^2.0.1"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
@@ -18,6 +22,6 @@
     "paper-item": "polymerelements/paper-item#^2.1.0"
   },
   "resolutions": {
-    "polymer": "^2.0.0"
+    "polymer": "^2.6.0"
   }
 }

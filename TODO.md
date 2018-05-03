@@ -1,5 +1,5 @@
 * localStorage, sessionStorage
-* insulation layers (domain,host,page,instance,named) - param & storage
+* scope insulation layers (domain,host,page,instance,named) - param & storage
 * insulation layers - dynamic change? 
 * cookies, insulation
 * layers - docs

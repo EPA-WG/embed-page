@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>embed-page demo</title>
+
+    <!--<script src="https://code.jquery.com/jquery-3.2.1.js" type="application/javascript"></script>-->
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <script src="../embed-page.js" ></script>
+
+
+    <link rel="stylesheet" href="../../codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="../../codemirror/theme/abcdef.css">
+    <script src="../../codemirror/lib/codemirror.js"></script>
+
+    <script src="../../codemirror/addon/selection/selection-pointer.js"></script>
+    <script src="../../codemirror/mode/xml/xml.js"></script>
+    <script src="../../codemirror/mode/javascript/javascript.js"></script>
+    <script src="../../codemirror/mode/css/css.js"></script>
+    <script src="../../codemirror/mode/vbscript/vbscript.js"></script>
+    <script src="../../codemirror/mode/htmlmixed/htmlmixed.js"></script>
+
+    <custom-style>
+        <style is="custom-style" include="demo-pages-shared-styles"></style>
+    </custom-style>
+    <style> @import "page.css";
+        iframe{ width: 100%; height: 24em; min-width: 26em; }
+        .CodeMirror{height: auto;}
+        fieldset{display: inline-block; border-bottom: none; border-right: none;}
+        embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
+        @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
+    </style>
+    <script>
+        window.addEventListener('load', x=>
+            [...document.getElementsByTagName('code') ].forEach( ta =>
+            {   const src = ta.getAttribute('src');
+                src && fetch(src).then( r=>r.text() )
+                .then( txt => CodeMirror( ta, { mode: src.includes('.js') ? "javascript" : "htmlmixed", value:txt, theme:'abcdef' } ) );
+            })
+        );
+    </script>
+</head>
+<body>
+
+<div class="">
+    <h3>Storage insulation <code>&lt;embed-page/&gt;</code> demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
+    <label>Change <var>scope</var> attribute to
+        <select onchange="document.getElementsByTagName('embed-page')[0].scope=this.value">
+            <option value="domain"                             >domain    </option>
+            <option value="host"                               >host      </option>
+            <option value="page"                               >page      </option>
+            <option value="instance"  selected="selected"      >instance  </option>
+            <option value="named"                              >named     </option>
+        </select>
+    </label>
+    <demo-snippet>
+        <template>
+            <embed-page src="page-storage.html" ></embed-page>
+        </template>
+    </demo-snippet>
+
+
+    <fieldset>
+        <legend>Demo (this) page </legend>
+        The content of this section same as <a href="page-storage.html">page-storage.html</a>.
+        <br/>
+
+        <link rel="import" href="storage-view.html">
+        <storage-view></storage-view>
+
+    </fieldset>
+    <fieldset>
+        <legend>Demo IFRAME <a href="page-storage.html">page-storage.html</a> </legend>
+        <iframe src="page-storage.html?src=iframe" ></iframe>
+    </fieldset>
+    <fieldset>
+        <legend>Manual test</legend>
+<pre>
+IFRAME & this page
+    1. <a href="page-storage.js">page-storage.js</a> will set localStorage 'a' to <var><b>localStorage</b> + url </var>
+    2. GET the localStorage, expected <var>localStorage page-storage.html?src=iframe</var>
+        as script from IFRAME will be executed after this page one.
+    3. GET the sessionStorage, expected <var>sessionStorage page-storage.html?src=iframe</var>
+    4. SET own key/value in each storage on page and get in IFRAME observing the value from page inside of IFRAME.
+    5. observe same key value in embed-page context is NOT propagated from the host page.
+
+localStorage - embed-page
+    1. <a href="page-storage.js">page-storage.js</a> will set localStorage 'a' to <var>window.location+" <b>localStorage</b></var>
+    2. Get the 'a' key on this page. Value's location part should match storage.html
+    3. same within embed-page. Value's location part should match page-storage.html
+
+sessionStorage - embed-page
+    1. <a href="page-storage.js">page-storage.js</a> will set sessionStorage 'a' to <var>window.location+" <b>sessionStorage</b></var>
+    2. Get the 'a' key on this page. Value's location part should match storage.html
+    3. same within embed-page. Value's location part should match page-storage.html
+
+Scope check
+    for localStorage & sessionStorage
+    1. set key/value
+    2. close and reopen browser tab
+    3. GET key, observe the previously set value is NOT set when scope set to "instance" and shown in other scopes.
+
+Cookies
+    1. set cookies <var>a=b</var>, set cookies <var>c=d</var>
+    2. get cookie should have both key/values presented
+    3. refresh page, get cookies should have both key/values presented
+
+</pre>
+
+        <div style="display: inline-block">
+            <legend><a href="page-storage.js" target="_blank">page-storage.js</a> </legend>
+            <code src="./page-storage.js"></code>
+            When used from <var>embed-page</var>, the <var>document</var> is wrapped to reflect component instance scope.<br/>
+        </div>
+    </fieldset>
+</div>
+<h3>More demo:</h3>
+<pre>
+    <a href="index.html">index.html</a> - basics demo.
+    <a href="dynamic-binding.html">dynamic-binding.html</a> - use of binding of html via <b>iron-ajax</b> .
+    <a href="inline-content.html">inline-content.html</a> - initial content and dynamic change.
+</pre>
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+<dom-module id="storage-view">
+    <link rel="import" href="../../vaadin-material-theme/typography.html">
+    <link rel="import" href="../../vaadin-material-theme/vaadin-text-field.html">
+    <link rel="import" href="../../vaadin-material-theme/vaadin-button.html">
+    <link rel="import" href="../../vaadin-button/vaadin-button.html">
+    <link rel="import" href="../../vaadin-text-field/vaadin-text-field.html">
+    <template>
+        <style>
+            vaadin-text-field, h5{ width: 100%; padding: 0; margin: 0; }
+            label{ width: 8em; display: inline-block; text-align: right; }
+        </style>
+        <custom-style>
+            <style include="material-typography">
+                /* The <style> tag needs to be non-empty for IE11 */
+            </style>
+        </custom-style>
+        <div theme="dark">
+            <h5><label>localStorage :</label>
+                    <vaadin-button theme="raised primary"   on-click="onGetLocal">Get</vaadin-button>
+                    <vaadin-button theme="raised"           on-click="onSetLocal">Set</vaadin-button>
+                 <br/>
+                    <label>sessionStorage :</label>
+                    <vaadin-button theme="raised primary"   on-click="onGetSession">Get</vaadin-button>
+                    <vaadin-button theme="raised"           on-click="onSetSession">Set</vaadin-button>
+
+            </h5>
+            <vaadin-text-field label="Key"   placeholder="Key"   value="{{key}}"  ></vaadin-text-field>
+            <vaadin-text-field label="Value" placeholder="Value" value="{{value}}"></vaadin-text-field>
+        </div>
+    </template>
+
+    <script>
+        class StorageView extends Polymer.Element
+        {   static get is() { return 'storage-view'; }
+            constructor()
+            {
+                super();
+                this.key="a";
+            }
+            onGetLocal  (){ this.value = localStorage.getItem( this.key );}
+            onSetLocal  (){ localStorage.setItem( this.key, this.value ); }
+            onGetSession(){ this.value = sessionStorage.getItem( this.key );}
+            onSetSession(){ sessionStorage.setItem( this.key, this.value ); }
+        }
+        customElements.define( StorageView.is, StorageView );
+    </script>
+</dom-module>
