@@ -16,36 +16,18 @@
 
     <link rel="import" href="../../paper-radio-group/paper-radio-group.html">
 
-    <link rel="stylesheet" href="../../codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="../../codemirror/theme/abcdef.css">
-    <script src="../../codemirror/lib/codemirror.js"></script>
-
-    <script src="../../codemirror/addon/selection/selection-pointer.js"></script>
-    <script src="../../codemirror/mode/xml/xml.js"></script>
-    <script src="../../codemirror/mode/javascript/javascript.js"></script>
-    <script src="../../codemirror/mode/css/css.js"></script>
-    <script src="../../codemirror/mode/vbscript/vbscript.js"></script>
-    <script src="../../codemirror/mode/htmlmixed/htmlmixed.js"></script>
+    <script src="code-view.js"></script>
 
     <custom-style>
         <style is="custom-style" include="demo-pages-shared-styles"></style>
     </custom-style>
-    <style>@import "page.css";
+    <style>
+        @import "page.css";
         iframe{width: 100%;}
-        .CodeMirror{height: auto;}
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
         embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
-         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
+        @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
     </style>
-    <script>
-        window.addEventListener('load', x=>
-            [...document.getElementsByTagName('code') ].forEach( ta =>
-            {   const src = ta.getAttribute('src');
-                src && fetch(src).then( r=>r.text() )
-                .then( txt => CodeMirror( ta, { mode: src.includes('.js') ? "javascript" : "htmlmixed", value:txt, theme:'abcdef' } ) );
-            })
-        );
-    </script>
 </head>
 <body>
 

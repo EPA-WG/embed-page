@@ -6,7 +6,6 @@
 
     <title>embed-page demo</title>
 
-    <!--<script src="https://code.jquery.com/jquery-3.2.1.js" type="application/javascript"></script>-->
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
 
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
@@ -14,41 +13,20 @@
 
     <script src="../embed-page.js" ></script>
 
-
-    <link rel="stylesheet" href="../../codemirror/lib/codemirror.css">
-    <link rel="stylesheet" href="../../codemirror/theme/abcdef.css">
-    <script src="../../codemirror/lib/codemirror.js"></script>
-
-    <script src="../../codemirror/addon/selection/selection-pointer.js"></script>
-    <script src="../../codemirror/mode/xml/xml.js"></script>
-    <script src="../../codemirror/mode/javascript/javascript.js"></script>
-    <script src="../../codemirror/mode/css/css.js"></script>
-    <script src="../../codemirror/mode/vbscript/vbscript.js"></script>
-    <script src="../../codemirror/mode/htmlmixed/htmlmixed.js"></script>
+    <script src="code-view.js"></script>
 
     <custom-style>
         <style is="custom-style" include="demo-pages-shared-styles"></style>
     </custom-style>
-    <style> @import "page.css";
+    <style>
         iframe{ width: 100%; height: 24em; min-width: 26em; }
-        .CodeMirror{height: auto;}
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
         embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
     </style>
-    <script>
-        window.addEventListener('load', x=>
-            [...document.getElementsByTagName('code') ].forEach( ta =>
-            {   const src = ta.getAttribute('src');
-                src && fetch(src).then( r=>r.text() )
-                .then( txt => CodeMirror( ta, { mode: src.includes('.js') ? "javascript" : "htmlmixed", value:txt, theme:'abcdef' } ) );
-            })
-        );
-    </script>
 </head>
 <body>
-
-<div class="">
+<div>
     <h3>Storage insulation <code>&lt;embed-page/&gt;</code> demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
     <label>Change <var>scope</var> attribute to
         <select onchange="document.getElementsByTagName('embed-page')[0].scope=this.value">
@@ -65,24 +43,14 @@
         </template>
     </demo-snippet>
 
-
     <fieldset>
-        <legend>Demo (this) page </legend>
-        The content of this section same as <a href="page-storage.html">page-storage.html</a>.
-        <br/>
-
-        <link rel="import" href="storage-view.html">
-        <storage-view></storage-view>
-
-    </fieldset>
-    <fieldset>
-        <legend>Demo IFRAME <a href="page-storage.html">page-storage.html</a> </legend>
+        <legend>Demo IFRAME <a href="page-storage.html?src=iframe">page-storage.html</a> </legend>
         <iframe src="page-storage.html?src=iframe" ></iframe>
     </fieldset>
     <fieldset>
         <legend>Manual test</legend>
 <pre>
-IFRAME & this page
+IFRAME
     1. <a href="page-storage.js">page-storage.js</a> will set localStorage 'a' to <var><b>localStorage</b> + url </var>
     2. GET the localStorage, expected <var>localStorage page-storage.html?src=iframe</var>
         as script from IFRAME will be executed after this page one.
