@@ -22,3 +22,6 @@ Release 1
 * remove Polymer dependencies
 * remove the use of cancelled XHRs.     
 * **iframe.contentWindow** protection to 
+
+WishList
+* "storage" event propagation for apps in same scope 

@@ -14,7 +14,8 @@
     <script src="../embed-page.js" ></script>
 
     <script src="code-view.js"></script>
-
+    <link rel="import" href="../../paper-styles/demo-pages.html">
+    <link rel="import" href="storage-view.html">
     <custom-style>
         <style is="custom-style" include="demo-pages-shared-styles"></style>
     </custom-style>
@@ -23,6 +24,7 @@
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
         embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
+        .iframe,iframe{width: 100%;}
     </style>
 </head>
 <body>
@@ -39,11 +41,11 @@
     </label>
     <demo-snippet>
         <template>
-            <embed-page src="page-storage.html" ></embed-page>
+            <embed-page src="page-storage.html?a" ></embed-page>
         </template>
     </demo-snippet>
 
-    <fieldset>
+    <fieldset class="iframe">
         <legend>Demo IFRAME <a href="page-storage.html?src=iframe">page-storage.html</a> </legend>
         <iframe src="page-storage.html?src=iframe" ></iframe>
     </fieldset>

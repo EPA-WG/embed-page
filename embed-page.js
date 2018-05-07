@@ -56,10 +56,10 @@
                 eachKey( k => i++ === idx && ( ret = k ) );
                 return ret;
             });
-            defProperty( this, 'getItem'    , k => storage.getItem( prefix()+k ) );
-            defProperty( this, 'setItem'    , (k,v) => k && storage.setItem( prefix()+k, v ) );
-            defProperty( this, 'removeItem' , k     => k && storage.removeItem( prefix()+k ) );
-            defProperty( this, 'clear'      , x=>eachKey( k => storage.removeItem( prefix()+k ) ) );
+            this.getItem = k => storage.getItem( prefix()+k );
+            this.setItem = (k,v) => k && storage.setItem( prefix()+k, v );
+            this.removeItem = k => k && storage.removeItem( prefix()+k );
+            this.clear = x => eachKey( k => storage.removeItem( prefix()+k ) );
             defProperty( this, 'configurable',x=>false);
             defProperty( this, 'enumerable'  ,x=>true );
         }
@@ -369,10 +369,6 @@
     function defProperty( obj, name, getter, setter=getter  )
     {
         Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:false } )
-    }
-    function defMethod( obj, name, method  )
-    {
-        defProperty( obj, name, x=>method  );
     }
 
     class EmbedPage0 extends HTMLElement

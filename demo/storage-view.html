@@ -8,6 +8,10 @@
         <style>
             vaadin-text-field, h5{ width: 100%; padding: 0; margin: 0; }
             label{ width: 8em; display: inline-block; text-align: right; }
+            table{width: 100%;}
+            td{    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;    max-width: 0;}
+            th:nth-child(1),td:nth-child(1){width: 3em;}
+            th:nth-child(2),td:nth-child(2){width: 11em;}
         </style>
         <custom-style>
             <style include="material-typography">
@@ -26,6 +30,17 @@
             </h5>
             <vaadin-text-field label="Key"   placeholder="Key"   value="{{key}}"  ></vaadin-text-field>
             <vaadin-text-field label="Value" placeholder="Value" value="{{value}}"></vaadin-text-field>
+            <table>
+                <tr><th>Storage</th><th>key</th><th>value</th><th>url</th></tr>
+                <template is="dom-repeat" items="{{storeNotifications}}">
+                    <tr>
+                    <td>{{item.store}}</td>
+                    <td>{{item.key  }}</td>
+                    <td>{{item.value}}</td>
+                    <td>{{item.url}}  </td>
+                    </tr>
+                </template>
+            </table>
         </div>
     </template>
 
@@ -36,6 +51,11 @@
             {
                 super();
                 this.key="a";
+                this.storeNotifications = [];
+                window.addEventListener( 'storage'
+                    , e => this.push('storeNotifications',{key:e.key,value:(''+e.newValue).substring(0,60)
+                                    , url:e.url,store: e.storageArea ===localStorage?'local':'session'}) );
+
             }
             onGetLocal  (){ this.value = localStorage.getItem( this.key );}
             onSetLocal  (){ localStorage.setItem( this.key, this.value ); }
