@@ -33,14 +33,12 @@
     class EpaStorageWrapper
     {
         // todo Window.onstorage event handler that fires when a storage area changes
-        constructor( /** Storage */ storage, /** EpaWindow */ win )
+        constructor( /** Storage */ storage, /** EpaWindow */ win, /** EmbedPage */ app )
         {
             // on init hook to StorageEvent
             // in StorageEvent pass through only own to `win` object
-
-            function prefix(){ return win.location.hostname+'-EPA' }
             function eachKey( cb )
-            {   let p = prefix()
+            {   let p = app.epaPrefix
                 ,   i = storage.length-1;
                 for( ; i>=0; i-- )
                     if( !storage.key(i).indexOf(p) )
@@ -51,28 +49,38 @@
                 eachKey( x=> ret++ );
                 return ret;
             });
-            defProperty( this, 'key'    , idx =>
+            defProperty( this, 'key'   , idx =>
             {   let i=0; ret = null;
                 eachKey( k => i++ === idx && ( ret = k ) );
                 return ret;
             });
-            this.getItem = k => storage.getItem( prefix()+k );
-            this.setItem = (k,v) => k && storage.setItem( prefix()+k, v );
-            this.removeItem = k => k && storage.removeItem( prefix()+k );
-            this.clear = x => eachKey( k => storage.removeItem( prefix()+k ) );
-            defProperty( this, 'configurable',x=>false);
-            defProperty( this, 'enumerable'  ,x=>true );
+            this.getItem = k => storage.getItem( app.epaPrefix+k );
+            this.setItem = (k,v) => k &&    storage.setItem   ( app.epaPrefix + k, v );
+            this.removeItem =  k => k &&    storage.removeItem( app.epaPrefix + k );
+            this.clear = x => eachKey( k => storage.removeItem( app.epaPrefix + k ) );
+            defProperty( this, 'configurable',x=>false );
+            defProperty( this, 'enumerable'  ,x=>true  );
         }
     }
     class EpaWindow
     {
-        constructor( app, a )
+        constructor( /** EmbedPage */ app, a )
         {   const h = new EpaHrefLocationHolder(app,a);
             defProperty( this, 'location', x=> h, v=> app.src = v );
-            defProperty( this, 'localStorage'  ,x=> new EpaStorageWrapper( win.localStorage  , this ) );
-            defProperty( this, 'sessionStorage',x=> new EpaStorageWrapper( win.sessionStorage, this ) );
+            defProperty( this, 'localStorage'  ,x=> new EpaStorageWrapper( win.localStorage  , this, app ) );
+            defProperty( this, 'sessionStorage',x=> new EpaStorageWrapper( win.sessionStorage, this, app ) );
+            window.addEventListener('storage', function(event)
+            {   const pr = app.epaPrefix;
+                if( !event.key.startsWith( pr ) )
+                    return;
+                event.key = event.key.substring( pr.length );
+                this.dispatchEvent( event );
+            });
+            this.dispatchEvent = event => app.$.framed.dispatchEvent(event);
+            this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
         }
-        // todo events API
+        dispatchEvent( /** Event */ event ){}
+        addEventListener( type, listener, useCapture, wantsUntrusted ){}
     }
 
     class EpaCookie
@@ -187,9 +195,15 @@
         }
         constructor()
         {   super();
-            this._InstanceNum = GBL_InstancesCount++;
+            const instanceNum = GBL_InstancesCount++;
+            defProperty( this, 'instanceNum' , x=> instanceNum );
+            const a = doc.createElement('a');
+            a.href  = this.src;
+            a.toString = function(){ return this.href };
+            const win = new EpaWindow(this,a);
+            defProperty( this, 'window'   , x=> win );
+            defProperty( this, 'epaPrefix', x=> `<EPA>${win.location.hostname}:${this.instanceNum}</EPA>` );
         }
-        getInstanceNum(){ return this._InstanceNum }
 
         connectedCallback()
         {   super.connectedCallback();
@@ -241,15 +255,11 @@
             console.log("onSlotChanged");
         }
         get context()
-        {   const f = this.$.framed
-            ,     a = doc.createElement('a');
-            a.href  = this.src;
-            a.toString = function(){ return this.href };
-            const win = new EpaWindow(this,a);
-            return  {   window      :   win
-                ,   document    :   new EpaDocument(this,f,win)
-                ,   head        : doc.head
-                ,   body        : doc.body
+        {   const f = this.$.framed;
+            return  {   window      :   this.window
+                    ,   document    :   new EpaDocument(this,f,win)
+                    ,   head        : doc.head
+                    ,   body        : doc.body
             }
         }
 
