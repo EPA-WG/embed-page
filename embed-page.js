@@ -65,10 +65,12 @@
     class EpaWindow
     {
         constructor( /** EmbedPage */ app, a )
-        {   const h = new EpaHrefLocationHolder(app,a);
-            defProperty( this, 'location', x=> h, v=> app.src = v );
-            defProperty( this, 'localStorage'  ,x=> new EpaStorageWrapper( win.localStorage  , this, app ) );
-            defProperty( this, 'sessionStorage',x=> new EpaStorageWrapper( win.sessionStorage, this, app ) );
+        {   const h = new EpaHrefLocationHolder(app,a)
+            ,    ls = new EpaStorageWrapper( win.localStorage  , this, app )
+            ,    ss = new EpaStorageWrapper( win.sessionStorage, this, app );
+            defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
+            defProperty( this, 'localStorage'  ,x=> ls );
+            defProperty( this, 'sessionStorage',x=> ss );
             window.addEventListener('storage', function(event)
             {   const pr = app.epaPrefix;
                 if( !event.key.startsWith( pr ) )
@@ -209,7 +211,7 @@
         {   super.connectedCallback();
             new MutationObserver( mutationsList => this.onHtmlChange() ).observe( this, { attributes: false, childList: true });
         }
-
+        getInstanceNum(){ return this.instanceNum }
         _loadHtml( html )
         {   const f = this.$f = this.$.framed;
             let el = doc.createElement('div');
@@ -292,8 +294,9 @@
         }
         url2hash( el, attr )
         {   el.target = this.$.targetframe.getAttribute( 'name' );
-            if( !el[attr].includes(FRAME_HASH_PREFIX) )
-                el[attr] = FRAME_HASH_PREFIX+encodeURIComponent( el[attr] )
+            var v = el.getAttribute(attr);
+            if( !v.includes(FRAME_HASH_PREFIX) )
+                el.setAttribute( attr, FRAME_HASH_PREFIX+encodeURIComponent( v ) )
         }
         _onClick(ev)
         {   const $f = this.$.framed;
@@ -352,6 +355,8 @@
         {   try
             {   with( window )
                 {
+eval("console.log(typeof window, window, typeof location, location);");
+
                     eval(txt);
                 }
             }catch(ex){ console.error(ex) }

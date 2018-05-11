@@ -1,9 +1,11 @@
+* bug: link changes only 1st embed-page content( IFRAME& link target needs unique ID )
 * localStorage, sessionStorage
 * scope insulation layers (domain,host,page,instance,named) - param & storage
 * insulation layers - dynamic change? 
 * cookies, insulation
 * layers - docs
 * history
+* separate sample on each aspect
 * [Extend HTMLElement](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements) instead of Polymer.Element
     * use embed-page.js as entry point  
 * bower & npm publish
