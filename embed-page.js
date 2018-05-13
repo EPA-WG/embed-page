@@ -38,7 +38,7 @@
             // on init hook to StorageEvent
             // in StorageEvent pass through only own to `win` object
             function eachKey( cb )
-            {   let p = app.epaPrefix
+            {   let p = app.getEpaPrefix()
                 ,   i = storage.length-1;
                 for( ; i>=0; i-- )
                     if( !storage.key(i).indexOf(p) )
@@ -54,10 +54,10 @@
                 eachKey( k => i++ === idx && ( ret = k ) );
                 return ret;
             });
-            this.getItem = k => storage.getItem( app.epaPrefix+k );
-            this.setItem = (k,v) => k &&    storage.setItem   ( app.epaPrefix + k, v );
-            this.removeItem =  k => k &&    storage.removeItem( app.epaPrefix + k );
-            this.clear = x => eachKey( k => storage.removeItem( app.epaPrefix + k ) );
+            this.getItem = k => storage.getItem( app.getEpaPrefix()+k );
+            this.setItem = (k,v) => k &&    storage.setItem   ( app.getEpaPrefix() + k, v );
+            this.removeItem =  k => k &&    storage.removeItem( app.getEpaPrefix() + k );
+            this.clear = x => eachKey( k => storage.removeItem( app.getEpaPrefix() + k ) );
             defProperty( this, 'configurable',x=>false );
             defProperty( this, 'enumerable'  ,x=>true  );
         }
@@ -72,7 +72,7 @@
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
             window.addEventListener('storage', function(event)
-            {   const pr = app.epaPrefix;
+            {   const pr = app.getEpaPrefix();
                 if( !event.key.startsWith( pr ) )
                     return;
                 event.key = event.key.substring( pr.length );
@@ -204,7 +204,6 @@
             a.toString = function(){ return this.href };
             const win = new EpaWindow(this,a);
             defProperty( this, 'window'   , x=> win );
-            defProperty( this, 'epaPrefix', x=> `<EPA>${win.location.hostname}:${this.instanceNum}</EPA>` );
         }
 
         connectedCallback()
@@ -212,6 +211,7 @@
             new MutationObserver( mutationsList => this.onHtmlChange() ).observe( this, { attributes: false, childList: true });
         }
         getInstanceNum(){ return this.instanceNum }
+        getEpaPrefix(){ return `<EPA>${this.window.location.hostname}:${this.instanceNum}</EPA>` }
         _loadHtml( html )
         {   const f = this.$f = this.$.framed;
             let el = doc.createElement('div');
