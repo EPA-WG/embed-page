@@ -5,6 +5,7 @@
 * cookies, insulation
 * layers - docs
 * history
+* wrap window.customElements to use CustomElementRegistry for Web Components scope insulation
 * separate sample on each aspect
 * [Extend HTMLElement](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements) instead of Polymer.Element
     * use embed-page.js as entry point  
