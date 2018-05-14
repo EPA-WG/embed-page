@@ -22,10 +22,10 @@ to component content. Similar approach is applied for url, storage, cookies, etc
 The content could be set either by **src** attribute or by Polymer {{data}} binding of content;
 including the insulated content in TEMPLATE; or binding content via **html** attribute.
 ```html
-    <embed-page src="abc.html" />
+    <embed-page src="abc.html" ></embed-page><!-- like seamless iframe -->
     
 
-    <embed-page>
+    <embed-page>    <!-- inline scope insulation -->
          <template>
              <style>h1{color:chocolate;}</style>
              <h1> In chocolate only itself, no fumes spread. </h1>
@@ -33,6 +33,7 @@ including the insulated content in TEMPLATE; or binding content via **html** att
     </embed-page>
 
 
+    <!-- dynamic content binding -->
     <iron-ajax  last-response="{{htmlContent}}" url="abc.html" auto ></iron-ajax>
     <embed-page html="[[htmlContent]]"></embed-page>    
 ```
@@ -45,7 +46,7 @@ There is no dependencies in run time. Polymer is used for demo and is not requir
 
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.9/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.8/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash

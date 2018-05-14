@@ -1,14 +1,15 @@
 <nav id="menu">
     <style>
-        #menu{box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14); float:left; display: inline-block;}
+        :host{display: inline-block; float: right; margin: 0 1em 1em 0; background-color: rgba(255,255,255,0.8); box-shadow: inset 0 0 2em #000000;}
         #menu a{ display: block; padding: 0.5em;}
         #menu a:hover{ background: bisque;}
-        #menu a.selected{ font-weight:bold; }
+        #menu a.selected{ font-weight:bold; text-decoration: underline; }
     </style>
     <a href="index.html"            > Demo home                         </a>
     <a href="inline-content.html"   > Inline content                    </a>
     <a href="storage.html"          > localStorage & sessionStorage     </a>
     <a href="dynamic-binding.html"  > dynamic url and content binding   </a>
+    <a href="demo-menu.html"        > This Menu                         </a>
 
     <script> [...document.querySelectorAll('#menu a')]
         .map( a => location.pathname.includes( a.getAttribute('href') ) && ( a.className += ' selected') )
