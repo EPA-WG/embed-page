@@ -24,6 +24,8 @@ including the insulated content in TEMPLATE; or binding content via **html** att
 ```html
     <embed-page src="abc.html" ></embed-page><!-- like seamless iframe -->
     
+    <embed-page src="demo-menu.html" scope="none" ></embed-page><!-- like html import, no insulation -->
+    
 
     <embed-page>    <!-- inline scope insulation -->
          <template>

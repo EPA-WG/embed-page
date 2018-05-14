@@ -180,6 +180,9 @@
                                 ,   value: ''
                                 ,   observer: 'onHtmlAttrChange'
                                 }
+                    ,   scope:  {   type: String
+                                ,   value: 'instance'
+                                }
                     ,redirects: {   type: Array
                                 ,   value:  ()=>[]
                                 }
@@ -199,16 +202,46 @@
         {   super();
             const instanceNum = GBL_InstancesCount++;
             defProperty( this, 'instanceNum' , x=> instanceNum );
-            const a = doc.createElement('a');
-            a.href  = this.src;
-            a.toString = function(){ return this.href };
-            const win = new EpaWindow(this,a);
-            defProperty( this, 'window'   , x=> win );
         }
 
         connectedCallback()
         {   super.connectedCallback();
             new MutationObserver( mutationsList => this.onHtmlChange() ).observe( this, { attributes: false, childList: true });
+        }
+        ready()
+        {   super.ready();
+
+            const scoped = this.scope !== 'none'
+            ,     f = this.$.framed
+            ,     w = scoped ? new EpaWindow( this, createA(this.src) ) : win
+            ,     d = scoped ? new EpaDocument( this, f, win ) : doc ;
+            defProperty( this, 'window'   , x=> w );
+            defProperty( this, 'document' , x=> d );
+
+            if( this.html )
+                this.onHtmlAttrChange();
+            if( this.src )
+                this.fetch();
+
+            scoped && this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
+
+            let sh= this.$.slotted;
+
+            const slot = sh.querySelector('slot');
+            slot.addEventListener('slotchange', e => {
+                console.log('light dom children changed!',slot);
+                setTimeout( ()=>  this.onSlotChanged(), 0 )
+            });
+            //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
+
+
+                function
+            createA( src )
+            {   const a = doc.createElement('a');
+                a.href  = src;
+                a.toString = function(){ return this.href };
+                return a;
+            }
         }
         getInstanceNum(){ return this.instanceNum }
         getEpaPrefix(){ return `<EPA>${this.window.location.hostname}:${this.instanceNum}</EPA>` }
@@ -224,7 +257,9 @@
         }
 
         fetch()
-        {   const f = this.$f = this.$.framed;
+        {   if( !this.document )
+                return;
+            const f = this.$f = this.$.framed;
             this.onBeforeLoad();
             this.src && ajax( this.src )
                 .then( t =>
@@ -245,7 +280,9 @@
             this.onAfterLoad();
         }
         onHtmlAttrChange()
-        {   this.onBeforeLoad();
+        {   if( !this.document )
+                return;
+            this.onBeforeLoad();
             if( this.html )
                 this._loadHtml( this.html );
             else
@@ -257,12 +294,9 @@
             console.log("onSlotChanged");
         }
         get context()
-        {   const f = this.$.framed;
-            return  {   window      :   this.window
-                    ,   document    :   new EpaDocument(this,f,win)
-                    ,   head        : doc.head
-                    ,   body        : doc.body
-            }
+        {   return  {   window      : this.window
+                    ,   document    : this.document
+                    }
         }
 
         runScripts( /** @type {!NodeList} */ pageScripts, { win, document, head, body } = this.context )
@@ -278,19 +312,6 @@
                 script.parentNode.insertBefore(clone, script);
                 script.parentNode.removeChild(script);
             });
-        }
-        ready()
-        {   super.ready();
-            this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
-
-            let sh= this.$.slotted;
-
-            const slot = sh.querySelector('slot');
-            slot.addEventListener('slotchange', e => {
-                console.log('light dom children changed!',slot);
-                setTimeout( ()=>  this.onSlotChanged(), 0 )
-            });
-            //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
         }
         url2hash( el, attr )
         {   el.target = this.$.targetframe.getAttribute( 'name' );
@@ -338,7 +359,7 @@
         let currentScript = arr.shift();
         if( !currentScript )
             return;
-        console.debug( "embed-page", currentScript.src || currentScript.text );
+console.debug( "embed-page", currentScript.src || currentScript.text );
         if( currentScript.src )
         {
             let url = currentScript.src;
