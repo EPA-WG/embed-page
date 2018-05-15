@@ -194,7 +194,7 @@
                     :host { display: block; }
                     iframe{display: none;}
                 </style>
-                <div id="framed" ><slot name="slotted" id="slotted">~<slot>...</slot>~</slot></div>
+                <div id="framed" ><slot name="slotted" id="slotted"><slot>...</slot></slot></div>
                 <!--base target="target-frame"/-->
                 <iframe id="targetframe" name$="target-frame[[getInstanceNum()]]" on-load="onTargetLoad" src=""></iframe>`;
         }
@@ -206,12 +206,12 @@
 
         connectedCallback()
         {   super.connectedCallback();
-            new MutationObserver( mutationsList => this.onHtmlChange() ).observe( this, { attributes: false, childList: true });
+            this.watchHtml(1);
         }
         ready()
         {   super.ready();
 
-            const scoped = this.scope !== 'none'
+            const scoped = this.isScoped()
             ,     f = this.$.framed
             ,     w = scoped ? new EpaWindow( this, createA(this.src) ) : win
             ,     d = scoped ? new EpaDocument( this, f, win ) : doc ;
@@ -244,16 +244,36 @@
             }
         }
         getInstanceNum(){ return this.instanceNum }
+        isScoped(){ return this.scope !== 'none' }
         getEpaPrefix(){ return `<EPA>${this.window.location.hostname}:${this.instanceNum}</EPA>` }
+        getCreateInlineElement(){ return this.inlineElement || this.appendChild( this.inlineElement = doc.createElement('div') ) }
+        watchHtml( boolWatch )
+        {   if(!this._mutationObserver )
+                this._mutationObserver = new MutationObserver( mutationsList => this.onHtmlChange() );
+            boolWatch ? this._mutationObserver.observe( this, { attributes: false, childList: true })
+                      : this._mutationObserver.disconnect();
+        }
+
         _loadHtml( html )
-        {   const f = this.$f = this.$.framed;
-            let el = doc.createElement('div');
-            el.innerHTML =  html;
-            // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
-            let $s = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
-            f.innerHTML='';
-            f.appendChild( el );
-            this.runScripts( $s );
+        {   try
+            {   this.watchHtml(0);
+                if( !this.isScoped() )
+                {
+                    const el     = this.getCreateInlineElement();
+                    el.innerHTML = html;
+                    let $s       = $( scriptsSelector, el );
+                    return this.runScriptsRaw( [ ... $s ] );
+                }
+                const f = this.isScoped() ? (this.$f = this.$.framed) : this.getCreateInlineElement();
+                let el       = doc.createElement( 'div' );
+                el.innerHTML = html;
+                // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
+                let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
+                f.innerHTML  = '';
+                f.appendChild( el );
+                return this.runScripts( $s );
+            }finally
+                {  this.watchHtml(1); }
         }
 
         fetch()
@@ -271,8 +291,7 @@
         onAfterLoad (){ removeClass( this.$f,'loading') }
 
         onHtmlChange()
-        {   debugger;
-            this.onBeforeLoad();
+        {   this.onBeforeLoad();
             if( this.html )
                 this._loadHtml( this.html );
             else
@@ -303,14 +322,14 @@
         {   const env = this.context;
             EPA_runScript( [...pageScripts], env, this.redirects );
         }
-        runScriptsRaw( { window, document, head, body } = this.context )
+        runScriptsRaw( $scripts )
         {
-            forEach( content.querySelectorAll(scriptsSelector), currentScript =>
-            {   const clone = /** @type {!HTMLScriptElement} */( script.ownerDocument.createElement('script') );
-                forEach(script.attributes, attr => clone.setAttribute(attr.name, attr.value));
-                clone.textContent = script.textContent;
-                script.parentNode.insertBefore(clone, script);
-                script.parentNode.removeChild(script);
+            forEach( $scripts, s =>
+            {   const clone = /** @type {!HTMLScriptElement} */( s.ownerDocument.createElement('script') );
+                forEach(s.attributes, attr => clone.setAttribute(attr.name, attr.value));
+                clone.textContent = s.textContent;
+                s.parentNode.insertBefore(clone, s);
+                s.parentNode.removeChild(s);
             });
         }
         url2hash( el, attr )
