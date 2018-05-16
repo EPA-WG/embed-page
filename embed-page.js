@@ -13,6 +13,7 @@
             this.setHref    = v=> app.src = v;
             this.toString   = x=>a.href;
             this.getProp    = p=>a[p];
+            this.reload     = x=> app.fetch();
         }
         get href( ){ return this.getHref( ) }
         set href(v){ return this.setHref(v) }
@@ -27,8 +28,7 @@
         get password(){ return this.getProp('password'  )}
         get origin  (){ return this.getProp('origin'    )}
         assign      (v){ return this.setHref( v ) }
-        replace     (v){ return this.setHref( v ) }
-        reload(){ this.setHref(''); return this.setHref( this.getHref() ) }
+        replace     (v){ return this.setHref( v ) }// todo skip in window history
     }
     class EpaStorageWrapper
     {
@@ -140,21 +140,22 @@
     class EpaDocument
     {
         constructor( app, f, w )
-        {   const cookie = new EpaCookie(this);
+        {   const cookie = new EpaCookie(this)
+            ,   $ = ( css, el = app.$.framed )=> el.querySelectorAll( css );
             Object.assign( this,
                            {   getElementById         : x=> $( '#'+x, f )[0]
-                               ,   getElementsByTagName   : x=> $( x, f )
-                               ,   getElementsByClassName : x=> f.getElementsByClassName( x )
-                               ,   createElement          : x=> doc.createElement(x)
-                               ,   createEvent            : x=> doc.createEvent(x)
-                               ,   querySelectorAll       : x=> f.querySelectorAll(x)
-                               ,   querySelector          : x=> f.querySelector(x)
-                               ,   write       : x=> console.error( 'document.write() is not supported yet.')
+                           ,   getElementsByTagName   : x=> $( x, f )
+                           ,   getElementsByClassName : x=> f.getElementsByClassName( x )
+                           ,   createElement          : x=> doc.createElement(x)
+                           ,   createEvent            : x=> doc.createEvent(x)
+                           ,   querySelectorAll       : x=> f.querySelectorAll(x)
+                           ,   querySelector          : x=> f.querySelector(x)
+                           ,   write       : x=> console.error( 'document.write() is not supported yet.')
                            });
 
-            defProperty( this, 'sessionStorage' , x=> win.sessionStorage );
-            defProperty( this, 'localStorage'   , x=> win.localStorage   );
-            defProperty( this, 'location'       , x=> w.location        , v=> w.location = v );
+            defProperty( this, 'sessionStorage' , x=> w.sessionStorage );
+            defProperty( this, 'localStorage'   , x=> w.localStorage   );
+            defProperty( this, 'location'       , x=> w.location       , v=> w.location = v );
             defProperty( this, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
         }
     }
@@ -215,10 +216,11 @@
         ready()
         {   super.ready();
             this._A.href=this.src;
+
             const scoped = this.isScoped()
             ,     f = this.$.framed
             ,     w = scoped ? new EpaWindow( this, this._A ) : win
-            ,     d = scoped ? new EpaDocument( this, f, win ) : doc ;
+            ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
 
