@@ -31,13 +31,14 @@
 <div>
     <embed-page src="demo-menu.html" scope="none" ></embed-page>
     <h3>Storage insulation <code>&lt;embed-page/&gt;</code> demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
-    <label>Change <var>scope</var> attribute to
+    <label>TBD Change <var>scope</var> attribute to
         <select onchange="document.getElementsByTagName('embed-page')[0].scope=this.value">
             <option value="domain"                             >domain    </option>
             <option value="host"                               >host      </option>
             <option value="page"                               >page      </option>
             <option value="instance"  selected="selected"      >instance  </option>
             <option value="named"                              >named     </option>
+            <option value="none"                               >none      </option>
         </select>
     </label>
     <demo-snippet>
@@ -91,12 +92,5 @@ Cookies
         </div>
     </fieldset>
 </div>
-<h3>More demo:</h3>
-<pre>
-    <a href="index.html">index.html</a> - basics demo.
-    <a href="dynamic-binding.html">dynamic-binding.html</a> - use of binding of html via <b>iron-ajax</b> .
-    <a href="inline-content.html">inline-content.html</a> - initial content and dynamic change.
-</pre>
-
 </body>
 </html>

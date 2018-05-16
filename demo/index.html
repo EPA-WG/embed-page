@@ -27,6 +27,7 @@
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
         embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
+        @media (min-width: 100em) { fieldset{width:46%} }
     </style>
 </head>
 <body>
@@ -38,7 +39,7 @@
         Its content is insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).  </p>
     <p>Unlike IFRAME it is embedded inline into parent page DOM and automatically resizing parent node. </p>
     <label>Change <var>src</var> attribute to
-        <select onchange="document.getElementsByTagName('embed-page')[0].src=this.value">
+        <select onchange="document.getElementsByTagName('embed-page')[1].src=this.value">
             <option value="page-violet.html" selected="selected"           >page-violet.html            </option>
             <option value="page-purple.html"                               >page-purple.html            </option>
         </select>
@@ -83,25 +84,22 @@
                 <li>    <input   id="external" class="external" type="checkbox" >
                         <button for="external">Toggle</button> checked by <var>page.js</var> </li>
             </ul>
-            <br/><label>window.location:   <input class="win-location" />
-                <input type="button" value="get"/><input type="button" value="set"/>
-                <input type="button" value="location get"/>
-                <input type="button" value="location set"/><br/>
-                <input type="button" value="href-get"/><input type="button" value="href-set"/>
-                <input type="button" value="other properties"/><br/>
+            <br/>
+            <input type="button" value="get"/><input type="button" value="set"/>
+            <label><input type="radio" name="l" value="location" checked > location          </label>
+            <label><input type="radio" name="l" value="location.href"    > location.href     </label>
+            <label><input type="radio" name="l" value="window.location"  > window.location   </label>
+            <label><input type="radio" name="l" value="document.location"> document.location </label>
+            <textarea></textarea>
 
-                <input type="button" value="assign()"/>
-                <input type="button" value="reload()"/>
-                <input type="button" value="replace()"/><br/>
-                <input type="button" value="location-win-doc" />
-                <input type="button" value="this===window" />
-            </label>
-            <br/><label>document.location: <input class="doc-location" />
-                <input type="button" value="get"/><input type="button" value="set"/> </label>
-            <br/><label>document.cookie: <textarea class="doc-cookie" ></textarea>
-                <input type="button" value="get"/><input type="button" value="set"/> </label>
+            <input type="button" value="other properties"/> &bullet;
+            <input type="button" value="assign()"/>
+            <input type="button" value="reload()"/>
+            <input type="button" value="replace()"/> &bullet;
+            <input type="button" value="location-win-doc" />
+            <input type="button" value="this===window" />
 
-           <script src="page.js" ></script>
+            <script src="page.js" ></script>
             <h3>Visual demo</h3>
 <pre>
 CSS
@@ -145,12 +143,6 @@ Cookies
         </div>
     </fieldset>
 </div>
-<h3>More demo:</h3>
-<pre>
-    <a href="dynamic-binding.html">dynamic-binding.html</a> - use of binding of html via <b>iron-ajax</b> .
-    <a href="inline-content.html">inline-content.html</a> - initial content and dynamic change.
-    <a href="storage.html">storage.html</a> - localStorage, sessionStorage, cookie.
-</pre>
 
 </body>
 </html>

@@ -7,7 +7,7 @@ function ToggleCb( b )
         x.checked = !x.checked;
 }
 const   $          = css => document.querySelector(css)
-,       getApiText = ()=> $('.location-entry:checked').value
+,       getApiText = ()=> $('input[name=l]:checked').value
 ,       locationText = $('textarea');
 
 $('*[value=get]').onclick = ()=> locationText.value = eval( getApiText() );
