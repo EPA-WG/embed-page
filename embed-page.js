@@ -200,8 +200,17 @@
         }
         constructor()
         {   super();
-            const instanceNum = GBL_InstancesCount++;
+            const instanceNum = GBL_InstancesCount++
+            ,   A = createA("#");
             defProperty( this, 'instanceNum' , x=> instanceNum );
+            defProperty( this, '_A' , x=> A );
+                function
+            createA( src )
+            {   const a = doc.createElement('a');
+                a.href  = src;
+                a.toString = function(){ return this.href };
+                return a;
+            }
         }
 
         connectedCallback()
@@ -210,10 +219,10 @@
         }
         ready()
         {   super.ready();
-
+            this._A.href=this.src;
             const scoped = this.isScoped()
             ,     f = this.$.framed
-            ,     w = scoped ? new EpaWindow( this, createA(this.src) ) : win
+            ,     w = scoped ? new EpaWindow( this, this._A ) : win
             ,     d = scoped ? new EpaDocument( this, f, win ) : doc ;
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
@@ -233,15 +242,6 @@
                 setTimeout( ()=>  this.onSlotChanged(), 0 )
             });
             //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
-
-
-                function
-            createA( src )
-            {   const a = doc.createElement('a');
-                a.href  = src;
-                a.toString = function(){ return this.href };
-                return a;
-            }
         }
         getInstanceNum(){ return this.instanceNum }
         isScoped(){ return this.scope !== 'none' }
@@ -281,6 +281,7 @@
                 return;
             const f = this.$f = this.$.framed;
             this.onBeforeLoad();
+            this._A.href = this.src;
             this.src && ajax( this.src )
                 .then( t =>
                        {   this._loadHtml(t);
