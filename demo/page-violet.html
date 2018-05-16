@@ -1,4 +1,4 @@
-<style> h1{color: violet; font-size: large} fieldset{display: inline-block}</style>
+<style> h1{color: violet; font-size: large} </style>
 <h1>Violet header</h1>
 Embedded and external script inclusion sample
 <ul><li>    <input   id="embedded" class="embedded" type="checkbox" >
@@ -22,26 +22,22 @@ Embedded and external script inclusion sample
         <input type="submit" value="POST" />
     </form>
 </fieldset>
-<br/><label>window.location:   <input class="win-location" />
-        <input type="button" value="get"/><input type="button" value="set"/>
-        <input type="button" value="location get"/>
-        <input type="button" value="location set"/><br/>
-        <input type="button" value="href-get"/><input type="button" value="href-set"/>
-        <input type="button" value="other properties"/><br/>
 
-        <input type="button" value="assign()"/>
-        <input type="button" value="reload()"/>
-        <input type="button" value="replace()"/><br/>
-        <input type="button" value="location-win-doc" />
-        <input type="button" value="this===window" />
-    </label>
-<br/><label>document.location: <input class="doc-location" />
-    <input type="button" value="get"/><input type="button" value="set"/> </label>
-<br/><label>document.cookie: <textarea class="doc-cookie" ></textarea>
-    <input type="button" value="get"/><input type="button" value="set"/> </label>
+<h3>location API</h3>
+<input type="button" value="get"/><input type="button" value="set"/>
+<label><input type="radio" name="l" class="location-entry" value="location" checked > location          </label>
+<label><input type="radio" name="l" class="location-entry" value="location.href"    > location.href     </label>
+<label><input type="radio" name="l" class="location-entry" value="window.location"  > window.location   </label>
+<label><input type="radio" name="l" class="location-entry" value="document.location"> document.location </label>
+<textarea></textarea>
+
+<input type="button" value="other properties"/> &bullet;
+<input type="button" value="assign()"/>
+<input type="button" value="reload()"/>
+<input type="button" value="replace()"/> &bullet;
+<input type="button" value="location-win-doc" />
+<input type="button" value="this===window" />
 
 <script>document.getElementById("embedded").checked=false;</script>
 <script src="page.js" ></script>
 <style>@import "page.css";</style>
-
-
