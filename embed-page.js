@@ -146,6 +146,7 @@
                                ,   getElementsByTagName   : x=> $( x, f )
                                ,   getElementsByClassName : x=> f.getElementsByClassName( x )
                                ,   createElement          : x=> doc.createElement(x)
+                               ,   createEvent            : x=> doc.createEvent(x)
                                ,   querySelectorAll       : x=> f.querySelectorAll(x)
                                ,   querySelector          : x=> f.querySelector(x)
                                ,   write       : x=> console.error( 'document.write() is not supported yet.')
@@ -201,16 +202,10 @@
         constructor()
         {   super();
             const instanceNum = GBL_InstancesCount++
-            ,   A = createA("#");
-            defProperty( this, 'instanceNum' , x=> instanceNum );
+            ,   A = doc.createElement('a');
+            A.toString = function(){ return this.href };
             defProperty( this, '_A' , x=> A );
-                function
-            createA( src )
-            {   const a = doc.createElement('a');
-                a.href  = src;
-                a.toString = function(){ return this.href };
-                return a;
-            }
+            defProperty( this, 'instanceNum' , x=> instanceNum );
         }
 
         connectedCallback()
@@ -238,7 +233,7 @@
 
             const slot = sh.querySelector('slot');
             slot.addEventListener('slotchange', e => {
-                console.log('light dom children changed!',slot);
+                console.log('slotchange',slot);
                 setTimeout( ()=>  this.onSlotChanged(), 0 )
             });
             //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
@@ -333,31 +328,38 @@
                 s.parentNode.removeChild(s);
             });
         }
-        url2hash( el, attr )
-        {   el.target = this.$.targetframe.getAttribute( 'name' );
-            var v = el.getAttribute(attr);
-            if( !v.includes(FRAME_HASH_PREFIX) )
-                el.setAttribute( attr, FRAME_HASH_PREFIX+encodeURIComponent( v ) )
+        _prepareTarget( el, attr )
+        {   var v = el.getAttribute(attr);
+            if( 'href' === attr )
+            {
+                if( !v )// is anchor
+                    return;
+                if( '#' === v.charAt(0) )
+                {
+                    // todo local anchor #link
+                    return
+                }
+            }
+            el.target = this.$.targetframe.getAttribute( 'name' );
+            if( !v )
+                el.setAttribute( attr, this.src );
         }
         _onClick(ev)
         {   const $f = this.$.framed;
             for( let el = ev.target; el && el!==$f ; el = el.parentElement )
             {   const a = { A:'href', FORM:'action'}[ el.tagName ];
                 if( a )
-                    return this.url2hash( el, a );
-                // todo POST handling
+                    return this._prepareTarget( el, a );
             }
         }
         onTargetLoad(ev)
         {
             const   fr  = ev.target
-                ,       url = fr.contentWindow.location.href;
+            ,       url = fr.contentWindow.location.href;
             if( url.includes(FRAME_BLANK) )
                 return;
-
-            const decoded = decodeURIComponent( url.substring( url.indexOf(FRAME_HASH_PREFIX)+FRAME_HASH_PREFIX.length ) );
             fr.src = FRAME_BLANK;
-            this.src = decoded;
+            this.src = url;
         }
     }
     const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
@@ -396,8 +398,6 @@ console.debug( "embed-page", currentScript.src || currentScript.text );
         {   try
             {   with( window )
                 {
-eval("console.log(typeof window, window, typeof location, location);");
-
                     eval(txt);
                 }
             }catch(ex){ console.error(ex) }
