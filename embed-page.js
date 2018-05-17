@@ -224,8 +224,7 @@
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
 
-            if( this.html )
-                this.onHtmlAttrChange();
+            this.onHtmlAttrChange();
             if( this.src )
                 this.fetch();
 
@@ -274,7 +273,8 @@
         }
 
         fetch()
-        {   if( !this.document )
+        {
+            if( !this.document )
                 return;
             const f = this.$f = this.$.framed;
             this.onBeforeLoad();
@@ -285,8 +285,8 @@
                            this.onAfterLoad();
                        }, err => f.innerHTML =  "Technical error" );
         }
-        onBeforeLoad(){ addClass   ( this.$f,'loading') }
-        onAfterLoad (){ removeClass( this.$f,'loading') }
+        onBeforeLoad(){ addClass   ( this.$.framed,'loading') }
+        onAfterLoad (){ removeClass( this.$.framed,'loading') }
 
         onHtmlChange()
         {   this.onBeforeLoad();
