@@ -1,5 +1,7 @@
-* bug: window.location does not match SRC, instead uses host page url.
 * localStorage, sessionStorage
+    * prefix by scope
+    * events b/w instances in same or smaller scope
+    * demo for different scopes
 * scope insulation layers (domain,host,page,**instance**,named,none) - param & storage
 * insulation layers - dynamic change? 
 * cookies, insulation
@@ -10,6 +12,9 @@
     * sample with same component tag but different implementation
     * CustomElementRegistry use for loading WC via **link rel="import"** 
 * separate sample on each aspect
+* microapplications
+    * intro page, menu & view-source samples, reference to registry
+    * view-source app pages: view & form ( source url, theme )
 * [Extend HTMLElement](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements) instead of Polymer.Element
     * use embed-page.js as entry point  
 * bower & npm publish

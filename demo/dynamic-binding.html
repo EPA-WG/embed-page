@@ -17,23 +17,12 @@
 <body>
     <embed-page src="demo-menu.html" scope="none" ></embed-page>
     <h1>embed-page demo - dynamic Polymer binding</h1>
-    <demo-snippet>
-        <template>
-            <embed-page>
-                <template>
-                    <style>h1{color:chocolate;}</style>
-                    <h1> 1st instance - chocolate defined within embed-page inline. </h1>
-                    Note the TEMPLATE wrapper which prevents execution of code
-                    within EMBED-PAGE in page context
-                </template>
-            </embed-page>
-        </template>
-    </demo-snippet>
-
-    <h3><a href="inline-demo-component.html">inline-demo-component-html.html</a> shows dynamic binding via <b>iron-ajax</b>
-        and <i>[[ ]]</i> binding in body.</h3>
+    <p>Binding via <var>src</var> attribute is shown on <a href="index.html">demo home page</a>. </p>
 
     <demo-snippet>
+        <p>Web Component <a href="inline-demo-component.html">inline-demo-component-html.html</a> shows dynamic <var>iron-ajax</var> <b>{{ }}</b>
+            and  <var>html</var> attribute <b>[[ ]]</b> binding.</p>
+        <p> Select violet/purple page to switch the URL to load content by <var>iron-ajax</var></p>
         <template>
             <inline-demo-component>Loading...</inline-demo-component>
             <!-- inline-demo-component uses: -->

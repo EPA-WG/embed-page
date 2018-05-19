@@ -1,9 +1,59 @@
 <link rel="import" href="../../paper-styles/demo-pages.html">
-<link rel="import" href="storage-view.html">
-<storage-view></storage-view>
 
-<label>document.cookie: <textarea class="doc-cookie" ></textarea>
-<input type="button" value="get-cookie"/><input type="button" value="set-cookie"/> </label>
+<style>
+    vaadin-text-field, h5{ width: 100%; padding: 0; margin: 0; }
+    label{ padding-top:1em;display: block;}
+    table, input{width: 100%;}
+    td{    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;    max-width: 0;}
+    th:nth-child(1),td:nth-child(1){width: 3em;}
+    th:nth-child(2),td:nth-child(2){width: 11em;}
+    tr:nth-child(odd){ background: #CCC }
+</style>
+<custom-style>
+    <style include="material-typography">
+        /* The <style> tag needs to be non-empty for IE11 */
+    </style>
+</custom-style>
+<div theme="dark">
+    <label>localStorage :</label>
+    <button theme="raised primary"   class="onGetLocal">Get</button>
+    <button theme="raised"           class="onSetLocal">Set</button>
+    <br/>
+    <label>sessionStorage :</label>
+    <button theme="raised primary"   class="onGetSession">Get</button>
+    <button theme="raised"           class="onSetSession">Set</button>
 
+    <label> Key   <input class="key"   placeholder="Key"   value="a" /> </label>
+    <label> Value <input class="value" placeholder="Value"           /> </label>
+    <br/>
+    <h3> "storage" event notifications </h3>
+    <table>
+        <tbody>
+            <tr><th> Storage </th><th> key </th><th> value </th><th> url </th></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const   $ = css => document.querySelector( css )
+    ,    $val = $('.value')
+    ,    $key = $('.key'  )
+    ,  $tbody = $('tbody' );
+
+    window.addEventListener( 'storage'
+        , e => $tbody.innerHTML +=
+            `
+            <tr>
+                <td>${e.storageArea === localStorage ? 'local':'session'}</td>
+                <td>${e.key                                             }</td>
+                <td>${(''+e.newValue).substring(0,160)                  }</td>
+                <td>${e.url                                             }</td>
+            </tr>
+            `);
+    $('.onGetLocal  ').onclick= ()=> { $val.value = localStorage.getItem( $key.value   )};
+    $('.onSetLocal  ').onclick= ()=> { localStorage.setItem( $key.value, $val.value    )};
+    $('.onGetSession').onclick= ()=> { $val.value = sessionStorage.getItem( $key.value )};
+    $('.onSetSession').onclick= ()=> { sessionStorage.setItem( $key.value, $val.value  )};
+</script>
 
 <script src="page-storage.js"></script>

@@ -26,18 +26,27 @@
         iframe{width: 100%;}
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
         embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
+        dl{ border-left: 1em solid lightgray; padding-left: 1em; }
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
         @media (min-width: 100em) { fieldset{width:46%} }
     </style>
 </head>
 <body>
 
-<div class="">
+
     <embed-page src="demo-menu.html" scope="none" ></embed-page>
-    <h3>Basic embed-page demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
-    <p> The <code>&lt;embed-page/&gt;</code> web component is acting as IFRAME.
-        Its content is insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).  </p>
-    <p>Unlike IFRAME it is embedded inline into parent page DOM and automatically resizing parent node. </p>
+    <h1>Basic &lt;embed-page&gt; demo</h1>
+    <i> <a href="https://github.com/EPA-WG/EPA-concept" >EPA-WG</a> (Embeddable Progressive Applications Working Group)</i>
+    <p> The <code>&lt;embed-page/&gt;</code> is a web component acting as </p>
+    <dl>
+        <dt> Seamless IFRAME.</dt>
+        <dd>        Its content is embedded into page DOM, but insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).<br/>
+                    Unlike IFRAME it is embedded inline into parent page DOM and automatically resizing parent node.
+        </dd>
+        <dt> HTML include.</dt>
+        <dd>        With plain html and JS/css injection into page content.
+        </dd>
+    </dl>
     <label>Change <var>src</var> attribute to
         <select onchange="document.getElementsByTagName('embed-page')[1].src=this.value">
             <option value="page-violet.html" selected="selected"           >page-violet.html            </option>
@@ -56,7 +65,7 @@
         <embed-page src="page-purple.html?a=b#c" ></embed-page>
         <legend> in IFRAME</legend>
         <iframe src="page-purple.html"></iframe>
-        <legend>View source </legend>
+        <legend> Source </legend>
 
         <code src="./page-purple.html"></code>
     </fieldset>
@@ -68,7 +77,7 @@
         <p>&nbsp;</p>
         <legend> in IFRAME</legend>
         <iframe src="page-violet.html"></iframe>
-        <legend>View source </legend>
+        <legend> Source </legend>
 
         <code src="./page-violet.html"></code>
     </fieldset>
@@ -142,7 +151,6 @@ Cookies
             The click will trigger just own instance checkbox.
         </div>
     </fieldset>
-</div>
 
 </body>
 </html>

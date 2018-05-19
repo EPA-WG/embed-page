@@ -71,14 +71,17 @@
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
-            window.addEventListener('storage', function(event)
+            window.addEventListener('storage', e =>
             {   const pr = app.getEpaPrefix();
-                if( !event.key.startsWith( pr ) )
+                if( !e.key || !e.key.startsWith( pr ) )
                     return;
-                event.key = event.key.substring( pr.length );
-                this.dispatchEvent( event );
+                const key = e.key.substring( pr.length )
+                ,      ev = new StorageEvent( e.type );
+                ev.initStorageEvent( e.type, e.bubbles, e.cancelBubble, key, e.oldValue, e.newValue, e.url, e.storageArea );
+                try{  this.dispatchEvent( ev ) }
+                catch( ev ){ console.error(ev) }
             });
-            this.dispatchEvent = event => app.$.framed.dispatchEvent(event);
+            this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
         }
         dispatchEvent( /** Event */ event ){}
@@ -107,35 +110,34 @@
         static parse( str )
         {   // inspired by https://github.com/jshttp/cookie/blob/master/index.js
             let obj = { attr:{} },   pairs = str.split( /; */ );
-
             pairs.map( pair =>
-                       {
-                           let  eqi = pair.indexOf( '=' );
+            {
+               let  eqi = pair.indexOf( '=' );
 
-                           if( eqi < 0 )
-                               return { key: pair.trim() };
+               if( eqi < 0 )
+                   return { key: pair.trim() };
 
-                           let key = pair.substr( 0, eqi ).trim()
-                               ,   val = pair.substr( ++eqi, pair.length ).trim();
+               let key = pair.substr( 0, eqi ).trim()
+               ,   val = pair.substr( ++eqi, pair.length ).trim();
 
-                           if( '"' == val[ 0 ] ) // quoted values
-                               val = val.slice( 1, -1 );
-                           return { key:key, val:val };
-                       }).map( (kw,i)=>
-                               {   if( i )
-                               {   if( undefined == obj[ key ] ) // only assign once
-                                   obj.attr[ key ] = tryDecode( val );
-                               }else
-                                   Object.assign( obj, kw )
-                               });
+               if( '"' == val[ 0 ] ) // quoted values
+                   val = val.slice( 1, -1 );
+               return { key:key, val:val };
+            }).map( (kw,i)=>
+            {   if( i )
+                {   if( undefined == obj[ key ] ) // only assign once
+                        obj.attr[ key ] = tryDecode( val );
+                }else
+                   Object.assign( obj, kw )
+            });
 
             return obj;
 
-            function
+                function
             tryDecode( str )
             {   try{        return decodeURIComponent( str ) }
-            catch( e ){ return str }
-            }   }   }
+                catch( e ){ return str }
+    }   }   }
 
     class EpaDocument
     {
@@ -185,6 +187,9 @@
                     ,   scope:  {   type: String
                                 ,   value: 'instance'
                                 }
+                    ,   name:   {   type: String
+                                ,   value: ''
+                                }
                     ,redirects: {   type: Array
                                 ,   value:  ()=>[]
                                 }
@@ -203,10 +208,13 @@
         constructor()
         {   super();
             const instanceNum = GBL_InstancesCount++
-            ,   A = doc.createElement('a');
+            ,   uid = instanceNum+'_'+Date.now()
+            ,     A = doc.createElement('a');
             A.toString = function(){ return this.href };
-            defProperty( this, '_A' , x=> A );
+
             defProperty( this, 'instanceNum' , x=> instanceNum );
+            defProperty( this, 'uid' , x=> uid );
+            defProperty( this, '_A'  , x=> A );
         }
 
         connectedCallback()
@@ -233,15 +241,26 @@
             let sh= this.$.slotted;
 
             const slot = sh.querySelector('slot');
-            slot.addEventListener('slotchange', e => {
-                console.log('slotchange',slot);
-                setTimeout( ()=>  this.onSlotChanged(), 0 )
-            });
+            slot.addEventListener('slotchange', e =>
+                {   setTimeout( ()=>  this.onSlotChanged(), 0 ) });
             //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
         }
         getInstanceNum(){ return this.instanceNum }
         isScoped(){ return this.scope !== 'none' }
-        getEpaPrefix(){ return `<EPA>${this.window.location.hostname}:${this.instanceNum}</EPA>` }
+        getEpaPrefix()
+        {   const f = x=>
+            {   switch( this.scope )
+                {   case 'none'     :   return '';
+                    case 'named'    :   return this.name || this.id ;
+                    case 'page'     :   return this.window.location.pathname ;
+                    case 'host'     :   return this.window.location.hostname ;
+                    case 'domain'   :   return this.window.location.hostname.split('.').splice(-2,2).join('.') ;
+                    case 'instance' :   ;
+                    default         :   return this.uid;
+                }
+            };
+            return `<EPA>${ f() }</EPA>`;
+        }
         getCreateInlineElement(){ return this.inlineElement || this.appendChild( this.inlineElement = doc.createElement('div') ) }
         watchHtml( boolWatch )
         {   if(!this._mutationObserver )

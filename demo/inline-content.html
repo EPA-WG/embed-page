@@ -26,6 +26,20 @@
             <li>dynamically like via 'html' attribute ( see <a href="dynamic-binding.html">dynamic-binding.html</a> demo)</li>
         </ul>
     </p>
+
+    <demo-snippet>
+        <template>
+            <embed-page>
+                <template>
+                    <style>h3{color:chocolate;}</style>
+                    <h3> 1st instance - chocolate defined within embed-page inline. </h3>
+                    Note the TEMPLATE wrapper which prevents execution of code
+                    within EMBED-PAGE in page context
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+
     <h3>1. This H3 element should NOT be in Courier(monospace) font and NOT in green</h3>
     <demo-snippet>
         <template>
