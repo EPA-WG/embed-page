@@ -23,7 +23,7 @@
         fieldset{display: inline-block; border-bottom: none; border-right: none;}
         embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
-        .iframe,iframe{width: 100%;}
+        .iframe,iframe{width: 98%;}
     </style>
 </head>
 <body>
@@ -47,10 +47,10 @@
         </template>
     </demo-snippet>
 
-    <!--<fieldset class="iframe">-->
-        <!--<legend>Demo IFRAME <a href="page-storage.html?src=iframe">page-storage.html</a> </legend>-->
-        <!--<iframe src="page-storage.html?src=iframe" ></iframe>-->
-    <!--</fieldset>-->
+    <fieldset class="iframe">
+        <legend>Demo IFRAME <a href="page-storage.html?src=iframe">page-storage.html</a> </legend>
+        <iframe src="page-storage.html?src=iframe" ></iframe>
+    </fieldset>
     <fieldset>
         <legend>Manual test</legend>
 <pre>
@@ -91,7 +91,7 @@ Scope check
         <legend>Named scope</legend>
         <embed-page>
             <template>
-                <style>embed-page{flex:1; border: dashed antiquewhite 1em; min-width: 25em;}
+                <style>embed-page{flex:1 45%; border: dashed antiquewhite 1em; min-width: 30em; }
                     div {display: flex; flex-flow: row wrap;}
                 </style>
                 <embed-page src="page-storage.html?name=a&instance=0" scope="named" name="a"></embed-page>
@@ -102,8 +102,5 @@ Scope check
         </embed-page>
     </fieldset>
 </div>
-<script>
-    document.querySelector('select').onchange( )
-</script>
 </body>
 </html>

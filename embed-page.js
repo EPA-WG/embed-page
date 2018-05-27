@@ -33,10 +33,10 @@
     class EpaStorageWrapper
     {
         // todo Window.onstorage event handler that fires when a storage area changes
-        constructor( /** Storage */ storage, /** EpaWindow */ win, /** EmbedPage */ app )
+        constructor( /** Storage */ storage, /** EpaWindow */ epaWin, /** EmbedPage */ app )
         {
             // on init hook to StorageEvent
-            // in StorageEvent pass through only own to `win` object
+            // in StorageEvent pass through only own to `epaWin` object
             function eachKey( cb )
             {   let p = app.getEpaPrefix()
                 ,   i = storage.length-1;
@@ -54,10 +54,28 @@
                 eachKey( k => i++ === idx && ( ret = k ) );
                 return ret;
             });
-            this.getItem = k => storage.getItem( app.getEpaPrefix()+k );
-            this.setItem = (k,v) => k &&    storage.setItem   ( app.getEpaPrefix() + k, v );
-            this.removeItem =  k => k &&    storage.removeItem( app.getEpaPrefix() + k );
-            this.clear = x => eachKey( k => storage.removeItem( app.getEpaPrefix() + k ) );
+            const execute = ( op, key = null, val = null )=>
+            {
+                const k = app.getEpaPrefix() + key
+                ,oldVal = key && this.getItem( k )
+                ,    ev = new StorageEvent( "storage" );
+
+                if( "setItem" === op )
+                    storage.setItem( k, val );
+                else if( "removeItem" === op )
+                    storage.removeItem( k );
+                else // clear
+                    eachKey( k => storage.removeItem( app.getEpaPrefix() + k ) );
+
+                ev.initStorageEvent( "storage", !1, !1, k, oldVal, val, app.src, this );
+                ev.epa_uid = app.uid;
+                try{  win.dispatchEvent( ev ) }
+                catch( ev ){ console.error(ev) }
+            };
+            this.getItem    =     k => storage.getItem( app.getEpaPrefix()+k );
+            this.setItem    = (k,v) => k &&    execute('setItem', k, v );
+            this.removeItem =     k => k &&    execute('removeItem', k );
+            this.clear      = x => execute( 'clear' );
             defProperty( this, 'configurable',x=>false );
             defProperty( this, 'enumerable'  ,x=>true  );
         }
@@ -224,7 +242,7 @@
 
             win.addEventListener('storage', e =>
             {   const pr = this.getEpaPrefix();
-                if( !e.key || !e.key.startsWith( pr ) || this.uid === e.target )
+                if( !e.key || !e.key.startsWith( pr ) || this.uid === e.epa_uid )
                     return;
                 var   key = e.key.substring( pr.length )
                 //,     url = e.url.substring( pr.length )

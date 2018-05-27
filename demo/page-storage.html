@@ -4,9 +4,7 @@
     vaadin-text-field, h5{ width: 100%; padding: 0; margin: 0; }
     label{ padding-top:1em;display: block;}
     table, input{width: 100%;}
-    td{    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;    max-width: 0;}
-    th:nth-child(1),td:nth-child(1){width: 3em;}
-    th:nth-child(2),td:nth-child(2){width: 11em;}
+    td{    overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     tr:nth-child(odd){ background: #CCC }
 </style>
 <custom-style>
@@ -19,10 +17,12 @@
     <label>localStorage :</label>
     <button theme="raised primary"   class="onGetLocal">Get</button>
     <button theme="raised"           class="onSetLocal">Set</button>
+    <button theme="raised"           class="onClearLocal">Clear</button>
     <br/>
     <label>sessionStorage :</label>
     <button theme="raised primary"   class="onGetSession">Get</button>
     <button theme="raised"           class="onSetSession">Set</button>
+    <button theme="raised"           class="onClearSession">Clear</button>
 
     <label> Key   <input class="key"   placeholder="Key"   value="a" /> </label>
     <label> Value <input class="value" placeholder="Value"           /> </label>
@@ -51,10 +51,12 @@
                 <td>${e.url                                             }</td>
             </tr>
             `);
-    $('.onGetLocal  ').onclick= ()=> { $val.value = localStorage.getItem( $key.value   )};
-    $('.onSetLocal  ').onclick= ()=> { localStorage.setItem( $key.value, $val.value    )};
-    $('.onGetSession').onclick= ()=> { $val.value = sessionStorage.getItem( $key.value )};
-    $('.onSetSession').onclick= ()=> { sessionStorage.setItem( $key.value, $val.value  )};
+    $('.onGetLocal    ').onclick= ()=> { $val.value = localStorage.getItem( $key.value   )};
+    $('.onSetLocal    ').onclick= ()=> { localStorage.setItem( $key.value, $val.value    )};
+    $('.onClearLocal  ').onclick= ()=> { localStorage.clear()};
+    $('.onGetSession  ').onclick= ()=> { $val.value = sessionStorage.getItem( $key.value )};
+    $('.onSetSession  ').onclick= ()=> { sessionStorage.setItem( $key.value, $val.value  )};
+    $('.onClearSession').onclick= ()=> { sessionStorage.clear()};
 </script>
 
 <script src="page-storage.js"></script>
