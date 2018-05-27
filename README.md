@@ -17,7 +17,10 @@ to component content. Similar approach is applied for url, storage, cookies, etc
 ## Use
 1. Add to project via npm, bower, or simply placing `embed-page.js` into project tree
 2. Import into page/module either by webcomponent `link rel="import"`, AMD require, ES6 import, or simple SCRIPT tag
-3. Add some useful 3rd party [microapplication](https://github.com/EPA-WG/EPA-concept/blob/master/microapplication.md) into your page.
+3. Develop your reusable widgets as insulated HTML and include into page by ```<embed-page>``` or
+ 
+Add some useful 3rd party [microapplication](https://github.com/EPA-WG/EPA-concept/blob/master/microapplication.md) 
+into your page same way.
 
 The content could be set either by **src** attribute or by Polymer {{data}} binding of content;
 including the insulated content in TEMPLATE; or binding content via **html** attribute.
@@ -44,11 +47,12 @@ At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the
 [change request](https://github.com/EPA-WG/embed-page/issues) if need other or no framework compatibility.
 
 ### Dependencies
-There is no dependencies in run time. Polymer is used for demo and is not required to use \<embed-page/\>
-
+Polymer 2 Element is a base for embed-page. No dependencies in run time planned before first release 
+( currently project is in pre-release alpha stage). Polymer and Vaadin are used for demo and 
+is not required to use \<embed-page/\>
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.9/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.10/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash
