@@ -30,7 +30,7 @@
 <div>
     <embed-page src="demo-menu.html" scope="none" ></embed-page>
     <h3>Storage insulation <code>&lt;embed-page/&gt;</code> demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
-    <label>TBD Change <var>scope</var> attribute to
+    <label>Change <var>scope</var> attribute to
         <select onchange="document.getElementsByTagName('embed-page')[0].scope=this.value">
             <option value="domain"                             >domain    </option>
             <option value="host"                               >host      </option>
@@ -40,6 +40,7 @@
             <option value="none"                               >none      </option>
         </select>
     </label>
+    <label>name: <input type="text" class="name" value="namespaceA" /> </label>
     <demo-snippet>
         <template>
             <embed-page src="page-storage.html?a" ></embed-page>
@@ -77,11 +78,6 @@ Scope check
     2. close and reopen browser tab
     3. GET key, observe the previously set value is NOT set when scope set to "instance" and shown in other scopes.
 
-Cookies
-    1. set cookies <var>a=b</var>, set cookies <var>c=d</var>
-    2. get cookie should have both key/values presented
-    3. refresh page, get cookies should have both key/values presented
-
 </pre>
 
         <div style="display: inline-block">
@@ -90,6 +86,24 @@ Cookies
             When used from <var>embed-page</var>, the <var>document</var> is wrapped to reflect component instance scope.<br/>
         </div>
     </fieldset>
+    <br/>
+    <fieldset style="display: block">
+        <legend>Named scope</legend>
+        <embed-page>
+            <template>
+                <style>embed-page{flex:1; border: dashed antiquewhite 1em; min-width: 25em;}
+                    div {display: flex; flex-flow: row wrap;}
+                </style>
+                <embed-page src="page-storage.html?name=a&instance=0" scope="named" name="a"></embed-page>
+                <embed-page src="page-storage.html?name=a&instance=1" scope="named" name="a"></embed-page>
+                <embed-page src="page-storage.html?name=b&instance=0" scope="named" name="b"></embed-page>
+                <embed-page src="page-storage.html?name=b&instance=1" scope="named" name="b"></embed-page>
+            </template>
+        </embed-page>
+    </fieldset>
 </div>
+<script>
+    document.querySelector('select').onchange( )
+</script>
 </body>
 </html>

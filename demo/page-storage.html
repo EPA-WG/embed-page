@@ -15,6 +15,7 @@
     </style>
 </custom-style>
 <div theme="dark">
+    <h4></h4>
     <label>localStorage :</label>
     <button theme="raised primary"   class="onGetLocal">Get</button>
     <button theme="raised"           class="onSetLocal">Set</button>
@@ -39,7 +40,7 @@
     ,    $val = $('.value')
     ,    $key = $('.key'  )
     ,  $tbody = $('tbody' );
-
+    $('h4').innerHTML = location.search;
     window.addEventListener( 'storage'
         , e => $tbody.innerHTML +=
             `

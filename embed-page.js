@@ -71,16 +71,6 @@
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
-            window.addEventListener('storage', e =>
-            {   const pr = app.getEpaPrefix();
-                if( !e.key || !e.key.startsWith( pr ) )
-                    return;
-                const key = e.key.substring( pr.length )
-                ,      ev = new StorageEvent( e.type );
-                ev.initStorageEvent( e.type, e.bubbles, e.cancelBubble, key, e.oldValue, e.newValue, e.url, e.storageArea );
-                try{  this.dispatchEvent( ev ) }
-                catch( ev ){ console.error(ev) }
-            });
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
         }
@@ -232,6 +222,35 @@
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
 
+            win.addEventListener('storage', e =>
+            {   const pr = this.getEpaPrefix();
+                if( !e.key || !e.key.startsWith( pr ) || this.uid === e.target )
+                    return;
+                var   key = e.key.substring( pr.length )
+                //,     url = e.url.substring( pr.length )
+                ,  origin = pr.substring( 5, pr.length-6 )
+                ,       a = this.document.createElement('a');
+
+                a.setAttribute('href',origin);
+                const dispatch = b=>
+                {   if( !b )
+                        return;
+                    const ev = new StorageEvent( e.type );
+                    ev.initStorageEvent( e.type, e.bubbles, e.cancelBubble, key, e.oldValue, e.newValue, origin, e.storageArea );
+                    try{  w.dispatchEvent( ev ) }
+                    catch( ev ){ console.error(ev) }
+                };
+                switch( this.scope )
+                {   case 'none'     :   return undefined;
+                    case 'named'    :   return dispatch( this.name === origin );
+                    case 'page'     :   return dispatch( this.window.location.pathname === a.pathname );
+                    case 'host'     :   return dispatch( this.window.location.hostname === a.hostname );
+                    case 'domain'   :   return dispatch( host2domain( this.window.location.hostname ) === host2domain( a.hostname ) );
+                    case 'instance' :   ;
+                    default         :   return undefined;
+                }
+            });
+
             this.onHtmlAttrChange();
             if( this.src )
                 this.fetch();
@@ -247,14 +266,27 @@
         }
         getInstanceNum(){ return this.instanceNum }
         isScoped(){ return this.scope !== 'none' }
+        inScope( url )
+        {   const a = this.document.createElement('a');
+            a.setAttribute( 'href',url );
+            switch( this.scope )
+            {   case 'none'     :   return true;
+                case 'named'    :   return false;
+                case 'page'     :   return this.window.location.pathname === a.pathname;
+                case 'host'     :   return this.window.location.hostname === a.hostname;
+                case 'domain'   :   return host2domain( this.window.location.hostname );
+                case 'instance' :   ;
+                default         :   return false;
+            }
+        }
         getEpaPrefix()
         {   const f = x=>
             {   switch( this.scope )
                 {   case 'none'     :   return '';
                     case 'named'    :   return this.name || this.id ;
-                    case 'page'     :   return this.window.location.pathname ;
+                    case 'page'     :   return this.window.location.hostname+this.window.location.pathname ;
                     case 'host'     :   return this.window.location.hostname ;
-                    case 'domain'   :   return this.window.location.hostname.split('.').splice(-2,2).join('.') ;
+                    case 'domain'   :   return host2domain( this.window.location.hostname );
                     case 'instance' :   ;
                     default         :   return this.uid;
                 }
@@ -394,7 +426,7 @@
     function $( css, el = doc ){ return el.querySelectorAll( css ) }
     function addClass   ( el, className  ){ el.className += ' '+className    }
     function removeClass( el, className  ){ el.className = el.className.split(' ').map(s=>s===className?'':s).join(' ') }
-
+    function host2domain( hostname ){ return hostname.split('.').splice(-2,2).join('.') }
 
     // outside of class to avoid strict mode
     function EPA_runScript( arr, env, redirects )
