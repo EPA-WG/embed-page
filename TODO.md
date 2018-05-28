@@ -1,11 +1,8 @@
-* localStorage, sessionStorage
-    * prefix by scope
-    * events b/w instances in same or smaller scope
-    * demo for different scopes
-* scope insulation layers (domain,host,page,**instance**,named,none) - param & storage
-* insulation layers - dynamic change? 
+* migration to Polymer 3    
+* test suite, test automation for all features
 * cookies, insulation
-* layers - docs
+* insulation layers - define dynamic change logic and restrictions. 
+* scope - docs for insulation layers
 * history
 * Web Components
     * wrap window.customElements to use CustomElementRegistry for Web Components scope insulation
@@ -21,7 +18,6 @@
 * instructions to use
 * form post
 * event handlers re-evaluation for embedded content
-* test suite
 
  
 * compatibility with Polymer, Ionic, Stencil, React, Angular,?...

@@ -4,14 +4,14 @@
   "version": "0.0.10",
   "main": "embed-page.html",
   "dependencies": {
-    "imported-template": "juicy/imported-template#^3.1.1",
-    "polymer": "^2.6.0",
+    "polymer": "^2.6.0"
+  },
+  "devDependencies": {
     "app-storage": "^2.1.1",
     "vaadin-material-theme": "^0.3.0",
     "vaadin-button": "^2.0.0",
-    "vaadin-text-field": "^2.0.1"
-  },
-  "devDependencies": {
+    "vaadin-text-field": "^2.0.1",
+    "imported-template": "juicy/imported-template#^3.1.1",
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
