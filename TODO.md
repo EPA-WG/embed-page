@@ -1,6 +1,8 @@
 * migration to Polymer 3    
+* sync description in NPM, github, demo, jsDoc
 * test suite, test automation for all features
-* cookies, insulation
+* postMessage, scope impl.
+* cookies, scope impl.
 * insulation layers - define dynamic change logic and restrictions. 
 * scope - docs for insulation layers
 * history
@@ -9,6 +11,7 @@
     * sample with same component tag but different implementation
     * CustomElementRegistry use for loading WC via **link rel="import"** 
 * separate sample on each aspect
+* clipboard protection & insulation
 * microapplications
     * intro page, menu & view-source samples, reference to registry
     * view-source app pages: view & form ( source url, theme )
@@ -18,7 +21,6 @@
 * instructions to use
 * form post
 * event handlers re-evaluation for embedded content
-
  
 * compatibility with Polymer, Ionic, Stencil, React, Angular,?...
 * series of examples in [Plunker](http://plnkr.co/), add examples into ApiFusion, 
@@ -33,3 +35,5 @@ Release 1
 WishList
 * "storage" event propagation for apps in same scope 
 * "noscript" attribute or scope value to serve content with JS completely disabled
+* embed-page as es6 module ( now fails in strict mode due to 'with' operator )
+    , use static import instead of dynamic 

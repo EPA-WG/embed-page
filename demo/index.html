@@ -1,25 +1,23 @@
 <!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
     <title>embed-page demo</title>
 
-    <!--<script src="https://code.jquery.com/jquery-3.2.1.js" type="application/javascript"></script>-->
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <script type="module">
+      import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+      import '@polymer/iron-demo-helpers/demo-snippet';
+    </script>
 
-    <script src="../embed-page.js" ></script>
-
-    <link rel="import" href="../../paper-radio-group/paper-radio-group.html">
-
+    <script src="../embed-page.js"></script>
     <script src="code-view.js"></script>
 
     <custom-style>
-        <style is="custom-style" include="demo-pages-shared-styles"></style>
+      <style is="custom-style" include="demo-pages-shared-styles"></style>
     </custom-style>
     <style>
         @import "page.css";
@@ -30,8 +28,8 @@
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
         @media (min-width: 100em) { fieldset{width:46%} }
     </style>
-</head>
-<body>
+  </head>
+  <body>
 
 
     <embed-page src="demo-menu.html" scope="none" ></embed-page>
@@ -53,11 +51,11 @@
             <option value="page-purple.html"                               >page-purple.html            </option>
         </select>
     </label>
-    <demo-snippet>
+      <demo-snippet>
         <template>
             <embed-page src="page-violet.html" ></embed-page>
         </template>
-    </demo-snippet>
+      </demo-snippet>
 
     <fieldset>
         <legend><a href="page-purple.html" target="_blank">page-purple.html</a> </legend>
@@ -149,8 +147,8 @@ Cookies
             <code src="./page.js"></code>
             When used from <var>embed-page</var>, the <var>document</var> is wrapped to reflect component instance scope.<br/>
             The click will trigger just own instance checkbox.
-        </div>
+    </div>
     </fieldset>
 
-</body>
+  </body>
 </html>

@@ -1,6 +1,7 @@
-# \<embed-page/\>
-Web Component acting as responsive IFRAME, a proof of concept for 
-[Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept).
+# \<embed-page\>
+Proof of concept for 
+[Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept)
+ - a microapplication container, a WebComponent acting as seamless IFRAME
 
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page) [![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -65,23 +66,24 @@ will work with document via wrapper in same way as standalone page.
 The host page document is not available from embedded content, which is validated by using 
 same DOM selectors as in host page as in instances of  ``` <embed-page> ```.
 
+# Project
+## Install the Polymer-CLI
 
-## Project
-### Preparing
-```bash
-$ bower install
+First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) 
+and npm (packaged with [Node.js](https://nodejs.org)) installed. 
+Run `npm install` to install your element's dependencies, then run `polymer serve` 
+to serve your element locally.
+
+## Viewing Your Element
+
 ```
-### Install the Polymer-CLI
+$ polymer serve
+```
 
-First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polymer-cli) installed. 
-Then run `polymer serve --open` to serve your element locally.
+## Running Tests
 
-### Running Tests
-
-```bash
+```
 $ polymer test
 ```
 
-Application is set up to be tested via 
-[web-component-tester](https://github.com/Polymer/web-component-tester). 
-Run `polymer test` to run your application's test suite locally.
+Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.

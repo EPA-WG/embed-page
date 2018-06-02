@@ -4,14 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>embed-page demo - inline html</title>
+    <title>embed-page demo - dynamic binding</title>
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
-
-    <link rel="import" href="inline-demo-component.html">
-    <link rel="import" href="../embed-page.html">
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+        import './inline-demo-component.js';
+    </script>
+    <script src="../embed-page.js"></script>
     <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
 </head>
 <body>

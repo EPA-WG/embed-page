@@ -1,4 +1,7 @@
-//export default
+//import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
+import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) =>
+{
+
 ( function( win, doc )
 {
     const   FRAME_HASH_PREFIX   = '#embed-page='
@@ -172,13 +175,14 @@
 
     /**
      * `embed-page`
-     * embeds page in iframe fashion but using shadow dom for CSS, dom insulation, and closure for JS jailing.
+     * Proof of concept for Embeddable Progressive Application -
+     * a microapplication container, a WebComponent acting as seamless IFRAME
      *
      * @customElement
      * @polymer
      * @demo demo/index.html
      */
-    class EmbedPage extends Polymer.Element
+    class EmbedPage extends PolymerElement
     {
         static get is() { return 'embed-page' }
 
@@ -204,7 +208,7 @@
                     };
         }
         static get template() {
-            return Polymer.html`
+            return html`
                 <style>
                     :host { display: block; }
                     iframe{display: none;}
@@ -532,3 +536,4 @@ console.debug( "embed-page", currentScript.src || currentScript.text );
     customElements.define('embed-page0', EmbedPage0);
     return EmbedPage;
 })( window||globals, document );
+});
