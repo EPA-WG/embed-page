@@ -1,10 +1,20 @@
 # \<embed-page\>
 Proof of concept for 
 [Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept)
- - a microapplication container, a WebComponent acting as seamless IFRAME
+ - a microapplication container, a WebComponent acting as seamless IFRAME and html include
 
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page) [![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+
+## Where to use?
+<code>&lt;embed-page/&gt;</code>  covers 2 extreme cases.
+
+1.    Super-<b>simple</b> development with library of pre-made microapplications and plain html codebase.
+            It assumes no web component knowledge and development.
+2.    Super-<b>complex</b> apps where on same page need to mix UX made with different frameworks and their incompatible otherwise revisions.<br/>
+            The JS Context insulation of embed-page provides "evolutionary architecture" support to web page.
+    
+    
 ## Security
 * General browser and application [security improvements overview](security.md).
  
@@ -17,7 +27,7 @@ to component content. Similar approach is applied for url, storage, cookies, etc
 
 ## Use
 1. Add to project via npm, bower, or simply placing `embed-page.js` into project tree
-2. Import into page/module either by webcomponent `link rel="import"`, AMD require, ES6 import, or simple SCRIPT tag
+2. Import into page/module either by ES6 import, simple SCRIPT tag, webcomponent `link rel="import"`, or AMD require 
 3. Develop your reusable widgets as insulated HTML and include into page by ```<embed-page>``` or
  
 Add some useful 3rd party [microapplication](https://github.com/EPA-WG/EPA-concept/blob/master/microapplication.md) 

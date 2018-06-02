@@ -35,7 +35,8 @@
     <embed-page src="demo-menu.html" scope="none" ></embed-page>
     <h1>Basic &lt;embed-page&gt; demo</h1>
     <i> <a href="https://github.com/EPA-WG/EPA-concept" >EPA-WG</a> (Embeddable Progressive Applications Working Group)</i>
-    <p> The <code>&lt;embed-page/&gt;</code> is a web component acting as </p>
+    <p> The <code>&lt;embed-page/&gt;</code> is a proof of concept for Embeddable Progressive Application
+        - a microapplication container implemented as WebComponent acting as</p>
     <dl>
         <dt> Seamless IFRAME.</dt>
         <dd>        Its content is embedded into page DOM, but insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).<br/>
@@ -45,6 +46,15 @@
         <dd>        With plain html and JS/css injection into page content.
         </dd>
     </dl>
+    <h2>Where to use?</h2>
+    <code>&lt;embed-page/&gt;</code>  covers 2 extreme cases.
+    <ol>
+        <li>Super-<b>simple</b> development with library of pre-made microapplications and plain html codebase.
+            It assumes no web component knowledge and development.</li>
+        <li>Super-<b>complex</b> apps where on same page need to mix UX made with different frameworks and their incompatible otherwise revisions.<br/>
+            The JS Context insulation of embed-page provides "evolutionary architecture" support to web page.</li>
+    </ol>
+    <h2>Demo cases</h2>
     <label>Change <var>src</var> attribute to
         <select onchange="document.getElementsByTagName('embed-page')[1].src=this.value">
             <option value="page-violet.html" selected="selected"           >page-violet.html            </option>

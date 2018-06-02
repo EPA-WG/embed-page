@@ -1,5 +1,3 @@
-* migration to Polymer 3    
-* sync description in NPM, github, demo, jsDoc
 * test suite, test automation for all features
 * postMessage, scope impl.
 * cookies, scope impl.
