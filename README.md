@@ -3,6 +3,10 @@ Proof of concept for
 [Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept)
  - a microapplication container, a WebComponent acting as seamless IFRAME and html include
 
+[![Dependencies][deps-image]][deps-url]
+[![devDependencies][dev-deps-image]][dev-deps-url]
+[![NPM version][npm-image]][npm-url]
+
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page) [![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
@@ -58,12 +62,12 @@ At the moment ``` <embed-page> ``` resides in Polymer echosystem, file the
 [change request](https://github.com/EPA-WG/embed-page/issues) if need other or no framework compatibility.
 
 ### Dependencies
-Polymer 2 Element is a base for embed-page. No dependencies in run time planned before first release 
-( currently project is in pre-release alpha stage). Polymer and Vaadin are used for demo and 
-is not required to use \<embed-page/\>
+Polymer 3 Element is a base for embed-page. No other dependencies in run time planned before first release 
+( currently project is in pre-release alpha stage). Polymer Paper Elements and Vaadin are used for demo and 
+are not required to use \<embed-page/\>
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.10/embed-page/demo/index.html)
+See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.11/embed-page/demo/index.html)
 , check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
 , or locally run
 ```bash
@@ -97,3 +101,10 @@ $ polymer test
 ```
 
 Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
+
+[npm-image]:      https://img.shields.io/npm/v/embed-page.svg
+[npm-url]:        https://npmjs.org/package/embed-page
+[deps-image]:     https://img.shields.io/david/EPA-WG/embed-page.svg
+[deps-url]:       https://david-dm.org/EPA-WG/embed-page
+[dev-deps-image]: https://img.shields.io/david/dev/EPA-WG/embed-page.svg
+[dev-deps-url]:   https://david-dm.org/EPA-WG/embed-page?type=dev
