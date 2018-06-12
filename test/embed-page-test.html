@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>embed-page test</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+    <!--<script src="../node_modules/mochawesome/dist/mochawesome.js"></script>-->
+
+    <script src="../embed-page.js" type="module"></script>
+</head>
+<body>
+
+<test-fixture id="BasicTestFixture">
+    <template>
+        <embed-page></embed-page>
+    </template>
+</test-fixture>
+
+<test-fixture id="ChangedPropertyTestFixture">
+    <template>
+        <embed-page src="../demo/page-violet.html"></embed-page>
+    </template>
+</test-fixture>
+
+<!-- <script type="module" src="test-basic.js"></script>  enables just Title and Console reporters -->
+<script>
+    WCT.loadSuites(
+    [
+        // 'test-0.js'
+    // ,
+        'test-basic.js'
+    ]);
+</script>
+<script>
+    window.addEventListener("load", function(event) {
+        console.log("All resources finished loading!",event);
+    });
+</script>
+</body>
+</html>

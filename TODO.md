@@ -1,3 +1,6 @@
+* expose readyState="complete" as in (iframe.contentDocument || iframe.contentWindow.document).readyState
+    iframe.onreadtstatechange( function(){ this.readystate==="complete" )// IE
+    
 * test suite, test automation for all features
 * postMessage, scope impl.
 * cookies, scope impl.
@@ -35,3 +38,4 @@ WishList
 * "noscript" attribute or scope value to serve content with JS completely disabled
 * embed-page as es6 module ( now fails in strict mode due to 'with' operator )
     , use static import instead of dynamic 
+* evaluate the use of DOMImplementation.createHTMLDocument|DOMImplementation.createDocument|new Document()     

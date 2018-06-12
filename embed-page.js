@@ -1,6 +1,5 @@
-//import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
-import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) =>
-{
+import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
+// import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) =>{
 
 ( function( win, doc )
 {
@@ -189,12 +188,22 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
         static get properties()
         {
             return  {   src:    {   type: String
-                                ,   value: ''
+                                ,   value: undefined
                                 ,   observer: 'fetch'
                                 }
                     ,   html:   {   type: String
                                 ,   value: ''
                                 ,   observer: 'onHtmlAttrChange'
+                                }
+                    ,readyState:{   type: String
+                                ,   value: ''   // https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
+                                                // loading when src or html changed
+                                                // error when load from src failed
+                                                // interactive when dom injected
+                                                // complete when js executed
+                                ,   readOnly: true
+                                ,   reflectToAttribute: true // ready-state attribute
+                                ,   notify: true // fires ready-state-changed and readystatechange events
                                 }
                     ,   scope:  {   type: String
                                 ,   value: 'instance'
@@ -273,9 +282,11 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
                 }
             });
 
-            this.onHtmlAttrChange();
+            // this.onHtmlAttrChange();
             if( this.src )
                 this.fetch();
+            else if( !this.html && !this.childNodes.length )
+                this.onHtmlAttrChange();
 
             scoped && this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
 
@@ -330,12 +341,14 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
                 {
                     const el     = this.getCreateInlineElement();
                     el.innerHTML = html;
+                    this.onAfterLoad();
                     let $s       = $( scriptsSelector, el );
                     return this.runScriptsRaw( [ ... $s ] );
                 }
                 const f = this.isScoped() ? (this.$f = this.$.framed) : this.getCreateInlineElement();
                 let el       = doc.createElement( 'div' );
                 el.innerHTML = html;
+                this.onAfterLoad();
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
                 let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
                 f.innerHTML  = '';
@@ -354,12 +367,14 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
             this._A.href = this.src;
             this.src && ajax( this.src )
                 .then( t =>
-                       {   this._loadHtml(t);
-                           this.onAfterLoad();
-                       }, err => f.innerHTML =  "Technical error" );
+                    {   this._loadHtml(t);
+                    }, err =>
+                    {   f.innerHTML =  "Technical error";
+                        this._setReadyState('error');
+                    });
         }
-        onBeforeLoad(){ addClass   ( this.$.framed,'loading') }
-        onAfterLoad (){ removeClass( this.$.framed,'loading') }
+        onBeforeLoad(){ addClass   ( this.$.framed,'loading');this._setReadyState('loading') }
+        onAfterLoad (){ removeClass( this.$.framed,'loading');this._setReadyState('interactive') }
 
         onHtmlChange()
         {   this.onBeforeLoad();
@@ -367,7 +382,6 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
                 this._loadHtml( this.html );
             else
                 this._loadHtml( this.innerHTML.trim().replace('<template>','').replace('</template>','') );
-            this.onAfterLoad();
         }
         onHtmlAttrChange()
         {   if( !this.document )
@@ -377,7 +391,6 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
                 this._loadHtml( this.html );
             else
                 this._loadHtml( this.innerHTML.trim().replace('<template>','').replace('</template>','') );
-            this.onAfterLoad();
         }
         onSlotChanged()
         {
@@ -386,6 +399,7 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
         get context()
         {   return  {   window      : this.window
                     ,   document    : this.document
+                    ,   epc         : this
                     }
         }
 
@@ -436,7 +450,7 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
             fr.src = FRAME_BLANK;
             this.src = url;
         }
-    }
+    }// =- EmbedPage
     const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
 
     win.customElements.define( EmbedPage.is, EmbedPage );
@@ -452,10 +466,16 @@ import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) 
 
     // outside of class to avoid strict mode
     function EPA_runScript( arr, env, redirects )
-    {   let { window, document, head, body } = env;
-        let currentScript = arr.shift();
+    {   const { window, document, head, body } = env;
+        const currentScript = arr.shift();
+        const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent('load', false, false),x);
         if( !currentScript )
+        {
+            env.epc._setReadyState('loaded');
+            window.dispatchEvent ( createEv('Event','load') );
+            env.epc.dispatchEvent( createEv('Event','load') );
             return;
+        }
 console.debug( "embed-page", currentScript.src || currentScript.text );
         if( currentScript.src )
         {
@@ -465,18 +485,24 @@ console.debug( "embed-page", currentScript.src || currentScript.text );
             if( m )
                 url = m.to + url.substring( m.from.length );
             ajax( url )
-                .then( txt => runScript.call( window, txt + "//# sourceURL=" + currentScript.src ) );
+                .then( txt => runScript.call( window, txt + "//# sourceURL=" + currentScript.src )
+                     , x => EPA_runScript( arr, env, redirects )  );
         }else
             runScript.call( window, currentScript.text );// todo src map
 
         function runScript( txt )
         {   try
-            {   with( window )
+            {   //let { ...window } = window;
                 {
                     eval(txt);
                 }
             }catch(ex){ console.error(ex) }
             setTimeout( x=> EPA_runScript( arr, env, redirects ), 0 );
+        }   function
+        createEvent(name)
+        {   const ev = document.createEvent('Event');
+            ev.initEvent('load', false, false);
+            return ev;
         }
     }
 
@@ -536,4 +562,4 @@ console.debug( "embed-page", currentScript.src || currentScript.text );
     customElements.define('embed-page0', EmbedPage0);
     return EmbedPage;
 })( window||globals, document );
-});
+//});

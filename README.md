@@ -3,11 +3,9 @@ Proof of concept for
 [Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept)
  - a microapplication container, a WebComponent acting as seamless IFRAME and html include
 
-[![Dependencies][deps-image]][deps-url]
-[![devDependencies][dev-deps-image]][dev-deps-url]
 [![NPM version][npm-image]][npm-url]
-
-[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page) [![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page) 
+[![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
 ## Where to use?
@@ -104,7 +102,3 @@ Your application is already set up to be tested via [web-component-tester](https
 
 [npm-image]:      https://img.shields.io/npm/v/embed-page.svg
 [npm-url]:        https://npmjs.org/package/embed-page
-[deps-image]:     https://img.shields.io/david/EPA-WG/embed-page.svg
-[deps-url]:       https://david-dm.org/EPA-WG/embed-page
-[dev-deps-image]: https://img.shields.io/david/dev/EPA-WG/embed-page.svg
-[dev-deps-url]:   https://david-dm.org/EPA-WG/embed-page?type=dev
