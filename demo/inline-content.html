@@ -13,6 +13,28 @@
         import './inline-demo-component.js';
     </script>
     <script src="../embed-page.js"></script>
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+    <script>
+        suite('embed-page inline content', () =>
+        {
+            test('initial src set, loaded event fired & content ready', function(done)
+            {
+                assert.equal( 0, 0);
+                done();
+                // const E = fixture('ChangedPropertyTestFixture');
+                // assert.equal(E.src, "../demo/page-violet.html");
+                // assert.equal( E.getAttribute('src'), "../demo/page-violet.html" );
+                // E.addEventListener('load', x=>
+                // {
+                //     debugger;
+                //     const s = E.shadowRoot;
+                //     const h = s.querySelector('h1');
+                //     assert.equal(h.innerHTML, 'Violet header');
+                //     done()
+                // });
+            });
+        });
+    </script>
     <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
 </head>
 <body>

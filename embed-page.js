@@ -196,7 +196,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                 ,   observer: 'onHtmlAttrChange'
                                 }
                     ,readyState:{   type: String
-                                ,   value: ''   // https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
+                                ,   value: 'loading'
+                                                // https://developer.mozilla.org/en-US/docs/Web/API/Document/readyState
                                                 // loading when src or html changed
                                                 // error when load from src failed
                                                 // interactive when dom injected
