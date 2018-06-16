@@ -34,8 +34,12 @@ Release 1
 * **iframe.contentWindow** protection to 
 
 WishList
-* "storage" event propagation for apps in same scope 
+* onerror event
 * "noscript" attribute or scope value to serve content with JS completely disabled
+* include embed-script-legacy.js in package as embed-page.js could be served only via type=module, still eill be handy 
+    to serve via usual JS script tag.
 * embed-page as es6 module ( now fails in strict mode due to 'with' operator )
     , use static import instead of dynamic 
-* evaluate the use of DOMImplementation.createHTMLDocument|DOMImplementation.createDocument|new Document()     
+* evaluate the use of DOMImplementation.createHTMLDocument|DOMImplementation.createDocument|new Document()   
+* populate title attribute into document.head.title (via doc constructor param) & sync head.title to @title from 
+    external doc.     

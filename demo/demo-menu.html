@@ -1,19 +1,21 @@
 <nav id="menu">
     <style>
         /* :host selector could be used for embed-page with scope other than 'none'  */
-        embed-page[src='demo-menu.html']{display: inline-block; float: right; margin: 0 1em 1em 0; background-color: rgba(255,255,255,0.8); box-shadow: inset 0 0 2em #000000;}
+        embed-page{display: inline-block; background-color: rgba(255,255,255,0.8); box-shadow: inset 0 0 2em #000000;}
+        embed-page[src='demo-menu.html']{ float: right; margin: 0 1em 1em 0; }
+        #menu h3{ padding: 0 0.5em;}
         #menu a{ display: block; padding: 0.5em;}
         #menu a:hover{ background: bisque;}
         #menu a.selected{ font-weight:bold; text-decoration: underline; }
         var{ font-family: monospace;color: green; font-weight: bolder; font-style: normal; font-size: larger; }
     </style>
     <a href="index.html"            > Demo home                         </a>
+    <a href="html-include.html"     > HTML include                      </a>
     <a href="dynamic-binding.html"  > Dynamic url and content binding   </a>
     <a href="inline-content.html"   > Inline content                    </a>
-    cross- microapplication messaging
+    <h3>Cross- microapplication messaging</h3>
     <a href="storage.html"          > localStorage & sessionStorage     </a>
-    HTML include
-    <a href="demo-menu.html"        > This Menu                         </a>
+    <a href="postMessage.html"      > postMessage API                   </a>
 
     <script>
         [...document.querySelectorAll('#menu>a')]
