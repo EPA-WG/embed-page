@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>HTML include - embed-page demo </title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+        import './inline-demo-component.js';
+    </script>
+    <script src="../embed-page.js" type="module"></script>
+    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; margin: 1em; }</style>
+</head>
+<body>
+    <embed-page src="demo-menu.html" scope="none" id="html-include-test"></embed-page>
+    <h1>HTML include - embed-page demo </h1>
+
+        <p><var>src</var> attribute along with <var>scope="none"</var>
+            makes HTML include similar to server side. Dependent JS and CSS resources will be embedded
+            into scope of host page.
+        </p>
+        <p><b>include</b> pattern is an alternative to the use of WebComponent. Good as for beginners
+            with limited to HTML skill set as for pros wanted to keep the KISS principle in web app.
+        </p>
+        <h3>Microapplication vs. include</h3>
+        <p>
+            With <var>scope="none"</var> the content of embed-page has no insulation from home page which could cause the
+            conflict on JS and CSS levels. It is good to use <b>include</b> pattern when the sources of
+            embedded HTML sections belong to same application with common architecture and release schedule.
+            <br/>
+            The good samples of such use will be a navigation menu or common CSS theme components.
+
+
+        </p>
+        <h3>Limitations</h3>
+        <ol>
+            <li><b>Performance</b> For single use of external content on the page the <b>include</b> pattern
+                is more efficient than WebComponent making the load lighter. With <i>multiple</i> inclusions
+                of same content, the WebComponent does it more efficiently by loading and parsing content only once.
+            </li>
+            <li><b>External</b> content ( from independent apps ) better to be served as microapplication
+                to prevent the interference with host app and other apps on same page.
+            </li>
+        </ol>
+    <demo-snippet>
+        <p>embed-page demo uses menu from <a href="demo-menu.html" > demo-menu.html </a>
+            which holds as menu content as common styling for demo pages as inner shadow for embed-page </p>
+        <template>
+                <embed-page src="demo-menu.html?inline" scope="none" ></embed-page>
+        </template>
+    </demo-snippet>
+    <h3>Visual demo steps</h3>
+    <pre>
+The menu should be shown on page right top side and in demo snipplet above.
+CSS
+    1. The menu should have gray inner shadow.
+    2. The page menu should be located on the right side.
+JS  3. current page( HTML include ) on menu should be in bold.
+    4. Links on menu should open the page in same browser page.
+</pre>
+    <h3>More</h3>
+    <ol>
+        <li><a href="dynamic-binding.html"  > Dynamic url and content binding   </a> for examples of URL change.</li>
+        <li><a href="index.html"            > Demo home                         </a> for other scope options.   </li>
+    </ol>
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+    <script>
+        suite('embed-page HTML include', () =>
+        {
+            test('initial src set, loaded event fired & content ready', function(done)
+            {
+                const E = document.querySelector('#html-include-test');
+                assert.equal(E.src, "demo-menu.html");
+                assert.equal( E.getAttribute('src'), "demo-menu.html" );
+                if( E.readyState === "complete")
+                {
+                    const m = document.querySelector('nav');
+                    assert.equal(m.id, 'menu');
+                    done()
+                }
+                else E.addEventListener('load', x=>
+                {
+                    const m = document.querySelector('nav');
+                    assert.equal(m.id, 'menu');
+                    done()
+                });
+            });
+        });
+    </script>
+</body>
+</html>

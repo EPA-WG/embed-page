@@ -4,7 +4,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 ( function( win, doc )
 {
     const   FRAME_HASH_PREFIX   = '#embed-page='
-    ,       FRAME_BLANK         = "about:blank";
+    ,       FRAME_BLANK         = "about:blank"
+    ,       ABS_URL = /(^\/)|(^#)|(^[\w-\d]*:)/;
     let     GBL_InstancesCount  = 0;
 
     class EpaHrefLocationHolder
@@ -149,6 +150,25 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 catch( e ){ return str }
     }   }   }
 
+    function createDocument( url, app, f, w )
+    {
+        let baseURI = doc.baseURI || win.location.href;
+        const d = doc.implementation.createHTMLDocument('temp');
+        d.base  = d.createElement('base');
+        d.head.appendChild(d.base);
+        d.anchor = d.createElement('a');
+    // d.body = app.$.framed;
+        d.body.appendChild(d.anchor);
+        d.base.href = baseURI;
+        d.anchor.href = url;
+
+        defProperty( d, 'sessionStorage' , x=> w.sessionStorage );
+        defProperty( d, 'localStorage'   , x=> w.localStorage   );
+        // defProperty( d, 'location'       , x=> w.location       , v=> w.location = v );
+        const cookie = new EpaCookie(w);
+        defProperty( d, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
+        return d;
+    }
     class EpaDocument
     {
         constructor( app, f, w )
@@ -245,12 +265,19 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
         ready()
         {   super.ready();
-            this._A.href=this.src;
+
+            const //body = doc.createElement('body'),
+                src = this.src || '';
+            // body.appendChild( this.$.framed.firstChild );
+            // this.$.framed = body;
+
+            this._A.href = src;
 
             const scoped = this.isScoped()
             ,     f = this.$.framed
             ,     w = scoped ? new EpaWindow( this, this._A ) : win
-            ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
+            ,     d = scoped ? createDocument( src, this, f, w  ) : doc ;
+            // ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
 
@@ -283,12 +310,17 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 }
             });
 
-            // this.onHtmlAttrChange();
+            if( this.childNodes.length )
+            {
+                this.onHtmlChange();
+            }
             if( this.src )
+            {
                 this.fetch();
-            else if( !this.html && !this.childNodes.length )
+            }else if( !this.html && !this.childNodes.length )
+            {
                 this.onHtmlAttrChange();
-
+            }
             scoped && this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
 
             let sh= this.$.slotted;
@@ -364,8 +396,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             if( !this.document )
                 return;
             const f = this.$f = this.$.framed;
-            this.onBeforeLoad();
             this._A.href = this.src;
+// todo create document with base
+            this.onBeforeLoad();
             this.src && ajax( this.src )
                 .then( t =>
                     {   this._loadHtml(t);
@@ -472,7 +505,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent('load', false, false),x);
         if( !currentScript )
         {
-            env.epc._setReadyState('loaded');
+            env.epc._setReadyState('complete');
             window.dispatchEvent ( createEv('Event','load') );
             env.epc.dispatchEvent( createEv('Event','load') );
             return;
