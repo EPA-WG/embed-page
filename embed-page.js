@@ -153,7 +153,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     function createDocument( url, app, f, w )
     {
         let baseURI = doc.baseURI || win.location.href;
-        const d = doc.implementation.createHTMLDocument('temp');
+        const d = doc.implementation.createHTMLDocument('temp')
+        ,     $ = ( css, el = app.$.framed )=> el.querySelectorAll( css );
         d.base  = d.createElement('base');
         d.head.appendChild(d.base);
         d.anchor = d.createElement('a');
@@ -162,6 +163,16 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         d.base.href = baseURI;
         d.anchor.href = url;
 
+        Object.assign( d,
+            {   getElementById         : x=> $( '#'+x, f )[0]
+            ,   getElementsByTagName   : x=> $( x, f )
+            ,   getElementsByClassName : x=> f.getElementsByClassName( x )
+            ,   createElement          : x=> doc.createElement(x)
+            ,   createEvent            : x=> doc.createEvent(x)
+            ,   querySelectorAll       : x=> f.querySelectorAll(x)
+            ,   querySelector          : x=> f.querySelector(x)
+            ,   write       : x=> console.error( 'document.write() is not supported yet.')
+            });
         defProperty( d, 'sessionStorage' , x=> w.sessionStorage );
         defProperty( d, 'localStorage'   , x=> w.localStorage   );
         // defProperty( d, 'location'       , x=> w.location       , v=> w.location = v );
