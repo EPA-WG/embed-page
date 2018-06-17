@@ -44,7 +44,9 @@
     </demo-snippet>
 
     <demo-snippet>
-        <h3>2. This H3 element should NOT be in Courier(<code>monospace</code>) font and NOT in green</h3>
+        <h3>2. This H3 element should NOT be in Courier(<code>monospace</code>) font and NOT in green
+            and <i style="color: Blue">blue</i> on button click
+        </h3>
         <template>
             <embed-page id="epa-1">
                 <template><!-- encapsulate the insulated content into TEMPLATE tag to prevent execution in page context -->
@@ -103,12 +105,24 @@ JS  3. Click on 'make blue' the embedded H3 should be blue colored.
                 assert.equal( E.readyState, "complete" );
                 const s = E.shadowRoot;
                 const h = s.querySelector('h3');
-                debugger;
                 const h3defaultFont = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('font-family')
                 ,    h3EmbeddedFont = window.getComputedStyle(h,null).getPropertyValue('font-family')
                 ,          spanFont = window.getComputedStyle(document.querySelector('h3 code'),null).getPropertyValue('font-family');
                 assert.notEqual( h3defaultFont, h3EmbeddedFont );
                 assert.equal( h3EmbeddedFont, spanFont );// 'monospace'
+            });
+            window.parent.location.href.includes('/test') && test('3. onClick', function()
+            {
+                const E = document.getElementById("epa-1");
+                assert.equal( E.readyState, "complete" );
+                const s = E.shadowRoot;
+                s.querySelector('button').dispatchEvent( new MouseEvent( "click" ));
+                const h = s.querySelector('h3');
+                const h3defaultColor = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('color')
+                ,    h3EmbeddedColor = window.getComputedStyle(h,null).getPropertyValue('color')
+                ,          spanColor = window.getComputedStyle(document.querySelector('h3 i'),null).getPropertyValue('color');
+                assert.notEqual( h3defaultColor, h3EmbeddedColor );
+                assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
             });
         });
     </script>
