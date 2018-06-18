@@ -63,14 +63,14 @@
     </label>
       <demo-snippet>
         <template>
-            <embed-page src="page-violet.html" ></embed-page>
+            <embed-page src="page-violet.html" id="epa-0"></embed-page>
         </template>
       </demo-snippet>
 
     <fieldset>
         <legend><a href="page-purple.html" target="_blank">page-purple.html</a> </legend>
         <legend>as <code>&lt;embed-page&gt;</code></legend>
-        <embed-page src="page-purple.html?a=b#c" ></embed-page>
+        <embed-page src="page-purple.html?a=b#c" id="epa-purple"></embed-page>
         <legend> in IFRAME</legend>
         <iframe src="page-purple.html"></iframe>
         <legend> Source </legend>
@@ -81,7 +81,7 @@
     <fieldset>
         <legend><a href="page-violet.html" target="_blank">page-violet.html</a> </legend>
         <legend>as <code>&lt;embed-page&gt;</code></legend>
-        <embed-page src="page-violet.html?d=e#f" ></embed-page>
+        <embed-page src="page-violet.html?d=e#f"  id="epa-violet"></embed-page>
         <p>&nbsp;</p>
         <legend> in IFRAME</legend>
         <iframe src="page-violet.html"></iframe>
@@ -159,6 +159,79 @@ Cookies
             The click will trigger just own instance checkbox.
     </div>
     </fieldset>
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+    <script>
+        suite('embed-page basics IFRAME test ', () =>
+        {
+            let epa0, epaV, epaP, $0, $V, $P;
+
+            const EPA_0_URL = "page-violet.html"
+            ,     EPA_V_URL = "page-violet.html?d=e#f"
+            ,     EPA_P_URL = "page-purple.html?a=b#c";
+
+            setup( function()
+            {
+                return wait4all().then( args =>
+                {   [ epa0, epaV, epaP ] = args;
+                    [ $0, $V,$P ] = args.map( epa => (css => epa.shadowRoot.querySelector(css) ) );
+                });
+            });
+
+            test('1. initial src set', function()
+            {
+                assert.equal( epa0.src, EPA_0_URL ); assert.equal( epa0.getAttribute('src'), EPA_0_URL );
+                assert.equal( epaV.src, EPA_V_URL ); assert.equal( epaV.getAttribute('src'), EPA_V_URL );
+                assert.equal( epaP.src, EPA_P_URL ); assert.equal( epaP.getAttribute('src'), EPA_P_URL );
+            });
+            test('2. content loaded', function()
+            {
+                assert.equal( $0('h1').innerText, "Violet header" );
+                assert.equal( $V('h1').innerText, "Violet header" );
+                assert.equal( $P('h1').innerText, "Purple header" );
+
+            });
+            if( !window.parent.location.href.includes('/test') ) // skip if from within demo where click is manual
+                return;
+
+            test('3. onClick', function()
+            {
+                const E = document.getElementById("epa-1");
+                assert.equal( E.readyState, "complete" );
+                const s = E.shadowRoot;
+                s.querySelector('button').dispatchEvent( new MouseEvent( "click" ));
+                const h = s.querySelector('h3');
+                const h3defaultColor = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('color')
+                ,    h3EmbeddedColor = window.getComputedStyle(h,null).getPropertyValue('color')
+                ,          spanColor = window.getComputedStyle(document.querySelector('h3 i'),null).getPropertyValue('color');
+                assert.notEqual( h3defaultColor, h3EmbeddedColor );
+                assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
+            });
+
+                function
+            wait4all()
+            {
+                return Promise.all([ wait4load( "epa-0"     , EPA_0_URL )
+                                  ,  wait4load( "epa-violet", EPA_V_URL )
+                                  ,  wait4load( "epa-purple", EPA_P_URL )
+                                  ]);
+            }
+                function
+            wait4load( id, url )
+            {
+                const E = document.getElementById( id );
+                assert.notEqual( E, null );
+                assert.equal( E.src, url );
+                assert.equal( E.getAttribute('src'), url );
+                if( "complete" === E.readyState )
+                    return Promise.resolve(E);
+                return new Promise( function( resolve, reject )
+                {
+                    E.addEventListener( 'load' , x=> resolve(E) );
+                    E.addEventListener( 'error', x=> reject (E) );
+                } );
+            }
+        });
+    </script>
 
   </body>
 </html>

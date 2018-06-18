@@ -16,7 +16,7 @@
     <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
 </head>
 <body>
-    <!--<embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>-->
+    <embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>
     <h1>embed-page demo - inline html</h1>
     <b>embed-page</b> allows to run its content in insulation from host page, including CSS and JS.
     <p>NOTE: encapsulate the insulated content into TEMPLATE tag to prevent execution in page context.</p>
@@ -111,7 +111,9 @@ JS  3. Click on 'make blue' the embedded H3 should be blue colored.
                 assert.notEqual( h3defaultFont, h3EmbeddedFont );
                 assert.equal( h3EmbeddedFont, spanFont );// 'monospace'
             });
-            window.parent.location.href.includes('/test') && // skip if from within demo where click is manual
+            if( !window.parent.location.href.includes('/test') ) // skip if from within demo where click is manual
+                return;
+
             test('3. onClick', function()
             {
                 const E = document.getElementById("epa-1");
@@ -127,7 +129,6 @@ JS  3. Click on 'make blue' the embedded H3 should be blue colored.
             });
 
             0 && // manually works, need async wait for innerHTML change
-            window.parent.location.href.includes('/test') && // skip if from within demo where click is manual
             test('4. set by innerHTML', function()
             {
                 const E = document.getElementById("epa-1");

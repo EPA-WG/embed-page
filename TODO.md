@@ -43,3 +43,7 @@ WishList
 * evaluate the use of DOMImplementation.createHTMLDocument|DOMImplementation.createDocument|new Document()   
 * populate title attribute into document.head.title (via doc constructor param) & sync head.title to @title from 
     external doc.     
+    
+## Test cases coverage
+* error event
+* cross-domain test: load, JS insulation, scope     
