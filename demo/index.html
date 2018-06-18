@@ -27,6 +27,8 @@
         dl{ border-left: 1em solid lightgray; padding-left: 1em; }
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
         @media (min-width: 100em) { fieldset{width:46%} }
+        #purple-color{ color: purple;}
+        #violet-color{ color: violet;}
     </style>
   </head>
   <body>
@@ -121,7 +123,7 @@
 <pre>
 CSS
     1. The header above should be intact(default) in color and text size.
-    2. Colors in demo components and IFRAMEs should match the page name: purple, violet.
+    2. Colors in demo components and IFRAMEs should match the page name: <i id="purple-color">purple</i>, <i id="violet-color">violet</i> .
 JS
     1. Checkboxes on page should not be affected by <var>embed-page</var> content.
     2. Operating the page content here should not affect the component` intestines.
@@ -163,11 +165,13 @@ Cookies
     <script>
         suite('embed-page basics IFRAME test ', () =>
         {
-            let epa0, epaV, epaP, $0, $V, $P;
+            let epa0, epaV, epaP, $0, $V, $P, $$ = css => document.querySelector(css);
 
             const EPA_0_URL = "page-violet.html"
             ,     EPA_V_URL = "page-violet.html?d=e#f"
-            ,     EPA_P_URL = "page-purple.html?a=b#c";
+            ,     EPA_P_URL = "page-purple.html?a=b#c"
+            ,   VIOLET_COLOR = getColor( $$("#violet-color") )
+            ,   PURPLE_COLOR = getColor( $$("#purple-color") );
 
             setup( function()
             {
@@ -188,8 +192,31 @@ Cookies
                 assert.equal( $0('h1').innerText, "Violet header" );
                 assert.equal( $V('h1').innerText, "Violet header" );
                 assert.equal( $P('h1').innerText, "Purple header" );
-
             });
+            test('3. inner JS executed', function()
+            {
+                assert.equal( $$('#embedded').checked, false );
+                assert.equal( $0('#embedded').checked, false );
+                assert.equal( $V('#embedded').checked, false );
+                assert.equal( $P('#embedded').checked, true  );
+            });
+            test('4. external page.js executed', function()
+            {
+                assert.equal( $$('#external').checked, true );
+                assert.equal( $0('#external').checked, true );
+                assert.equal( $V('#external').checked, true );
+                assert.equal( $P('#external').checked, true );
+            });
+            test('5. internal css executed', function()
+            {
+                assert.notEqual( $$('h1'), VIOLET_COLOR );
+                assert.notEqual( $$('h1'), PURPLE_COLOR );
+
+                assert.equal( getColor( $0('h1') ), VIOLET_COLOR );
+                assert.equal( getColor( $V('h1') ), VIOLET_COLOR );
+                assert.equal( getColor( $P('h1') ), PURPLE_COLOR );
+            });
+
             if( !window.parent.location.href.includes('/test') ) // skip if from within demo where click is manual
                 return;
 
@@ -207,6 +234,11 @@ Cookies
                 assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
             });
 
+                function
+            getColor( el )
+            {
+                return window.getComputedStyle( el, null ).getPropertyValue('color')
+            }
                 function
             wait4all()
             {
