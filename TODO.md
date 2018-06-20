@@ -46,4 +46,11 @@ WishList
     
 ## Test cases coverage
 * error event
-* cross-domain test: load, JS insulation, scope     
+* cross-domain test: load, JS insulation, scope 
+
+## APIs
+* BroadcastChannel 
+* documentElement, firstChild, firstElementChild, lastChild, lastElementChild
+* forms, images, anchors, links, ...
+
+    

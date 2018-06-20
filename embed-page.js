@@ -150,56 +150,51 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 catch( e ){ return str }
     }   }   }
 
-    function createDocument( url, app, f, w )
-    {
-        let baseURI = doc.baseURI || win.location.href;
-        const d = doc.implementation.createHTMLDocument('temp')
-        ,     $ = ( css, el = app.$.framed )=> el.querySelectorAll( css );
-        d.base  = d.createElement('base');
-        d.head.appendChild(d.base);
-        d.anchor = d.createElement('a');
-    // d.body = app.$.framed;
-        d.body.appendChild(d.anchor);
-        d.base.href = baseURI;
-        d.anchor.href = url;
-
-        Object.assign( d,
-            {   getElementById         : x=> $( '#'+x, f )[0]
-            ,   getElementsByTagName   : x=> $( x, f )
-            ,   getElementsByClassName : x=> f.getElementsByClassName( x )
-            ,   createElement          : x=> doc.createElement(x)
-            ,   createEvent            : x=> doc.createEvent(x)
-            ,   querySelectorAll       : x=> f.querySelectorAll(x)
-            ,   querySelector          : x=> f.querySelector(x)
-            ,   write       : x=> console.error( 'document.write() is not supported yet.')
-            });
-        defProperty( d, 'sessionStorage' , x=> w.sessionStorage );
-        defProperty( d, 'localStorage'   , x=> w.localStorage   );
-        // defProperty( d, 'location'       , x=> w.location       , v=> w.location = v );
-        const cookie = new EpaCookie(w);
-        defProperty( d, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
-        return d;
-    }
     class EpaDocument
     {
         constructor( app, f, w )
-        {   const cookie = new EpaCookie(this)
-            ,   $ = ( css, el = app.$.framed )=> el.querySelectorAll( css );
-            Object.assign( this,
-                           {   getElementById         : x=> $( '#'+x, f )[0]
-                           ,   getElementsByTagName   : x=> $( x, f )
-                           ,   getElementsByClassName : x=> f.getElementsByClassName( x )
-                           ,   createElement          : x=> doc.createElement(x)
-                           ,   createEvent            : x=> doc.createEvent(x)
-                           ,   querySelectorAll       : x=> f.querySelectorAll(x)
-                           ,   querySelector          : x=> f.querySelector(x)
-                           ,   write       : x=> console.error( 'document.write() is not supported yet.')
-                           });
+        {   const zs = this
+            , cookie = new EpaCookie(zs)
+            ,      $ = ( css, el = app.$.framed )=> el.querySelectorAll( css );
+            Object.assign( zs,
+                {   getElementById         : x=> $( '#'+x, f )[0]
+                ,   getElementsByTagName   : x=> $( x, f )
+                ,   getElementsByClassName : x=> f.getElementsByClassName( x )
+                ,   createElement          : x=> doc.createElement(x)
+                ,   createEvent            : x=> doc.createEvent(x)
+                ,   querySelectorAll       : x=> f.querySelectorAll(x)
+                ,   querySelector          : x=> f.querySelector(x)
+                ,   write       : x=> console.error( 'document.write() is not supported yet.')
+                });
 
-            defProperty( this, 'sessionStorage' , x=> w.sessionStorage );
-            defProperty( this, 'localStorage'   , x=> w.localStorage   );
-            defProperty( this, 'location'       , x=> w.location       , v=> w.location = v );
-            defProperty( this, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
+            defProperty( zs, 'sessionStorage' , x=> w.sessionStorage );
+            defProperty( zs, 'localStorage'   , x=> w.localStorage   );
+            defProperty( zs, 'location'       , x=> w.location       , v=> w.location = v );
+            defProperty( zs, 'documentURI'    , x=> w.location       ); // https://html.spec.whatwg.org/multipage/history.html#the-location-interface
+            defProperty( zs, 'URL'            , x=> w.location       );
+            defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
+            const epaDoc = createDocument(  );
+            // marshal undefined yet properties to epaDoc
+            Object.keys( epaDoc ).forEach( k => (k in zs) || defProperty( zs, k, x=>epaDoc[k], v=>epaDoc[k]=v ) );
+
+            function createDocument() // https://dom.spec.whatwg.org/#document
+            {
+                let   url = f.src
+                , baseURI = ( url && ABS_URL.test(url) ) ? url : doc.baseURI || win.location.href;
+                //  new Document()
+                const d = doc.implementation.createHTMLDocument('epa');
+                d.base  = d.createElement('base');
+                d.base.href = baseURI;
+                d.head.appendChild(d.base);
+                d.anchor = d.createElement('a');
+                d.body.appendChild(d.anchor);
+                d.anchor.href = f.src;
+
+                // d.body = app.$.framed;
+                // document.domain
+                // document.origin
+                return d;
+            }
         }
     }
 
@@ -287,8 +282,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             const scoped = this.isScoped()
             ,     f = this.$.framed
             ,     w = scoped ? new EpaWindow( this, this._A ) : win
-            ,     d = scoped ? createDocument( src, this, f, w  ) : doc ;
-            // ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
+            ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
 
@@ -444,11 +438,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         get context()
         {   return  {   window      : this.window
                     ,   document    : this.document
+                    ,   location    : this.window.location
                     ,   epc         : this
                     }
         }
 
-        runScripts( /** @type {!NodeList} */ pageScripts, { win, document, head, body } = this.context )
+        runScripts( /** @type {!NodeList} */ pageScripts, { win, document, location, head, body } = this.context )
         {   const env = this.context;
             EPA_runScript( [...pageScripts], env, this.redirects );
         }
@@ -511,7 +506,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
     // outside of class to avoid strict mode
     function EPA_runScript( arr, env, redirects )
-    {   const { window, document, head, body } = env;
+    {   const { window, document, location } = env;
         const currentScript = arr.shift();
         const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent('load', false, false),x);
         if( !currentScript )
@@ -521,7 +516,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             env.epc.dispatchEvent( createEv('Event','load') );
             return;
         }
-console.debug( "embed-page", currentScript.src || currentScript.text );
         if( currentScript.src )
         {
             let url = currentScript.src;

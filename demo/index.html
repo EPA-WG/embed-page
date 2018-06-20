@@ -124,13 +124,20 @@
 CSS
     1. The header above should be intact(default) in color and text size.
     2. Colors in demo components and IFRAMEs should match the page name: <i id="purple-color">purple</i>, <i id="violet-color">violet</i> .
+
 JS
-    1. Checkboxes on page should not be affected by <var>embed-page</var> content.
-    2. Operating the page content here should not affect the component` intestines.
+    1. Checkboxes on page(in this section) should not be affected by <var>embed-page</var> content
+        and checked as labeled. Click on "Toggle" button from <var>embed-page</var> should trigger
+        checkmark only for own checkbox and not affect similar checkboxes in this section
+        or another <var>embed-page</var>.
+    2. Similarly toggling checkboxes here should not affect the <var>embed-page</var> intestines.
+
 Links
     1. Click on link will replace the component content with page from <var>href</var> attribute.
+
 Form
     1. GET and POST will replace content according to FORM <var>action</var> attribute.
+
 location & window.location & document.location
     1. page in component populates text box with value matching SRC attribute of component.
     2. clear the text box, click on GET. The full URL matching SRC attribute
@@ -170,6 +177,7 @@ Cookies
             const EPA_0_URL = "page-violet.html"
             ,     EPA_V_URL = "page-violet.html?d=e#f"
             ,     EPA_P_URL = "page-purple.html?a=b#c"
+            ,      DEMO_URL = absUrl('../demo/')
             ,   VIOLET_COLOR = getColor( $$("#violet-color") )
             ,   PURPLE_COLOR = getColor( $$("#purple-color") );
 
@@ -216,24 +224,55 @@ Cookies
                 assert.equal( getColor( $V('h1') ), VIOLET_COLOR );
                 assert.equal( getColor( $P('h1') ), PURPLE_COLOR );
             });
-
-            if( !window.parent.location.href.includes('/test') ) // skip if from within demo where click is manual
-                return;
-
-            test('3. onClick', function()
+            test('6. external page.css executed', function()
             {
-                const E = document.getElementById("epa-1");
-                assert.equal( E.readyState, "complete" );
-                const s = E.shadowRoot;
-                s.querySelector('button').dispatchEvent( new MouseEvent( "click" ));
-                const h = s.querySelector('h3');
-                const h3defaultColor = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('color')
-                ,    h3EmbeddedColor = window.getComputedStyle(h,null).getPropertyValue('color')
-                ,          spanColor = window.getComputedStyle(document.querySelector('h3 i'),null).getPropertyValue('color');
-                assert.notEqual( h3defaultColor, h3EmbeddedColor );
-                assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
+                assert.notEqual( $$('a'), VIOLET_COLOR );
+                assert.notEqual( $$('a'), PURPLE_COLOR );
+
+                assert.equal( getColor( $0('a') ), VIOLET_COLOR );
+                assert.equal( getColor( $V('a') ), VIOLET_COLOR );
+                assert.equal( getColor( $P('a') ), PURPLE_COLOR );
+            });
+            // test('7. location API, read', function()
+            // {
+            //     assert.equal( $0('textarea').value, DEMO_URL+EPA_V_URL );
+            //     assert.equal( $V('textarea').value, DEMO_URL+EPA_V_URL );
+            //     assert.equal( $P('textarea').value, DEMO_URL+EPA_P_URL );
+            // });
+            //
+            // if( !window.parent.location.href.includes('/test') ) // skip if from within demo where click is manual
+            //     return;
+
+            test('7. location API, read', function()
+            {
+                testVar( $V, 'location'         , EPA_V_URL );
+                testVar( $V, 'location.href'    , EPA_V_URL );
+                testVar( $V, 'window.location'  , EPA_V_URL );
+                testVar( $V, 'document.location', EPA_V_URL );
+
+                testVar( $P, 'location'         , EPA_P_URL );
+                testVar( $P, 'location.href'    , EPA_P_URL );
+                testVar( $P, 'window.location'  , EPA_P_URL );
+                testVar( $P, 'document.location', EPA_P_URL );
+
+                function testVar( $sel, varSrt, expectedVal )
+                {
+                    $sel('input[value="'+varSrt+'"]').checked =true;
+                    $sel('textarea').value = "";
+                    SimClick( $sel('input[value="get"]') );
+                    assert.equal( $sel('textarea').value, DEMO_URL+expectedVal );
+                }
             });
 
+                function
+            SimClick( el ){   el.dispatchEvent( new MouseEvent( "click" )); }
+
+                function
+            absUrl( rel )
+            {   const A = document.createElement('a');
+                A.setAttribute( 'href', rel );
+                return A.href;
+            }
                 function
             getColor( el )
             {
