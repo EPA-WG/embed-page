@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
@@ -9,121 +9,166 @@
     <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
     <script type="module">
-      import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
-      import '@polymer/iron-demo-helpers/demo-snippet';
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
     </script>
 
-    <script src="../embed-page.js"  type="module" ></script>
+    <script src="../embed-page.js" type="module"></script>
     <script src="code-view.js"></script>
 
     <custom-style>
-      <style is="custom-style" include="demo-pages-shared-styles"></style>
+        <style is="custom-style" include="demo-pages-shared-styles"></style>
     </custom-style>
     <style>
         @import "page.css";
-        iframe{width: 100%;}
-        fieldset{display: inline-block; border-bottom: none; border-right: none;}
-        embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
-        dl{ border-left: 1em solid lightgray; padding-left: 1em; }
-        @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
-        @media (min-width: 100em) { fieldset{width:46%} }
-        #purple-color{ color: purple;}
-        #violet-color{ color: violet;}
+
+        iframe {
+            width: 100%;
+        }
+
+        fieldset {
+            display: inline-block;
+            border-bottom: none;
+            border-right: none;
+        }
+
+        embed-page {
+            box-shadow: inset 0 0 2em #000000;
+            padding: 1em;
+        }
+
+        dl {
+            border-left: 1em solid lightgray;
+            padding-left: 1em;
+        }
+
+        @media (max-width: 500px) {
+            body, fieldset {
+                padding: 0;
+                border-left: none
+            }
+        }
+
+        @media (min-width: 100em) {
+            fieldset {
+                width: 46%
+            }
+        }
+
+        #purple-color {
+            color: purple;
+        }
+
+        #violet-color {
+            color: violet;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
 
-    <embed-page src="demo-menu.html" scope="none" ></embed-page>
-    <h1>Basic &lt;embed-page&gt; demo</h1>
-    <i> <a href="https://github.com/EPA-WG/EPA-concept" >EPA-WG</a> (Embeddable Progressive Applications Working Group)</i>
-    <p> The <code>&lt;embed-page/&gt;</code> is a proof of concept for Embeddable Progressive Application
-        - a microapplication container implemented as WebComponent acting as</p>
-    <dl>
-        <dt> Seamless IFRAME.</dt>
-        <dd>        Its content is embedded into page DOM, but insulated on JS, DOM, CSS and browsing context level( A links and FORM get/post ).<br/>
-                    Unlike IFRAME it is embedded inline into parent page DOM and automatically resizing parent node.
-        </dd>
-        <dt> HTML include.</dt>
-        <dd>        With plain html and JS/css injection into page content.
-        </dd>
-    </dl>
-    <h2>Where to use?</h2>
-    <code>&lt;embed-page/&gt;</code>  covers 2 extreme cases.
-    <ol>
-        <li>Super-<b>simple</b> development with library of pre-made microapplications and plain html codebase.
-            It assumes no web component knowledge and development.</li>
-        <li>Super-<b>complex</b> apps where on same page need to mix UX made with different frameworks and their incompatible otherwise revisions.<br/>
-            The JS Context insulation of embed-page provides "evolutionary architecture" support to web page.</li>
-    </ol>
-    <h2>Demo cases</h2>
-    <label>Change <var>src</var> attribute to
-        <select onchange="document.getElementsByTagName('embed-page')[1].src=this.value">
-            <option value="page-violet.html" selected="selected"           >page-violet.html            </option>
-            <option value="page-purple.html"                               >page-purple.html            </option>
-        </select>
-    </label>
-      <demo-snippet>
-        <template>
-            <embed-page src="page-violet.html" id="epa-0"></embed-page>
-        </template>
-      </demo-snippet>
+<embed-page src="demo-menu.html" scope="none"></embed-page>
+<h1>Basic &lt;embed-page&gt; demo</h1>
+<i> <a href="https://github.com/EPA-WG/EPA-concept">EPA-WG</a> (Embeddable Progressive Applications Working Group)</i>
+<p> The <code>&lt;embed-page/&gt;</code> is a proof of concept for Embeddable Progressive Application
+    - a microapplication container implemented as WebComponent acting as</p>
+<dl>
+    <dt> Seamless IFRAME.</dt>
+    <dd> Its content is embedded into page DOM, but insulated on JS, DOM, CSS and browsing context level( A links and
+        FORM get/post ).<br/>
+        Unlike IFRAME it is embedded inline into parent page DOM and automatically resizing parent node.
+    </dd>
+    <dt> HTML include.</dt>
+    <dd> With plain html and JS/css injection into page content.
+    </dd>
+</dl>
+<h2>Where to use?</h2>
+<code>&lt;embed-page/&gt;</code> covers 2 extreme cases.
+<ol>
+    <li>Super-<b>simple</b> development with library of pre-made microapplications and plain html codebase.
+        It assumes no web component knowledge and development.
+    </li>
+    <li>Super-<b>complex</b> apps where on same page need to mix UX made with different frameworks and their
+        incompatible otherwise revisions.<br/>
+        The JS Context insulation of embed-page provides "evolutionary architecture" support to web page.
+    </li>
+</ol>
+<h2>Demo cases</h2>
+<label>Change <var>src</var> attribute to
+    <select onchange="document.getElementsByTagName('embed-page')[1].src=this.value">
+        <option value="page-violet.html" selected="selected">page-violet.html</option>
+        <option value="page-purple.html">page-purple.html</option>
+    </select>
+</label>
+<demo-snippet>
+    <template>
+        <embed-page src="page-violet.html" id="epa-0"></embed-page>
+    </template>
+</demo-snippet>
 
-    <fieldset>
-        <legend><a href="page-purple.html" target="_blank">page-purple.html</a> </legend>
-        <legend>as <code>&lt;embed-page&gt;</code></legend>
-        <embed-page src="page-purple.html?a=b#c" id="epa-purple"></embed-page>
-        <legend> in IFRAME</legend>
-        <iframe src="page-purple.html"></iframe>
-        <legend> Source </legend>
+<fieldset>
+    <legend><a href="page-purple.html" target="_blank">page-purple.html</a></legend>
+    <legend>as <code>&lt;embed-page&gt;</code></legend>
+    <embed-page src="page-purple.html?a=b#c" id="epa-purple"></embed-page>
+    <legend> in IFRAME</legend>
+    <iframe src="page-purple.html"></iframe>
+    <legend> Source</legend>
 
-        <code src="./page-purple.html"></code>
-    </fieldset>
+    <code src="./page-purple.html"></code>
+</fieldset>
 
-    <fieldset>
-        <legend><a href="page-violet.html" target="_blank">page-violet.html</a> </legend>
-        <legend>as <code>&lt;embed-page&gt;</code></legend>
-        <embed-page src="page-violet.html?d=e#f"  id="epa-violet"></embed-page>
-        <p>&nbsp;</p>
-        <legend> in IFRAME</legend>
-        <iframe src="page-violet.html"></iframe>
-        <legend> Source </legend>
+<fieldset>
+    <legend><a href="page-violet.html" target="_blank">page-violet.html</a></legend>
+    <legend>as <code>&lt;embed-page&gt;</code></legend>
+    <embed-page src="page-violet.html?d=e#f" id="epa-violet"></embed-page>
+    <p>&nbsp;</p>
+    <legend> in IFRAME</legend>
+    <iframe src="page-violet.html"></iframe>
+    <legend> Source</legend>
 
-        <code src="./page-violet.html"></code>
-    </fieldset>
-    <br/>
-    <fieldset>
-        <legend>Demo(this) page </legend>
-        <div style="display: inline-block">
-            <h1>Default style header</h1>
-            The content of this section, page-violet.html, and page-purple.html is identical.<br/>
-            Scripts and CSS rules are operating with same IDs and class names.
-            <ul><li>    <input   id="embedded" class="embedded" type="checkbox" >
-                        <button for="embedded">Toggle</button> UNchecked by default.         </li>
-                <li>    <input   id="external" class="external" type="checkbox" >
-                        <button for="external">Toggle</button> checked by <var>page.js</var> </li>
-            </ul>
-            <br/>
-            <input type="button" value="get"/><input type="button" value="set"/>
-            <label><input type="radio" name="l" value="location" checked > location          </label>
-            <label><input type="radio" name="l" value="location.href"    > location.href     </label>
-            <label><input type="radio" name="l" value="window.location"  > window.location   </label>
-            <label><input type="radio" name="l" value="document.location"> document.location </label>
-            <textarea></textarea>
+    <code src="./page-violet.html"></code>
+</fieldset>
+<br/>
+<fieldset>
+    <legend>Demo(this) page</legend>
+    <div style="display: inline-block">
+        <h1>Default style header</h1>
+        The content of this section, page-violet.html, and page-purple.html is identical.<br/>
+        Scripts and CSS rules are operating with same IDs and class names.
+        <ul>
+            <li><input id="embedded" class="embedded" type="checkbox">
+                <button for="embedded">Toggle</button>
+                UNchecked by default.
+            </li>
+            <li><input id="external" class="external" type="checkbox">
+                <button for="external">Toggle</button>
+                checked by <var>page.js</var></li>
+        </ul>
+        <br/>
+        <input type="button" value="get"/><input type="button" value="set"/>
+        <label><input type="radio" name="l" value="location" checked> location </label>
+        <label><input type="radio" name="l" value="location.href"> location.href </label>
+        <label><input type="radio" name="l" value="window.location"> window.location </label>
+        <label><input type="radio" name="l" value="document.location"> document.location </label>
+        <textarea></textarea>
 
-            <input type="button" value="other properties"/> &bullet;
-            <input type="button" value="assign()"/>
-            <input type="button" value="reload()"/>
-            <input type="button" value="replace()"/> &bullet;
-            <input type="button" value="location-win-doc" />
-            <input type="button" value="this===window" />
+        <input type="button" value="other properties"/> &bullet;
+        <input type="button" value="assign()"/>
+        <input type="button" value="reload()"/>
+        <input type="button" value="replace()"/> &bullet;
+        <input type="button" value="location-win-doc"/>
+        <input type="button" value="this===window"/>
 
-            <script src="page.js" ></script>
-            <h3>Visual demo</h3>
-<pre>
+        <script src="page.js"></script>
+        <h3>Visual demo</h3>
+        <pre>
+<b>IFRAME</b>s are given as reference to desired behavior. Meaning same actions on IFRAME and <var>embed-page</var>
+    should have identical outcome in own UI.
+
 CSS
     1. The header above should be intact(default) in color and text size.
-    2. Colors in demo components and IFRAMEs should match the page name: <i id="purple-color">purple</i>, <i id="violet-color">violet</i> .
+    2. Colors in demo components and IFRAMEs should match the page name: <i id="purple-color">purple</i>, <i
+                id="violet-color">violet</i> .
 
 JS
     1. Checkboxes on page(in this section) should not be affected by <var>embed-page</var> content
@@ -160,149 +205,16 @@ Cookies
 
 
 </pre>
-        </div>
-        <div style="display: inline-block">
-            <legend><a href="page.  js" target="_blank">page.js</a> </legend>
-            <code src="./page.js"></code>
-            When used from <var>embed-page</var>, the <var>document</var> is wrapped to reflect component instance scope.<br/>
-            The click will trigger just own instance checkbox.
-        </div>
-    </fieldset>
-    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
-    <script>
-        suite('embed-page basics IFRAME test ', () =>
-        {
-            let epa0, epaV, epaP, $0, $V, $P, $$ = css => document.querySelector(css);
-
-            const EPA_0_URL = "page-violet.html"
-            ,     EPA_V_URL = "page-violet.html?d=e#f"
-            ,     EPA_P_URL = "page-purple.html?a=b#c"
-            ,      DEMO_URL = absUrl('../demo/')
-            ,   VIOLET_COLOR = getColor( $$("#violet-color") )
-            ,   PURPLE_COLOR = getColor( $$("#purple-color") );
-
-            setup( function()
-            {
-                return wait4all().then( args =>
-                {   [ epa0, epaV, epaP ] = args;
-                    [ $0, $V,$P ] = args.map( epa => (css => epa.shadowRoot.querySelector(css) ) );
-                });
-            });
-
-            test('1. initial src set', function()
-            {
-                assert.equal( epa0.src, EPA_0_URL ); assert.equal( epa0.getAttribute('src'), EPA_0_URL );
-                assert.equal( epaV.src, EPA_V_URL ); assert.equal( epaV.getAttribute('src'), EPA_V_URL );
-                assert.equal( epaP.src, EPA_P_URL ); assert.equal( epaP.getAttribute('src'), EPA_P_URL );
-            });
-            test('2. content loaded', function()
-            {
-                assert.equal( $0('h1').innerText, "Violet header" );
-                assert.equal( $V('h1').innerText, "Violet header" );
-                assert.equal( $P('h1').innerText, "Purple header" );
-            });
-            test('3. inner JS executed', function()
-            {
-                assert.equal( $$('#embedded').checked, false );
-                assert.equal( $0('#embedded').checked, false );
-                assert.equal( $V('#embedded').checked, false );
-                assert.equal( $P('#embedded').checked, true  );
-            });
-            test('4. external page.js executed', function()
-            {
-                assert.equal( $$('#external').checked, true );
-                assert.equal( $0('#external').checked, true );
-                assert.equal( $V('#external').checked, true );
-                assert.equal( $P('#external').checked, true );
-            });
-            test('5. internal css executed', function()
-            {
-                assert.notEqual( $$('h1'), VIOLET_COLOR );
-                assert.notEqual( $$('h1'), PURPLE_COLOR );
-
-                assert.equal( getColor( $0('h1') ), VIOLET_COLOR );
-                assert.equal( getColor( $V('h1') ), VIOLET_COLOR );
-                assert.equal( getColor( $P('h1') ), PURPLE_COLOR );
-            });
-            test('6. external page.css executed', function()
-            {
-                assert.notEqual( $$('a'), VIOLET_COLOR );
-                assert.notEqual( $$('a'), PURPLE_COLOR );
-
-                assert.equal( getColor( $0('a') ), VIOLET_COLOR );
-                assert.equal( getColor( $V('a') ), VIOLET_COLOR );
-                assert.equal( getColor( $P('a') ), PURPLE_COLOR );
-            });
-            // test('7. location API, read', function()
-            // {
-            //     assert.equal( $0('textarea').value, DEMO_URL+EPA_V_URL );
-            //     assert.equal( $V('textarea').value, DEMO_URL+EPA_V_URL );
-            //     assert.equal( $P('textarea').value, DEMO_URL+EPA_P_URL );
-            // });
-            //
-            // if( !window.parent.location.href.includes('/test') ) // skip if from within demo where click is manual
-            //     return;
-
-            test('7. location API, read', function()
-            {
-                testVar( $V, 'location'         , EPA_V_URL );
-                testVar( $V, 'location.href'    , EPA_V_URL );
-                testVar( $V, 'window.location'  , EPA_V_URL );
-                testVar( $V, 'document.location', EPA_V_URL );
-
-                testVar( $P, 'location'         , EPA_P_URL );
-                testVar( $P, 'location.href'    , EPA_P_URL );
-                testVar( $P, 'window.location'  , EPA_P_URL );
-                testVar( $P, 'document.location', EPA_P_URL );
-
-                function testVar( $sel, varSrt, expectedVal )
-                {
-                    $sel('input[value="'+varSrt+'"]').checked =true;
-                    $sel('textarea').value = "";
-                    SimClick( $sel('input[value="get"]') );
-                    assert.equal( $sel('textarea').value, DEMO_URL+expectedVal );
-                }
-            });
-
-                function
-            SimClick( el ){   el.dispatchEvent( new MouseEvent( "click" )); }
-
-                function
-            absUrl( rel )
-            {   const A = document.createElement('a');
-                A.setAttribute( 'href', rel );
-                return A.href;
-            }
-                function
-            getColor( el )
-            {
-                return window.getComputedStyle( el, null ).getPropertyValue('color')
-            }
-                function
-            wait4all()
-            {
-                return Promise.all([ wait4load( "epa-0"     , EPA_0_URL )
-                                  ,  wait4load( "epa-violet", EPA_V_URL )
-                                  ,  wait4load( "epa-purple", EPA_P_URL )
-                                  ]);
-            }
-                function
-            wait4load( id, url )
-            {
-                const E = document.getElementById( id );
-                assert.notEqual( E, null );
-                assert.equal( E.src, url );
-                assert.equal( E.getAttribute('src'), url );
-                if( "complete" === E.readyState )
-                    return Promise.resolve(E);
-                return new Promise( function( resolve, reject )
-                {
-                    E.addEventListener( 'load' , x=> resolve(E) );
-                    E.addEventListener( 'error', x=> reject (E) );
-                } );
-            }
-        });
-    </script>
-
-  </body>
+    </div>
+    <div style="display: inline-block">
+        <legend><a href="page.  js" target="_blank">page.js</a></legend>
+        <code src="./page.js"></code>
+        When used from <var>embed-page</var>, the <var>document</var> is wrapped to reflect component instance
+        scope.<br/>
+        The click will trigger just own instance checkbox.
+    </div>
+</fieldset>
+<script src="../node_modules/wct-browser-legacy/browser.js"></script>
+<script src="index.html.test.js"></script>
+</body>
 </html>

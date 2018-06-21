@@ -42,11 +42,13 @@ WishList
     , use static import instead of dynamic 
 * evaluate the use of DOMImplementation.createHTMLDocument|DOMImplementation.createDocument|new Document()   
 * populate title attribute into document.head.title (via doc constructor param) & sync head.title to @title from 
-    external doc.     
+    external doc.    
+* embed-page.promise getter to avoid registering/release "load"/"error" event handlers.
     
 ## Test cases coverage
 * error event
 * cross-domain test: load, JS insulation, scope 
+* epa.document.origin === window.top.document.origin
 
 ## APIs
 * BroadcastChannel 

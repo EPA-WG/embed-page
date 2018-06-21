@@ -334,6 +334,32 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             slot.addEventListener('slotchange', e =>
                 {   setTimeout( ()=>  this.onSlotChanged(), 0 ) });
             //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
+            // this.$.targetframe.contentWindow.onbeforeunload = ()=>
+            // {   this.readyState = 'loading';
+            //
+            // };
+            const zs = this;
+            new MutationObserver(function(mutations)
+            {   mutations.some(function(mutation)
+                {   if( mutation.type !== 'attributes' || mutation.attributeName !== 'src' )
+                        return false;
+                    // console.log(mutation);
+                    // console.log('Old src: ', mutation.oldValue);
+                    // console.log('New src: ', mutation.target.src);
+                    zs.readyState = 'loading';
+                    return true;
+                });
+            }).observe( this.$.targetframe,
+            {   attributes: true,
+                attributeFilter: ['src'],
+                attributeOldValue: true,
+                characterData: false,
+                characterDataOldValue: false
+            });
+
+
+
+
         }
         getInstanceNum(){ return this.instanceNum }
         isScoped(){ return this.scope !== 'none' }
@@ -434,6 +460,33 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         onSlotChanged()
         {
             console.log("onSlotChanged");
+        }
+
+        get promise()
+        {   const zs = this;
+            if( "complete" === this.readyState )
+                return Promise.resolve(this);
+            return new Promise( function( resolve, reject )
+            {
+                zs.addEventListener( 'error' , _onError );
+                zs.addEventListener( 'load'  , _onLoad  );
+                    function
+                _onLoad( ev )
+                {   try{ resolve(zs); }
+                    finally { releaseEv(); }
+                }
+                    function
+                _onError( err )
+                {   try{ reject(err); }
+                    finally { releaseEv(); }
+                }
+                    function
+                releaseEv()
+                {   zs.removeEventListener('load' , _onLoad  );
+                    zs.removeEventListener('error', _onError );
+                }
+            });
+
         }
         get context()
         {   return  {   window      : this.window
