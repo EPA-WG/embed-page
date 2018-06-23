@@ -90,7 +90,7 @@ suite('embed-page basics IFRAME test ', () =>
     });
 
     test('8. change src attribute', function( )
-    {   //assert.equal( $0('h1').innerText, "Violet header" );
+    {
         const TEST_URL = 'page-purple.html?from=test8';
         epa0.setAttribute('src','page-purple.html?from=test8');
         return epa0.promise.then( x=>
@@ -99,20 +99,38 @@ suite('embed-page basics IFRAME test ', () =>
         });
     });
 
-    test('9. form GET', function( done )
+    test('9. form GET via form.submit', function()
     {
         assert.equal( $0('h1').innerText, "Purple header" );
-        console.log( epa0.readyState,"before" );
-        SimClick( $0('input[value="GET"]') );
-        // $0('form[action="page-violet.html"]').submit();
-        setTimeout( x=>epa0.promise.then( E=>
+        $0( 'form[action="page-violet.html"]' ).submit();
+        return epa0.promise.then( E=>
+        {   assert.equal( $0('h1').innerText, "Violet header" );
+            assert.equal( $0('textarea').value, DEMO_URL+"page-violet.html?from=purple" );
+        })
+    });
+
+    test('10. form GET via click', function()
+    {
+        assert.equal( $0('h1').innerText, "Violet header" );
+        let ret = epa0.promiseNext.then( E=>
         {
-            console.log( epa0.readyState );
-            // debugger;
+            assert.equal( $0('h1').innerText, "Purple header" );
+            assert.equal( $0('textarea').value, DEMO_URL+"page-purple.html?from=violet" );
+        });
+        SimClick( $0('input[value="GET"]') );
+        return ret;
+    });
+
+    test('11. link click', function()
+    {
+        assert.equal( $0('h1').innerText, "Purple header" );
+        let ret = epa0.promiseNext.then( E=>
+        {
             assert.equal( $0('h1').innerText, "Violet header" );
-            // assert.equal( $0('textarea').value, DEMO_URL+TEST_URL );
-            done();
-        }), 100 );
+            assert.equal( $0('textarea').value, DEMO_URL+"page-violet.html" );
+        });
+        SimClick( $0('a[href="page-violet.html"]') );
+        return ret;
     });
 
 

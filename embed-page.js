@@ -285,6 +285,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
+            f.epa = this;
 
             win.addEventListener('storage', e =>
             {   const pr = this.getEpaPrefix();
@@ -334,32 +335,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             slot.addEventListener('slotchange', e =>
                 {   setTimeout( ()=>  this.onSlotChanged(), 0 ) });
             //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
-            // this.$.targetframe.contentWindow.onbeforeunload = ()=>
-            // {   this.readyState = 'loading';
-            //
-            // };
-            const zs = this;
-            new MutationObserver(function(mutations)
-            {   mutations.some(function(mutation)
-                {   if( mutation.type !== 'attributes' || mutation.attributeName !== 'src' )
-                        return false;
-                    // console.log(mutation);
-                    // console.log('Old src: ', mutation.oldValue);
-                    // console.log('New src: ', mutation.target.src);
-                    zs.readyState = 'loading';
-                    return true;
-                });
-            }).observe( this.$.targetframe,
-            {   attributes: true,
-                attributeFilter: ['src'],
-                attributeOldValue: true,
-                characterData: false,
-                characterDataOldValue: false
-            });
-
-
-
-
         }
         getInstanceNum(){ return this.instanceNum }
         isScoped(){ return this.scope !== 'none' }
@@ -463,12 +438,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
 
         get promise()
-        {   const zs = this;
-            if( "complete" === this.readyState )
+        {   if( "complete" === this.readyState )
                 return Promise.resolve(this);
+            return this.promiseNext;
+        }
+        get promiseNext()
+        {   const zs = this;
             return new Promise( function( resolve, reject )
-            {
-                zs.addEventListener( 'error' , _onError );
+            {   zs.addEventListener( 'error' , _onError );
                 zs.addEventListener( 'load'  , _onLoad  );
                     function
                 _onLoad( ev )
@@ -486,7 +463,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     zs.removeEventListener('error', _onError );
                 }
             });
-
         }
         get context()
         {   return  {   window      : this.window
@@ -544,6 +520,21 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.src = url;
         }
     }// =- EmbedPage
+
+    const HTMLFormElement_submit = HTMLFormElement.prototype.submit;
+    HTMLFormElement.prototype.submit = function ()
+    {
+        for( let el = this.parentElement; el ; el = el.parentNode )
+            if( el.epa )
+            {   if( el.epa.isScoped() )
+                {   this.target = el.epa.$.targetframe.getAttribute( 'name' );
+                    el.epa._setReadyState( 'loading' );
+                }
+                break;
+            }
+        return HTMLFormElement_submit.apply( this, arguments );
+    };
+
     const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
 
     win.customElements.define( EmbedPage.is, EmbedPage );
