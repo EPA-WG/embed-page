@@ -1,0 +1,49 @@
+{
+  "name": "embed-page",
+  "description": "Proof of concept for Embeddable Progressive Application - a microapplication container, a WebComponent acting as seamless IFRAME or html include",
+  "version": "0.0.11",
+  "browser": "embed-page.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EPA-WG/embed-page.git"
+  },
+  "author": {
+    "name": "Sasha Firsov",
+    "email": "suns@simulationworks.com",
+    "url": "http://xml4jquery.com/"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/EPA-WG/embed-page",
+  "bugs": "https://github.com/EPA-WG/embed-page/issues",
+  "keywords": [
+    "JS",
+    "Polymer",
+    "IFRAME",
+    "seamless",
+    "microapplication",
+    "EPA-WG",
+    "Web Component",
+    "WebComponent"
+  ],
+  "dependencies": {
+    "@polymer/polymer": "^3.0.0",
+    "mochawesome": "^3.0.2"
+  },
+  "devDependencies": {
+    "@polymer/iron-ajax": "^3.0.0-pre.19",
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.19",
+    "@polymer/paper-item": "^3.0.0-pre.19",
+    "@polymer/paper-listbox": "^3.0.0-pre.19",
+    "@vaadin/vaadin-combo-box": "^4.0.1-pre.2",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "codemirror": "^5.38.0",
+    "wct-browser-legacy": "^1.0.0"
+  },
+  "directories": {
+    "test": "test",
+    "demo": "demo"
+  },
+  "scripts": {
+    "test": "polymer test"
+  }
+}
