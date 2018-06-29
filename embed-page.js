@@ -403,7 +403,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 return;
             const f = this.$f = this.$.framed;
             this._A.href = this.src;
-// todo create document with base
+
             this.onBeforeLoad();
             this.src && ajax( this.src )
                 .then( t =>
@@ -471,7 +471,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     ,   epc         : this
                     }
         }
-
+        preparseScript(srciptText){ return EPA_PreparseScript(srciptText) }
         runScripts( /** @type {!NodeList} */ pageScripts, { win, document, location, head, body } = this.context )
         {   const env = this.context;
             EPA_runScript( [...pageScripts], env, this.redirects );
@@ -548,6 +548,39 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     function removeClass( el, className  ){ el.className = el.className.split(' ').map(s=>s===className?'':s).join(' ') }
     function host2domain( hostname ){ return hostname.split('.').splice(-2,2).join('.') }
 
+    function EPA_PreparseScript( s )
+    {
+        const s1 =  s.replace( /(^|[\{\}\\;\(\)\,])(\s*)(location\s*=)/g , '$1 location.href=');
+        // converting eval(expr) to  eval(EPA_PreparseScript( expr ))
+        const ev= s1.split( /(^|\W)(eval\s*\()/g );
+
+        return ev.map( (si,i,arr) =>
+        {   if( !si.startsWith('eval') )
+                return si;
+            const s=si+arr[i+1];
+            arr[i+1]="";
+            let start = s.indexOf( '(' )
+            ,     end = seekChar( ')',s, start+1 );
+            if( end < 0 )
+                return s;
+            return 'eval(EPA_PreparseScript' + s.substring(start,end) + '))'+s.substring(end+1);
+        }).join('');
+
+        function seekChar( c, s, start ) // position of character
+        {   let i=start;
+            for( ; i<s.length ; i++ )
+            {   if( s.startsWith('/*',i) )      // skip comment /* */
+                    i = seekChar( '*/',s,i+2 )+2;
+                else if( s.startsWith('//',i) ) // skip comment // ...
+                    i = seekChar( '\n',s,i+2 )+1;
+                if( s.charAt(i)==='(' )
+                    i = seekChar( ')',s,i+1 )+1;
+                if( s.startsWith(c,i) )
+                    return i;
+            }
+            return -1
+        }
+    }
     // outside of class to avoid strict mode
     function EPA_runScript( arr, env, redirects )
     {   const { window, document, location } = env;
@@ -563,7 +596,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         if( currentScript.src )
         {
             let url = currentScript.src;
-
             let m = redirects.find( m => url.startsWith( m.from ) );
             if( m )
                 url = m.to + url.substring( m.from.length );
@@ -573,11 +605,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }else
             runScript.call( window, currentScript.text );// todo src map
 
-        function runScript( txt )
-        {   try
-            {   //let { ...window } = window;
+            function
+        runScript( txt )
+        {
+            try
+            {
+                //let { ...window } = window;
                 {
-                    eval(txt);
+                    eval( EPA_PreparseScript(txt) );
                 }
             }catch(ex){ console.error(ex) }
             setTimeout( x=> EPA_runScript( arr, env, redirects ), 0 );

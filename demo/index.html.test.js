@@ -133,6 +133,41 @@ suite('embed-page basics IFRAME test ', () =>
         return ret;
     });
 
+    test('12. replacing location= with window.location= and eval with EPA_eval', function()
+    {   const E = epa0;
+        assert.equal( E.preparseScript("location='qwe'"         ), " location.href='qwe'"       );
+        assert.equal( E.preparseScript("  location='qwe'"       ), " location.href='qwe'"       );
+        assert.equal( E.preparseScript("let location  = 'qwe'"  ), "let location  = 'qwe'"      );
+        assert.equal( E.preparseScript("abc"                    ), "abc"                        );
+        assert.equal( E.preparseScript("AS;Slocation='adas' ;"  ), "AS;Slocation='adas' ;"      );
+        assert.equal( E.preparseScript("a.location = jhg"       ), "a.location = jhg"           );
+        assert.equal( E.preparseScript("sqwe . location = iowu" ), "sqwe . location = iowu"     );
+        assert.equal( E.preparseScript("zz; location  = 'qwe'"  ), "zz; location.href= 'qwe'" );
+        assert.equal( E.preparseScript("asd) location  = 'qwe'" ), "asd) location.href= 'qwe'");
+        assert.equal( E.preparseScript("asd}location  = 'qwe'"  ), "asd} location.href= 'qwe'");
+        assert.equal( E.preparseScript("zz+location  = 'qwe'"   ), "zz+location  = 'qwe'"       );
+        assert.equal( E.preparseScript("win. location='sss'"    ), "win. location='sss'"        );
+        assert.equal( E.preparseScript("abceval=aa"             ), "abceval=aa"                 );
+
+        assert.equal( E.preparseScript("eval(aa)"       ), "eval(EPA_PreparseScript(aa))"   );
+        assert.equal( E.preparseScript(";eval(aa)"      ), ";eval(EPA_PreparseScript(aa))"      );
+        assert.equal( E.preparseScript("zz=eval(aa);ss" ), "zz=eval(EPA_PreparseScript(aa));ss" );
+    });
+
+    test('13. location API, set', function()
+    {
+        assert.equal( $0('h1').innerText, "Violet header" );
+        let ret = epa0.promiseNext.then( E=>
+        {
+            assert.equal( $0('h1').innerText, "Purple header" );
+            assert.equal( $0('textarea').value, DEMO_URL+"page-purple.html?api=location" );
+        });
+        $0('textarea').value = DEMO_URL+"page-purple.html?api=location";
+        $0('input[value="location"]').checked = true;
+        SimClick( $0('input[value="set"]') );
+        return ret;
+    });
+
 
         function
     SimClick( el ){   el.dispatchEvent( new MouseEvent( "click" )); }
