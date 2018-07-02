@@ -465,10 +465,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             });
         }
         get context()
-        {   return  {   window      : this.window
-                    ,   document    : this.document
-                    ,   location    : this.window.location
-                    ,   epc         : this
+        {   return  {   window          : this.window
+                    ,   document        : this.document
+                    ,   location        : this.window.location
+                    ,   localStorage    : this.window.localStorage
+                    ,   sessionStorage  : this.window.sessionStorage
+                    ,   epc             : this
                     }
         }
         preparseScript(srciptText){ return EPA_PreparseScript(srciptText) }
@@ -583,7 +585,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     }
     // outside of class to avoid strict mode
     function EPA_runScript( arr, env, redirects )
-    {   const { window, document, location } = env;
+    {   const { window, document, location,localStorage, sessionStorage } = env;
         const currentScript = arr.shift();
         const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent('load', false, false),x);
         if( !currentScript )

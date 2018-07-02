@@ -51,14 +51,10 @@
     <label>name: <input type="text" class="name" value="namespaceA" /> </label>
     <demo-snippet>
         <template>
-            <embed-page src="page-storage.html?a" ></embed-page>
+            <embed-page id="e0" src="page-storage.html?name=sample" ></embed-page>
         </template>
     </demo-snippet>
 
-    <fieldset class="iframe">
-        <legend>Demo IFRAME <a href="page-storage.html?src=iframe">page-storage.html</a> </legend>
-        <iframe src="page-storage.html?src=iframe" ></iframe>
-    </fieldset>
     <fieldset>
         <legend>Manual test</legend>
 <pre>
@@ -111,6 +107,11 @@ embed-page - named scope
             <embed-page id="b1" src="page-storage.html?name=b&instance=1" scope="named" name="b"></embed-page>
         </div>
     </fieldset>
+    <fieldset class="iframe">
+        <legend>Demo IFRAME <a href="page-storage.html?src=iframe">page-storage.html</a> </legend>
+        <iframe src="page-storage.html?src=iframe" ></iframe>
+    </fieldset>
+
 </div>
 <script src="../node_modules/wct-browser-legacy/browser.js"></script>
 <script src="storage.html.test.js"></script>
