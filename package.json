@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@polymer/iron-ajax": "^3.0.0-pre.19",
-    "@polymer/iron-demo-helpers": "^3.0.0-pre.19",
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.21",
     "@polymer/paper-item": "^3.0.0-pre.19",
     "@polymer/paper-listbox": "^3.0.0-pre.19",
     "@vaadin/vaadin-combo-box": "^4.0.1-pre.2",

@@ -1,7 +1,5 @@
-* expose readyState="complete" as in (iframe.contentDocument || iframe.contentWindow.document).readyState
-    iframe.onreadtstatechange( function(){ this.readystate==="complete" )// IE
-    
 * test suite, test automation for all features
+** storage.html test
 * postMessage, scope impl.
 * cookies, scope impl.
 * insulation layers - define dynamic change logic and restrictions. 
