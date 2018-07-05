@@ -88,10 +88,15 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         constructor( /** EmbedPage */ app, a )
         {   const h = new EpaHrefLocationHolder(app,a)
             ,    ls = new EpaStorageWrapper( win.localStorage  , this, app )
-            ,    ss = new EpaStorageWrapper( win.sessionStorage, this, app );
+            ,    ss = new EpaStorageWrapper( win.sessionStorage, this, app )
+            , hostWin = { postMessage:(message, targetOrigin, transfer)=> postMessageTo( message, targetOrigin, transfer, h.href, win )}; ;
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
+            defProperty( this, 'opener',x=>hostWin );
+            defProperty( this, 'parent',x=>hostWin );
+            defProperty( this, 'frames', todo=>[] );
+            this.open = todo =>console.warn( "window.open is not implemented in microapplication" );
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
         }
@@ -131,12 +136,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                let key = pair.substr( 0, eqi ).trim()
                ,   val = pair.substr( ++eqi, pair.length ).trim();
 
-               if( '"' == val[ 0 ] ) // quoted values
+               if( '"' === val[ 0 ] ) // quoted values
                    val = val.slice( 1, -1 );
                return { key:key, val:val };
             }).map( (kw,i)=>
             {   if( i )
-                {   if( undefined == obj[ key ] ) // only assign once
+                {   if( undefined === obj[ key ] ) // only assign once
                         obj.attr[ key ] = tryDecode( val );
                 }else
                    Object.assign( obj, kw )
@@ -437,6 +442,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             console.log("onSlotChanged");
         }
 
+        postMessage( message, targetOrigin, transfer )
+            {   return postMessageTo( message, targetOrigin, transfer, this._A.href, this.$.framed );  }
         get promise()
         {   if( "complete" === this.readyState )
                 return Promise.resolve(this);
@@ -549,6 +556,11 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     function addClass   ( el, className  ){ el.className += ' '+className    }
     function removeClass( el, className  ){ el.className = el.className.split(' ').map(s=>s===className?'':s).join(' ') }
     function host2domain( hostname ){ return hostname.split('.').splice(-2,2).join('.') }
+    function postMessageTo( message, targetOrigin, transfer, origin, dispatcher )
+    {   const cloned = JSON.parse( JSON.stringify(message) ) //  Components.utils.cloneInto
+        ,   event = new MessageEvent("message", {   data: cloned,   origin: origin,   lastEventId:"" /*, source */ ,   ports: [] });
+        dispatcher.dispatchEvent( event )
+    }
 
     function EPA_PreparseScript( s )
     {

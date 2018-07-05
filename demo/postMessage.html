@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>postMessage API - embed-page demo</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+    </script>
+    <script src="../embed-page.js" type="module" ></script>
+
+    <script src="code-view.js"></script>
+    <custom-style>
+        <style is="custom-style" include="demo-pages-shared-styles"></style>
+    </custom-style>
+    <style>
+        iframe{ width: 100%; height: 12em; min-width: 26em; }
+        fieldset{ border-bottom: none; border-right: none;}
+        embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
+        @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
+        .iframe,iframe{width: 98%;}
+    </style>
+</head>
+<body>
+<div>
+    <embed-page src="demo-menu.html" scope="none"></embed-page>
+    <h3><var>postMessage()</var> API for <code>&lt;embed-page/&gt;</code> demo,
+        <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
+
+    <p><code>&lt;embed-page/&gt;</code> mimicks the window object in context of <var>postMessage()</var> API.
+        See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a> for details.
+    </p>
+
+    <demo-snippet>
+        <template>
+            <embed-page src="postMessage-app.html?from=epa0"  id="e0"></embed-page>
+        </template>
+    </demo-snippet>
+<fieldset>
+    <legend>postMessage events log</legend>
+    <table>
+        <thead><tr><th>message event content</th><th>origin url</th></tr></thead>
+        <tbody></tbody>
+    </table>
+</fieldset>
+    <fieldset>
+        <legend>Manual test</legend>
+<pre>
+1. postMessage from epa, unsecured
+    $([ epa.window.opener, epa.window.parent ]).postMessage( "ab", "*" )
+
+2.  postMessage from epa, targeted only for given URL
+    $([ epa.window.opener, epa.window.parent ])
+       .postMessage( "cd", epa.window.parent.location.href )
+
+3. postMessage to epa, unsecured & w/ url
+
+4. epa.window.parent.frames collection limited to scoped instances
+
+<a href="postMessage-app.html">postMessage-app.html</a> listens to "message" event and appends data to own HTML.
+It is served in IFRAME, in main incognito embed-page instance and
+    two pairs of named embed-page instances.
+
+
+The common load sequence is
+1. <a href="postMessage-app.js">postMessage-app.js</a> listens for "message" event.
+2. <a href="postMessage-app.js">postMessage-app.js</a> will send to <var>opener</var> message with own URL.
+3. "message" event handler appends data to log table
+
+IFRAME
+    1-3. as in common part.
+    4. <var>?src=iframe</var> added to page log matrix
+    5. <button class="to-iframe">Click here</button> to post to IFRAME, observe appearance of page URL inside of IFRAME log matrix
+
+embed-page - main
+    1-3. as in common part.
+    4. observe <var>?from=epa0</var> in page log matrix
+    5. <button class="to-epa0">Click here</button> to post to epa, observe appearance of page URL inside of epa log matrix
+
+embed-page - second
+    1-4. as in embed-page - main part.
+    5. <button class="to-epa1">Click here</button> to post to epa, observe appearance of page URL inside of 2nd epa log matrix
+
+</pre>
+
+        <div style="display: inline-block">
+            <legend><a href="postMessage-app.js" target="_blank">postMessage-app.js</a> </legend>
+            <code src="./postMessage-app.js"></code>
+            When used from <var>embed-page</var>, behaves same way as from IFRAME.<br/>
+        </div>
+    </fieldset>
+
+    <embed-page src="postMessage-app.html?from=epa1"  id="e1"></embed-page>
+    <fieldset class="iframe">
+        <legend>Demo IFRAME <a href="postMessage-app.html?src=iframe">postMessage-app.html</a> </legend>
+        <iframe src="postMessage-app.html?from=iframe" ></iframe>
+    </fieldset>
+
+</div>
+<script src="../node_modules/wct-browser-legacy/browser.js"></script>
+<script src="postMessage.html.test.js"></script>
+<script src="postMessage-app.js" ></script>
+<script>
+document.addEventListener("DOMContentLoaded", x=>
+{   function onPost( btnClass, id )
+    {
+        let btn = document.querySelector(btnClass)
+        ,   w = document.querySelector(id);
+        btn.addEventListener('click'
+            ,   x=>( w.contentWindow || w ).postMessage("from=demo",'*') );
+    }
+    onPost('.to-iframe' ,'iframe' );
+    onPost('.to-epa0'   ,'#e0'  );
+    onPost('.to-epa1'   ,'#e1'  );
+});
+</script>
+</body>
+</html>

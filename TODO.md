@@ -1,5 +1,4 @@
 * test suite, test automation for all features
-** storage.html test
 * postMessage, scope impl.
 * cookies, scope impl.
 * insulation layers - define dynamic change logic and restrictions. 
@@ -52,5 +51,7 @@ WishList
 * BroadcastChannel 
 * documentElement, firstChild, firstElementChild, lastChild, lastElementChild
 * forms, images, anchors, links, ...
+* window.open()
+* epa.window.parent.location.href
 
     
