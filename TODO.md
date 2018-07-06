@@ -1,5 +1,5 @@
-* test suite, test automation for all features
-* postMessage, scope impl.
+* window management: window.open, window.frames
+* epa.window.parent.location.href
 * cookies, scope impl.
 * insulation layers - define dynamic change logic and restrictions. 
 * scope - docs for insulation layers
@@ -51,7 +51,6 @@ WishList
 * BroadcastChannel 
 * documentElement, firstChild, firstElementChild, lastChild, lastElementChild
 * forms, images, anchors, links, ...
-* window.open()
-* epa.window.parent.location.href
+
 
     
