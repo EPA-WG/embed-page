@@ -24,6 +24,7 @@
         @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
         .iframe,iframe{width: 98%;}
     </style>
+    <script src="postMessage-app.js" ></script>
 </head>
 <body>
 <div>
@@ -35,9 +36,14 @@
         See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a> for details.
     </p>
 
-    <demo-snippet>
+    <demo-snippet> <h4>epa 0</h4>
         <template>
             <embed-page src="postMessage-app.html?from=epa0"  id="e0"></embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet> <h4>epa 1</h4>
+        <template>
+            <embed-page src="postMessage-app.html?from=epa1"  id="e1"></embed-page>
         </template>
     </demo-snippet>
 <fieldset>
@@ -50,21 +56,8 @@
     <fieldset>
         <legend>Manual test</legend>
 <pre>
-1. postMessage from epa, unsecured
-    $([ epa.window.opener, epa.window.parent ]).postMessage( "ab", "*" )
-
-2.  postMessage from epa, targeted only for given URL
-    $([ epa.window.opener, epa.window.parent ])
-       .postMessage( "cd", epa.window.parent.location.href )
-
-3. postMessage to epa, unsecured & w/ url
-
-4. epa.window.parent.frames collection limited to scoped instances
-
-<a href="postMessage-app.html">postMessage-app.html</a> listens to "message" event and appends data to own HTML.
-It is served in IFRAME, in main incognito embed-page instance and
-    two pairs of named embed-page instances.
-
+<a href="postMessage-app.html">postMessage-app.html</a> listens to "message" event and appends data to log matrix.
+It is served within IFRAME and two embed-page instances.
 
 The common load sequence is
 1. <a href="postMessage-app.js">postMessage-app.js</a> listens for "message" event.
@@ -73,17 +66,17 @@ The common load sequence is
 
 IFRAME
     1-3. as in common part.
-    4. <var>?src=iframe</var> added to page log matrix
-    5. <button class="to-iframe">Click here</button> to post to IFRAME, observe appearance of page URL inside of IFRAME log matrix
+    4. <var>?from=iframe</var> added to page log matrix
+    5. <button class="to-iframe">Click here</button> to post to IFRAME, observe appearance of <var>?from=demo</var> inside of IFRAME log matrix
 
 embed-page - main
     1-3. as in common part.
     4. observe <var>?from=epa0</var> in page log matrix
-    5. <button class="to-epa0">Click here</button> to post to epa, observe appearance of page URL inside of epa log matrix
+    5. <button class="to-epa0">Click here</button> to post to epa, observe appearance of <var>?from=demo</var> within epa log matrix
 
 embed-page - second
     1-4. as in embed-page - main part.
-    5. <button class="to-epa1">Click here</button> to post to epa, observe appearance of page URL inside of 2nd epa log matrix
+    5. <button class="to-epa1">Click here</button> to post to epa, observe appearance of <var>?from=demo</var> within epa log matrix
 
 </pre>
 
@@ -94,7 +87,6 @@ embed-page - second
         </div>
     </fieldset>
 
-    <embed-page src="postMessage-app.html?from=epa1"  id="e1"></embed-page>
     <fieldset class="iframe">
         <legend>Demo IFRAME <a href="postMessage-app.html?src=iframe">postMessage-app.html</a> </legend>
         <iframe src="postMessage-app.html?from=iframe" ></iframe>
@@ -103,7 +95,6 @@ embed-page - second
 </div>
 <script src="../node_modules/wct-browser-legacy/browser.js"></script>
 <script src="postMessage.html.test.js"></script>
-<script src="postMessage-app.js" ></script>
 <script>
 document.addEventListener("DOMContentLoaded", x=>
 {   function onPost( btnClass, id )
@@ -111,7 +102,7 @@ document.addEventListener("DOMContentLoaded", x=>
         let btn = document.querySelector(btnClass)
         ,   w = document.querySelector(id);
         btn.addEventListener('click'
-            ,   x=>( w.contentWindow || w ).postMessage("from=demo",'*') );
+            ,   ev=>{ ev.preventDefault(); ( w.contentWindow || w ).postMessage("from=demo",'*') });
     }
     onPost('.to-iframe' ,'iframe' );
     onPost('.to-epa0'   ,'#e0'  );

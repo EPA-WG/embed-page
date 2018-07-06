@@ -95,7 +95,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( this, 'sessionStorage',x=> ss );
             defProperty( this, 'opener',x=>hostWin );
             defProperty( this, 'parent',x=>hostWin );
-            defProperty( this, 'frames', todo=>[] );
+            defProperty( this, 'frames', todo=>[]  );
             this.open = todo =>console.warn( "window.open is not implemented in microapplication" );
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
@@ -169,6 +169,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 ,   createEvent            : x=> doc.createEvent(x)
                 ,   querySelectorAll       : x=> f.querySelectorAll(x)
                 ,   querySelector          : x=> f.querySelector(x)
+                ,   addEventListener       : (...args) => w.addEventListener(...args)
                 ,   write       : x=> console.error( 'document.write() is not supported yet.')
                 });
 
@@ -599,9 +600,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     function EPA_runScript( arr, env, redirects )
     {   const { window, document, location,localStorage, sessionStorage } = env;
         const currentScript = arr.shift();
-        const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent('load', false, false),x);
+        const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent(type, false, false),x);
         if( !currentScript )
         {
+
+            try { window.dispatchEvent ( createEv('Event','DOMContentLoaded') );}
+            catch(ex)
+                { console.error(ex); }
+
             env.epc._setReadyState('complete');
             window.dispatchEvent ( createEv('Event','load') );
             env.epc.dispatchEvent( createEv('Event','load') );
