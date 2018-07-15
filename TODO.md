@@ -51,6 +51,6 @@ WishList
 * BroadcastChannel 
 * documentElement, firstChild, firstElementChild, lastChild, lastElementChild
 * forms, images, anchors, links, ...
-
-
+* window.focus(), window.blur(), window.closed flag
+* window.print()
     

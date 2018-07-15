@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>Microapplications referencing - embed-page demo</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+    </script>
+    <script src="../embed-page.js" type="module" ></script>
+
+    <script src="code-view.js"></script>
+    <custom-style>
+        <style is="custom-style" include="demo-pages-shared-styles"></style>
+    </custom-style>
+    <style>
+        html,body{min-width: auto;}
+        iframe{ width: 100%; min-height: 16em; }
+        fieldset{ border-bottom: none; border-right: none; }
+        table{ width: 100%; }
+        fieldset>div{ display: flex; flex-flow: row wrap; }
+        embed-page{ display:block!important; box-shadow: inset 0 0 2em #000000; padding: 1em; flex: 1; }
+        @media (max-width: 500px) { body,fieldset{padding: 0; border-left: none} }
+    </style>
+</head>
+<body>
+<div>
+    <embed-page src="demo-menu.html" scope="none" ></embed-page>
+    <h3>Microapplications referencing <code>&lt;embed-page&gt;</code> demo, <a href="https://github.com/EPA-WG/EPA-concept" >Embeddable Progressive Applications Working Group</a></h3>
+    <p> Applications ( web pages ) in browser environment are referencing each other via direct <var>Window</var> object
+        reference and by name via several APIs like <var>window.frames</var>, <var>window.open</var>, and <var>target</var>
+        attribute on FORM or A link.
+    </p>
+    <p> <var>&lt;embed-page&gt;</var> uses same API to reference other microapplication windows
+        ( instances of <var>&lt;embed-page&gt;</var> ) and parent application ( parent window ).
+
+    </p>
+    <p> While the direct reference to window object via <var>window.open</var> assumes the straight ownership relation
+        ( only creator has reference to child and child has back reference to parent ),
+        the named windows have a "global" in browser scope. Meaning different apps could use same name
+        ( legit or not aside )
+        to reference another application(window). In JS it is counted a bad practice to use global variables as it
+        threatens the integrity of application. On application level it threatens even more: cross-application integrity
+        and user safety.
+
+    </p>
+    <p>
+        To solve the issue of global nature of named application window, <code>&lt;embed-page/&gt;</code>
+        limits the iteration of named apps to child/parent and scoping by target groups defined by parent. This way the
+        visibility (and referencing by <var>target</var> ) is limited to parent-child tree. The child could see the
+        parent and only siblings under same target scope.
+    </p>
+    <p>
+
+        See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/frames">window.frames</a>
+        and <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/open">window.open</a> for details.
+
+    </p>
+
+
+    <demo-snippet>
+        <template>
+            <embed-page id="e0" src="appsList-microapp.html?from=epa0" ></embed-page>
+        </template>
+    </demo-snippet>
+
+    <fieldset>
+        <legend>Manual test</legend>
+<pre>
+ENVIRONMENT
+    <a href="appsList-microapp.html">appsList-microapp.html</a> is served in two IFRAMEs named
+    A & B, main incognito embed-page instance and two pairs of named embed-page instances.
+
+    The A & B names of IFRAME are used to test a "target" in A and FORM,
+    In embed-page pair ( united by same <var>target</var> attribute: X & Y) same link and form will
+    target the embed-page instance with same name AND within same (X or Y) embed-page group.
+
+    If the instance with name does not exist in the group, a new embed-page instance will
+    be created immediately after originating one and available within group.
+
+COMMON SEQUENCE
+    to be run in IFRAMEs, X, and Y groups. When content is updated, check the list of window.frames
+    which should have only instances from same group.
+
+    1. <a href="appsList-microapp.html.js">appsList-microapp.html.js</a> will list 'name' and 'target'
+       attributes of <var>window.parent</var> and all in <var>window.frames</var> along with page URL.
+    2. In instance with name=A click the link with target A. The content should be replaced by url
+        with "link=A" parameter.
+    3. In instance with name=B, click the link with target B. The content of instance with name=B
+       should be replaced by url with "link=B" parameter.
+    4. In instance with name=A submit the form with target A. The content should be replaced by url
+        with "form=A" parameter.
+    5. In instance with name=B submit the form with target B, . The content of instance with name=B
+       should be replaced by url with "form=B" parameter.
+    6. In instance with name=A click the link with target C. New instance should be created next to
+        clicked with url "link=C" parameter.
+    7. Close instance created in #6 by 'X' button.
+    8. In instance with name=B submit the form with target C. New instance should be created next to
+        clicked with url "form=C" parameter.
+    9. In instance with name=B click the link with target C. The content of instance with name=C
+       (created in #8 ) should be replaced by url with "link=C" parameter.
+    10.In instance with name=C(last created) submit the form with target C.
+        The content of this instance should be replaced by url with "form=C" parameter.
+    11. Close instance created in #8 by 'X' button.
+    12. "Open A" button should replace content of instance A with url parameter "open=A"
+    13. "Open B" button should replace content of instance B with url parameter "open=B"
+    14. "Open C" button should create             instance C with url parameter "open=C"
+    15. close instance C by 'X' button.
+
+</pre>
+
+
+    </fieldset>
+    <br/>
+    <fieldset style="display: block">
+        <legend>Group <b>'X'</b></legend>
+        <div>
+            <embed-page id="xa" src="appsList-microapp.html?name=A&target=X" target="X" name="A"></embed-page>
+            <embed-page id="xb" src="appsList-microapp.html?name=B&target=X" target="X" name="B"></embed-page>
+        </div>
+    </fieldset>
+    <fieldset style="display: block">
+        <legend>Group <b>'Y'</b></legend>
+        <div>
+            <embed-page id="ya" src="appsList-microapp.html?name=A&target=Y" target="Y" name="A"></embed-page>
+            <embed-page id="yb" src="appsList-microapp.html?name=B&target=Y" target="Y" name="B"></embed-page>
+        </div>
+    </fieldset>
+    <fieldset class="iframe">
+        <legend>Demo IFRAME <a href="page-storage.html?src=iframe">page-storage.html</a> </legend>
+        <table>
+            <tr><th>name=A</th><th>name=B</th></tr>
+            <tr>
+                <td><iframe src="appsList-microapp.html?src=iframeA" name="A"></iframe></td>
+                <td><iframe src="appsList-microapp.html?src=iframeB" name="B"></iframe></td>
+            </tr>
+        </table>
+    </fieldset>
+    <fieldset >
+        <legend>Output of  <a href="appsList-microapp.html.js" target="_blank">appsList-microapp.html.js</a> </legend>
+        <code src="./appsList-microapp.html.js"></code>
+        <h1></h1>
+        <button class="app-list-refresh">&#8635; Reload</button>
+        <table>
+            <thead><tr><th>window</th><th>name</th><th>target</th><th>url</th></tr></thead>
+            <tbody class="apps-list"></tbody>
+        </table>
+        NOTE. In demo page the list does not include the 'C' frame. Dynamically opened windows are not enumerable.
+    </fieldset>
+
+</div>
+<script src="appsList-microapp.html.js"></script>
+
+<!--<script src="../node_modules/wct-browser-legacy/browser.js"></script>-->
+<!--<script src="storage.html.test.js"></script>-->
+</body>
+</html>

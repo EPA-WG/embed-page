@@ -1,0 +1,15 @@
+<style> h1{ font-size: large} form{display: inline-block}</style>
+<h1>appsList-microapp.html</h1>
+<button class="app-list-refresh">&#8635; Reload</button>
+<a href="appsList-microapp.html?link=A" target="A" >link=A target="A" </a> |
+<a href="appsList-microapp.html?link=B" target="B" >link=B target="B" </a> |
+<a href="appsList-microapp.html?link=C" target="C" >link=B target="C" </a> <hr/>
+<form target="A" action="appsList-microapp.html?form=A"> <input type="submit" value="form=A"/> </form>
+<form target="B" action="appsList-microapp.html?form=B"> <input type="submit" value="form=B"/> </form>
+<form target="C" action="appsList-microapp.html?form=C"> <input type="submit" value="form=C"/> </form>
+<table>
+    <thead><tr><th>window</th><th>name</th><th>target</th><th>url</th></tr></thead>
+    <tbody class="apps-list"></tbody>
+</table>
+
+<script src="appsList-microapp.html.js"></script>
