@@ -83,19 +83,33 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( this, 'enumerable'  ,x=>true  );
         }
     }
+
     class EpaWindow
     {
         constructor( /** EmbedPage */ app, a )
         {   const h = new EpaHrefLocationHolder(app,a)
             ,    ls = new EpaStorageWrapper( win.localStorage  , this, app )
             ,    ss = new EpaStorageWrapper( win.sessionStorage, this, app )
-            , hostWin = { postMessage:(message, targetOrigin, transfer)=> postMessageTo( message, targetOrigin, transfer, h.href, win )}; ;
+            ,parentLoc = doc.createElement('a')
+            ,  hostWin = {   postMessage:(message, targetOrigin, transfer)=> postMessageTo( message, targetOrigin, transfer, h.href, win )
+                         ,   location: parentLoc
+                         ,   name: app.name
+                         ,   target: app.target
+                         };
+            parentLoc.href = win.location.href;
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
-            defProperty( this, 'opener',x=>hostWin );
-            defProperty( this, 'parent',x=>hostWin );
-            defProperty( this, 'frames', todo=>[]  );
+            defProperty( this, 'name'  , x=> app.name   );
+            defProperty( this, 'target', x=> app.target );
+            defProperty( this, 'opener', x=>hostWin );
+            defProperty( this, 'parent', x=>hostWin );
+            defProperty( this   , 'frames', x=> [ ...this.document.querySelectorAll('embed-page') ]
+                                                .map( (f,i,frames) => (f.name ?  ( frames[ f.name ] = f ) : f ).window ));
+            defProperty( hostWin, 'frames', x=> [ ...doc.querySelectorAll('embed-page') ]
+                                                .filter( f => f===app || app.target && f.target === app.target )
+                                                .map( (f,i,frames) => (f.name ?  ( frames[ f.name ] = f ) : f ).window) );
+
             this.open = todo =>console.warn( "window.open is not implemented in microapplication" );
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
@@ -238,15 +252,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                 ,   reflectToAttribute: true // ready-state attribute
                                 ,   notify: true // fires ready-state-changed and readystatechange events
                                 }
-                    ,   scope:  {   type: String
-                                ,   value: 'instance'
-                                }
-                    ,   name:   {   type: String
-                                ,   value: ''
-                                }
-                    ,redirects: {   type: Array
-                                ,   value:  ()=>[]
-                                }
+                    ,   scope:  {   type: String    , value: 'instance' }
+                    ,   name:   {   type: String    , value: ''         }
+                    ,   target: {   type: String    , value: ''         }
+                    ,redirects: {   type: Array     , value:  ()=>[]    }
                     };
         }
         static get template() {
@@ -291,6 +300,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
             defProperty( this, 'window'   , x=> w );
             defProperty( this, 'document' , x=> d );
+            scoped && defProperty( w, 'document' , x=> d );
             f.epa = this;
 
             win.addEventListener('storage', e =>
@@ -478,6 +488,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     ,   location        : this.window.location
                     ,   localStorage    : this.window.localStorage
                     ,   sessionStorage  : this.window.sessionStorage
+                    ,   parent          : this.window.parent
+                    ,   frames          : this.window.frames
                     ,   epc             : this
                     }
         }
@@ -598,7 +610,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     }
     // outside of class to avoid strict mode
     function EPA_runScript( arr, env, redirects )
-    {   const { window, document, location,localStorage, sessionStorage } = env;
+    {   const { window, document, location,localStorage, sessionStorage, parent, frames } = env;
         const currentScript = arr.shift();
         const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent(type, false, false),x);
         if( !currentScript )
