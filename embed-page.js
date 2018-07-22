@@ -115,7 +115,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
             this.open = ( url, windowName="", windowFeatures={target:"A"} ) =>
-            {   const d = doc.createElement('div');
+            {   if( windowName && app.target )
+                {   const trg = document.querySelector(`embed-page[name=${windowName}][target=${app.target}]`);
+                    if( trg )
+                    {   trg.setAttribute('src', url);
+                        return trg;
+                }   }
+                const d = doc.createElement('div');
                 d.innerHTML = `<embed-page src="${url}" name="${windowName}" target="${windowFeatures.target}"></embed-page>`;
                 return app.parentNode.insertBefore( d.firstElementChild, app.nextSibling );// append after
             };
