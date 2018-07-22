@@ -96,12 +96,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                          ,   name: app.name
                          ,   target: app.target
                          };
+            let closed;
             parentLoc.href = win.location.href;
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
-            defProperty( this, 'name'  , x=> app.name   );
-            defProperty( this, 'target', x=> app.target );
+            defProperty( this, 'closed', x=> closed    );
+            defProperty( this, 'name'  , x=> app.name  );
+            defProperty( this, 'target', x=> app.target);
             defProperty( this, 'opener', x=>hostWin );
             defProperty( this, 'parent', x=>hostWin );
             defProperty( this   , 'frames', x=> [ ...this.document.querySelectorAll('embed-page') ]
@@ -110,12 +112,22 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                 .filter( f => f===app || app.target && f.target === app.target )
                                                 .map( (f,i,frames) => (f.name ?  ( frames[ f.name ] = f ) : f ).window) );
 
-            this.open = todo =>console.warn( "window.open is not implemented in microapplication" );
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
+            this.open = ( url, windowName="", windowFeatures={target:"A"} ) =>
+            {   const d = doc.createElement('div');
+                d.innerHTML = `<embed-page src="${url}" name="${windowName}" target="${windowFeatures.target}"></embed-page>`;
+                return app.parentNode.insertBefore( d.firstElementChild, app.nextSibling );// append after
+            };
+            this.close = x =>
+            {   closed = true;
+                app.remove();
+            };
         }
         dispatchEvent( /** Event */ event ){}
         addEventListener( type, listener, useCapture, wantsUntrusted ){}
+        open(url, windowName, windowFeatures ){} // https://developer.mozilla.org/en-US/docs/Web/API/Window/open
+        close(){} // https://developer.mozilla.org/en-US/docs/Web/API/Window/close
     }
 
     class EpaCookie

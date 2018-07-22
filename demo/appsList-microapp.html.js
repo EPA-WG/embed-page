@@ -1,5 +1,14 @@
+const    $ = css=>document.querySelector(css)
+, setClick = (css,cb)=> $(css).addEventListener('click',cb);
 window.addEventListener('load', renderAppsList );
-document.querySelector('.app-list-refresh').addEventListener('click', renderAppsList );
+setClick( '.app-list-refresh' , renderAppsList  );
+setClick( '.app-list-close'   , x=> window.close() );
+setClick( '.app-list-open'    , x=>
+{   const name = $('.app-list-name').value
+    ,      url = $('.app-list-url' ).value;
+    window.open(`${url}?name=${name}`, name, {target:window.target});
+    renderAppsList();
+});
 
 function renderAppsList()
 {
