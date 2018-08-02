@@ -106,24 +106,27 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( this, 'target', x=> app.target);
             defProperty( this, 'opener', x=>hostWin );
             defProperty( this, 'parent', x=>hostWin );
-            defProperty( this   , 'frames', x=> [ ...this.document.querySelectorAll('embed-page') ]
-                                                .map( (f,i,frames) => (f.name ?  ( frames[ f.name ] = f ) : f ).window ));
-            defProperty( hostWin, 'frames', x=> [ ...doc.querySelectorAll('embed-page') ]
-                                                .filter( f => f===app || app.target && f.target === app.target )
-                                                .map( (f,i,frames) => (f.name ?  ( frames[ f.name ] = f ) : f ).window) );
+            defProperty( this   , 'frames', x=> forEach( [ ...this.document.querySelectorAll('embed-page') ]
+                                                         .map( f => f.window )
+                                                       , (f,i,frames) => f.name && (frames[ f.name ] = f )));
+            defProperty( hostWin, 'frames', x=> forEach( [ ...doc.querySelectorAll('embed-page') ]
+                                                         .filter( f => f===app || app.target && f.target === app.target )
+                                                         .map( f => f.window )
+                                                       , (f,i,frames) => f.name && (frames[ f.name ] = f )));
 
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
-            this.open = ( url, windowName="", windowFeatures={target:"A"} ) =>
+            this.open = ( url, windowName="", windowFeatures={} ) =>
             {   if( windowName && app.target )
                 {   const trg = document.querySelector(`embed-page[name=${windowName}][target=${app.target}]`);
                     if( trg )
                     {   trg.setAttribute('src', url);
-                        return trg;
+                        return trg.contentWindow;
                 }   }
-                const d = doc.createElement('div');
-                d.innerHTML = `<embed-page src="${url}" name="${windowName}" target="${windowFeatures.target}"></embed-page>`;
-                return app.parentNode.insertBefore( d.firstElementChild, app.nextSibling );// append after
+                const d = doc.createElement('div')
+                ,     t = windowFeatures.target || this.target;
+                d.innerHTML = `<embed-page src="${url}" name="${windowName}" target="${t}"></embed-page>`;
+                return app.parentNode.insertBefore( d.firstElementChild, app.nextSibling ).contentWindow;// append after
             };
             this.close = x =>
             {   closed = true;
@@ -316,9 +319,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             ,     f = this.$.framed
             ,     w = scoped ? new EpaWindow( this, this._A ) : win
             ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
-            defProperty( this, 'window'   , x=> w );
-            defProperty( this, 'document' , x=> d );
-            scoped && defProperty( w, 'document' , x=> d );
+            defProperty( this, 'window'         , x=> w );
+            defProperty( this, 'contentWindow'  , x=> w );
+            defProperty( this, 'document'       , x=> d );
+            scoped && defProperty( w, 'document', x=> d );
             f.epa = this;
 
             win.addEventListener('storage', e =>
@@ -582,7 +586,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     return EmbedPage;
 
     function log( ...args  ){ console.log(...args); }
-    function forEach(arr,cb){[...arr].forEach(cb)}
+    function forEach(arr,cb){ let ret = [...arr]; ret.forEach(cb); return ret;}
     function $( css, el = doc ){ return el.querySelectorAll( css ) }
     function addClass   ( el, className  ){ el.className += ' '+className    }
     function removeClass( el, className  ){ el.className = el.className.split(' ').map(s=>s===className?'':s).join(' ') }

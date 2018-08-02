@@ -61,7 +61,6 @@
 
     </p>
 
-
     <demo-snippet>
         <template>
             <embed-page id="e0" src="appsList-microapp.html?from=epa0" ></embed-page>
@@ -73,14 +72,15 @@
 <pre>
 ENVIRONMENT
     <a href="appsList-microapp.html">appsList-microapp.html</a> is served in two IFRAMEs named
-    A & B, main incognito embed-page instance and two pairs of named embed-page instances.
+    A & B, main incognito embed-page instance and two pairs of named(A&B) embed-page instances.
 
     The A & B names of IFRAME are used to test a "target" in A and FORM,
     In embed-page pair ( united by same <var>target</var> attribute: X & Y) same link and form will
     target the embed-page instance with same name AND within same (X or Y) embed-page group.
 
     If the instance with name does not exist in the group, a new embed-page instance will
-    be created immediately after originating one and available within group.
+    be created immediately after originating one and available within group. Refresh the matrix
+    before checking the values.
 
 COMMON SEQUENCE
     to be run in IFRAMEs, X, and Y groups. When content is updated, check the list of window.frames
@@ -135,8 +135,8 @@ COMMON SEQUENCE
         <table>
             <tr><th>name=A</th><th>name=B</th></tr>
             <tr>
-                <td><iframe src="appsList-microapp.html?src=iframeA" name="A"></iframe></td>
-                <td><iframe src="appsList-microapp.html?src=iframeB" name="B"></iframe></td>
+                <td><iframe id="fa" src="appsList-microapp.html?src=iframeA" name="A" ></iframe></td>
+                <td><iframe id="fb" src="appsList-microapp.html?src=iframeB" name="B" ></iframe></td>
             </tr>
         </table>
     </fieldset>
@@ -157,7 +157,7 @@ COMMON SEQUENCE
 </div>
 <script src="appsList-microapp.html.js"></script>
 
-<!--<script src="../node_modules/wct-browser-legacy/browser.js"></script>-->
-<!--<script src="storage.html.test.js"></script>-->
+<script src="../node_modules/wct-browser-legacy/browser.js"></script>
+<script src="appList.html.test.js"></script>
 </body>
 </html>

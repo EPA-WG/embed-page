@@ -1,61 +1,116 @@
-suite('embed-page basics IFRAME test ', () =>
+suite('embed-page window frames APIs ', () =>
 {
-    let e0, a0, a1, b0, b1, $e0, $a0, $a1,$b0, $b1, $$ = css => document.querySelector(css);
+    let E0,  XA,  XB, YA,  YB,  FA, FB
+    ,  $E0, $XA, $XB,$YA, $YB, $FA, $FB
+    ,   $$ = css => document.querySelector(css);
 
-    const FR_URL = "page-storage.html?src=iframe"
-    ,     E0_URL = "page-storage.html?name=sample"
-    ,     A0_URL = "page-storage.html?name=a&instance=0"
-    ,     A1_URL = "page-storage.html?name=a&instance=1"
-    ,     B0_URL = "page-storage.html?name=b&instance=0"
-    ,     B1_URL = "page-storage.html?name=b&instance=1"
-    ,     DEMO_URL = absUrl('../demo/');
+    const FA_URL = "appsList-microapp.html?src=iframeA"
+    ,     FB_URL = "appsList-microapp.html?src=iframeB"
+    ,     E0_URL = "appsList-microapp.html?from=epa0"
+    ,     XA_URL = "appsList-microapp.html?name=A&target=X"
+    ,     XB_URL = "appsList-microapp.html?name=B&target=X"
+    ,     YA_URL = "appsList-microapp.html?name=A&target=Y"
+    ,     YB_URL = "appsList-microapp.html?name=B&target=Y"
+    ,   DEMO_URL = absUrl('../demo/');
 
-    let AllReady;
+    let AllReady, id_A, id_B, epaA, epaB, urlA, urlB;
 
     setup( ()=> AllReady || (AllReady = wait4all().then( args =>
-                {   [  e0,  a0,  a1,  b0,  b1 ] = args;
-                    [ $e0, $a0, $a1, $b0, $b1 ] = args.map( epa => ( css => epa.shadowRoot.querySelector(css) ) );
+                {   [  E0,  XA,  XB, YA,  YB,  FA,  FB ] = args;
+                    [ $E0, $XA, $XB,$YA, $YB, $FA, $FB ] = args.map( epa => ( css => epa.shadowRoot.querySelector(css) ) );
                 }))
     );
 
-    test('1. initial src set', function()
+    test('Initial src set', function()
     {
-        assert.equal( e0.src, E0_URL ); assert.equal( e0.getAttribute('src'), E0_URL );
-        assert.equal( a0.src, A0_URL ); assert.equal( a0.getAttribute('src'), A0_URL );
-        assert.equal( a1.src, A1_URL ); assert.equal( a1.getAttribute('src'), A1_URL );
-        assert.equal( b0.src, B0_URL ); assert.equal( b0.getAttribute('src'), B0_URL );
-        assert.equal( b1.src, B1_URL ); assert.equal( b1.getAttribute('src'), B1_URL );
+        assert.include( E0.src, E0_URL ); assert.equal( E0.getAttribute('src'), E0_URL );
+        assert.include( XA.src, XA_URL ); assert.equal( XA.getAttribute('src'), XA_URL );
+        assert.include( XB.src, XB_URL ); assert.equal( XB.getAttribute('src'), XB_URL );
+        assert.include( YA.src, YA_URL ); assert.equal( YA.getAttribute('src'), YA_URL );
+        assert.include( YB.src, YB_URL ); assert.equal( YB.getAttribute('src'), YB_URL );
+        assert.include( FA.src, FA_URL ); assert.equal( FA.getAttribute('src'), FA_URL );
+        assert.include( FB.src, FB_URL ); assert.equal( FB.getAttribute('src'), FB_URL );
     });
 
-    test('2. epa.contentWindow & contentDocument proxying API to implementation', function()
-    {
-        // epa.contentWindow.location === src
-    });
+    testPair( "FA,FB" ); // reference check on IFRAME, of course it should pass. If not the test is written wrong.
+    testPair( "XA,XB" ); // same test cases on embed-page pair
+    testPair( "YA,YB" ); // second pair assures there is no window name collision in window.frames
 
-    test('3. epa.open ', function()
-    {
-        // about:blank as initial state
-        // url as final
-        // initial doc != final doc
-    });
-
-    test('4. epa.close', function()
+        function
+    testPair( pair  )
     {
 
-    });
+        suite( pair, ()=>
+        {
+            suiteSetup( ()=>
+            {   [ id_A, id_B ] = pair.split(',');
+                [ epaA, epaB ] = eval(`[${pair}]`);
+                [ urlA, urlB ] = pair.split(',').map( id=>eval(`${id}_URL`) );
+            });
+            test(`1. epa.contentWindow.location matches SRC attribute`, function()
+            {
+                // epa.contentWindow.location === src
+                epaA.window && assert.include( epaA.window.location       .href, urlA );
+                               assert.include( epaA.contentWindow.location.href, urlA );
+                epaB.window && assert.include( epaB.window.location       .href, urlB );
+                               assert.include( epaB.contentWindow.location.href, urlB );
+            });
 
-    test('5. epa events to match epa.contentWindow events', function()
-    {   // epa.onload & epa.contentWindow.onload
-        // iframe.contentDocument.addEventListener('DOMContentLoaded'
-        // contentWindow
-    });
+            test(`2. parent.frames[A|B] matches URL`, function()
+            {   // for X and Y targeted pairs it ensures insulation of parent.frames
+                assert.include( epaA.contentWindow.parent.frames["A"].location.href, urlA );
+                assert.include( epaA.contentWindow.parent.frames["B"].location.href, urlB );
+            });
 
-    test('5. window.frames', function()
-    {
-        // access index & by name
-        // list only child or same @target
-        // same as content of epa.contentWindow
-    });
+            test('3. epa.open() into C, close() ', function()
+            {
+                const parentFramesCount0 = epaA.contentWindow.parent.frames.length;
+                const url = `appsList-microapp.html?pair=${pair}&case=3`
+                ,       w = epaA.contentWindow.open( url,"C" );
+                if( "IFRAME" === epaA.tagName )
+                {   // standard window behavior just for reference and epa test clarity
+                    assert( !w.closed );
+                    assert.include( w.location.href, url );
+                    w.close();
+                    assert( w.closed );
+                }else
+                {   assert.equal( 2, parentFramesCount0 );
+                    assert.equal( 3, w.parent.frames.length );
+                    assert( !w.closed );
+                    assert( w.parent.frames["C"] );
+                    assert.include( w.parent.frames["C"].location.href, url  );
+                    assert.equal( 3, w.parent.frames.length );
+                    w.close();
+                    assert( w.closed );
+                    assert( !w.parent.frames["C"] );
+                    assert.equal( 2, w.parent.frames.length );
+                }
+
+                // about:blank as initial state
+                // url as final
+                // initial doc != final doc
+            });
+
+            test('4. epa.open replaces existing B window ', function()
+            {
+
+            });
+
+            test('5. epa events to match epa.contentWindow events', function()
+            {   // epa.onload & epa.contentWindow.onload
+                // iframe.contentDocument.addEventListener('DOMContentLoaded'
+                // contentWindow
+            });
+
+            test('5. window.frames', function()
+            {
+                // access index & by name
+                // list only child or same @target
+                // same as content of epa.contentWindow
+            });
+
+        });
+    }
 
 
         function
@@ -70,11 +125,13 @@ suite('embed-page basics IFRAME test ', () =>
         function
     wait4all()
     {
-        return Promise.all( ["e0","a0","a1","b0","b1"].map( wait4load ) );
+        return Promise.all( ["e0","xa","xb","ya","yb","fa","fb"].map( wait4load ) );
     }
         function
     wait4load( id )
     {
+        if( id.startsWith('f') )
+            return Promise.resolve( $$( '#'+id ) );
         const E = document.getElementById( id );
         assert.notEqual( E, null );
         return E.promiseNext;

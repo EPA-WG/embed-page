@@ -1,3 +1,4 @@
+* **iframe.contentWindow** alias to epa.window
 * window management: window.open, window.frames
 * epa.window.parent.location.href
 * cookies, scope impl.
@@ -28,7 +29,6 @@ Release 1
 
 * remove Polymer dependencies
 * remove the use of cancelled XHRs.     
-* **iframe.contentWindow** protection to 
 
 WishList
 * onerror event
@@ -53,4 +53,5 @@ WishList
 * forms, images, anchors, links, ...
 * window.focus(), window.blur(), window.closed flag
 * window.print()
+* network control and management layer. Could be implemented by service workers or wrapping ajax APIs.
     
