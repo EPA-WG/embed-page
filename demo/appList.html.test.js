@@ -70,9 +70,12 @@ suite('embed-page window frames APIs ', () =>
                 if( "IFRAME" === epaA.tagName )
                 {   // standard window behavior just for reference and epa test clarity
                     assert( !w.closed );
-                    assert.include( w.location.href, url );
+                    const initialUrl = w.location.href;
+                    if( initialUrl !== "about:blank" )
+                        assert.include( initialUrl, url );
                     w.close();
-                    assert( w.closed );
+                    const isClosed = w.closed;
+                    assert( isClosed );
                 }else
                 {   assert.equal( 2, parentFramesCount0 );
                     assert.equal( 3, w.parent.frames.length );
@@ -93,7 +96,30 @@ suite('embed-page window frames APIs ', () =>
 
             test('4. epa.open replaces existing B window ', function()
             {
+                assert( epaA.contentWindow.parent.frames["B"] );
 
+                const parentFramesCount0 = epaA.contentWindow.parent.frames.length;
+                const   url = `appsList-microapp.html?pair=${pair}&case=4`
+                ,         w = epaA.contentWindow.open( url,"B" )
+                ,initialUrl = w.location.href;
+
+                assert.equal( parentFramesCount0, w.parent.frames.length ); // window B is reused
+                assert( !w.closed );
+                assert( w.parent.frames["B"] );
+
+                return loadPromise(epaB).then( finalUrl =>
+                {
+                    assert.include( w.location.href, url );
+                    assert.include( w.parent.frames["B"].location.href, url  );
+
+                    if( "IFRAME" === epaA.tagName )
+                    {   // standard window behavior just for reference and epa test clarity
+                    }else
+                    {
+                        assert.equal( 2, w.parent.frames.length );
+                    }
+                    return true;
+                });
             });
 
             test('5. epa events to match epa.contentWindow events', function()
@@ -113,6 +139,25 @@ suite('embed-page window frames APIs ', () =>
     }
 
 
+        function
+    loadPromise( el )
+    {
+        return new Promise( ( resolve, reject ) =>
+        {
+            const loadCb = x=>{ release(); resolve( el.contentWindow.location.href ) }
+            ,    errorCb = x=>{ release(); reject ( el.contentWindow.location.href ) };
+
+            el.addEventListener( 'load', loadCb  );
+            el.addEventListener( 'error', errorCb );
+
+                function
+            release()
+            {
+                el.removeEventListener('load' , loadCb  );
+                el.removeEventListener('error', errorCb );
+            }
+        });
+    }
         function
     SimClick( el ){   el.dispatchEvent( new MouseEvent( "click" )); }
 

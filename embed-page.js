@@ -115,7 +115,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                        , (f,i,frames) => f.name && (frames[ f.name ] = f )));
 
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
-            this.addEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener( type, listener, useCapture, wantsUntrusted );
+            this.addEventListener    = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener   ( type, listener, useCapture, wantsUntrusted );
+            this.removeEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.removeEventListener( type, listener, useCapture, wantsUntrusted );
             this.open = ( url, windowName="", windowFeatures={} ) =>
             {   if( windowName && app.target )
                 {   const trg = document.querySelector(`embed-page[name=${windowName}][target=${app.target}]`);
