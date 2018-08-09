@@ -1,5 +1,4 @@
-* **iframe.contentWindow** alias to epa.window
-* window management: window.open, window.frames
+* target attribute in content ( A & FORM )
 * epa.window.parent.location.href
 * cookies, scope impl.
 * insulation layers - define dynamic change logic and restrictions. 

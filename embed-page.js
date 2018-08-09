@@ -121,7 +121,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             {   if( windowName && app.target )
                 {   const trg = document.querySelector(`embed-page[name=${windowName}][target=${app.target}]`);
                     if( trg )
-                    {   trg.setAttribute('src', url);
+                    {   trg.src= url;
                         return trg.contentWindow;
                 }   }
                 const d = doc.createElement('div')
@@ -531,16 +531,19 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 s.parentNode.removeChild(s);
             });
         }
-        _prepareTarget( el, attr )
-        {   var v = el.getAttribute(attr);
+        _prepareTarget( el, attr ) // return embed-page if target defined explicitly
+        {   var v = el.getAttribute(attr)
+            ,   t = el.getAttribute('target');
             if( 'href' === attr )
             {
                 if( !v )// is anchor
-                    return;
+                    return; // todo scroll to target
+                if( t )
+                    return this.contentWindow.open( v, t );
+
                 if( '#' === v.charAt(0) )
                 {
                     // todo local anchor #link
-                    return
                 }
             }
             el.target = this.$.targetframe.getAttribute( 'name' );
@@ -552,7 +555,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             for( let el = ev.target; el && el!==$f ; el = el.parentElement )
             {   const a = { A:'href', FORM:'action'}[ el.tagName ];
                 if( a )
-                    return this._prepareTarget( el, a );
+                    return this._prepareTarget( el, a ) && ev.preventDefault();
             }
         }
         onTargetLoad(ev)

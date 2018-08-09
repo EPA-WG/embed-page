@@ -13,11 +13,11 @@ suite('embed-page window frames APIs ', () =>
     ,     YB_URL = "appsList-microapp.html?name=B&target=Y"
     ,   DEMO_URL = absUrl('../demo/');
 
-    let AllReady, id_A, id_B, epaA, epaB, urlA, urlB;
+    let AllReady, id_A, id_B, epaA, epaB, urlA, urlB, $A, $B;
 
     setup( ()=> AllReady || (AllReady = wait4all().then( args =>
                 {   [  E0,  XA,  XB, YA,  YB,  FA,  FB ] = args;
-                    [ $E0, $XA, $XB,$YA, $YB, $FA, $FB ] = args.map( epa => ( css => epa.shadowRoot.querySelector(css) ) );
+                    [ $E0, $XA, $XB,$YA, $YB, $FA, $FB ] = args.map( epa => ( css => ( epa.shadowRoot || epa.contentDocument ).querySelector(css) ) );
                 }))
     );
 
@@ -46,6 +46,7 @@ suite('embed-page window frames APIs ', () =>
             {   [ id_A, id_B ] = pair.split(',');
                 [ epaA, epaB ] = eval(`[${pair}]`);
                 [ urlA, urlB ] = pair.split(',').map( id=>eval(`${id}_URL`) );
+                [   $A, $B   ] = pair.split(',').map( id=>eval(`$${id}`) );
             });
             test(`1. epa.contentWindow.location matches SRC attribute`, function()
             {
@@ -110,7 +111,7 @@ suite('embed-page window frames APIs ', () =>
                 return loadPromise(epaB).then( finalUrl =>
                 {
                     assert.include( w.location.href, url );
-                    assert.include( w.parent.frames["B"].location.href, url  );
+                    assert.include( w.parent.frames["B"].location.href, url );
 
                     if( "IFRAME" === epaA.tagName )
                     {   // standard window behavior just for reference and epa test clarity
@@ -122,23 +123,71 @@ suite('embed-page window frames APIs ', () =>
                 });
             });
 
-            test('5. epa events to match epa.contentWindow events', function()
-            {   // epa.onload & epa.contentWindow.onload
-                // iframe.contentDocument.addEventListener('DOMContentLoaded'
-                // contentWindow
-            });
-
-            test('5. window.frames', function()
+            test('5. link with NO target', function()
             {
-                // access index & by name
-                // list only child or same @target
-                // same as content of epa.contentWindow
+                const p = loadPromise( epaB ).then( x=>
+                {
+                    assert.include( epaA.contentWindow.location.href, urlA ); // unchanged
+                    assert.include( epaB.contentWindow.location.href, "link=A" );
+                });
+                SimClick( $B('a.no-target') );
+                return p;
             });
+            test('5a. link with named target - existing window', function()
+            {
+                const p = loadPromise( epaB ).then( x=>
+                {
+                    assert.include( epaA.contentWindow.location.href, urlA ); // unchanged
+                    assert.include( epaB.contentWindow.location.href, "link=B" );
+                });
+                SimClick( $B('a[target=B]') );
+                return p;
+            });
+            //
+            // test('5a. link with named target - existing window', function()
+            // {
+            //
+            // });
+            // test('5b. link with named target - new window', function()
+            // {
+            //
+            // });
+            // test('5c. link with target=_self', function()
+            // {
+            // });
+            // test('5d. link with target=_parent', function()
+            // {
+            // });
+            // test('5e. link with target=_top', function()
+            // {
+            // });
+            //
+            //
+            // test('6.  form with NO target', function()
+            // {
+            //
+            // });
+            //
+            // test('6a. form  with named target - existing window', function()
+            // {
+            //
+            // });
+            // test('6a. form  with named target - new window', function()
+            // {
+            //
+            // });
+            // test('6b. form  with target=_self', function()
+            // {
+            // });
+            // test('6c. form  with target=_parent', function()
+            // {
+            // });
+            // test('6c. form  with target=_top', function()
+            // {
+            // });
 
         });
     }
-
-
         function
     loadPromise( el )
     {
