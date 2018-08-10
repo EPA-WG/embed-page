@@ -143,25 +143,51 @@ suite('embed-page window frames APIs ', () =>
                 SimClick( $B('a[target=B]') );
                 return p;
             });
-            //
-            // test('5a. link with named target - existing window', function()
-            // {
-            //
-            // });
-            // test('5b. link with named target - new window', function()
-            // {
-            //
-            // });
-            // test('5c. link with target=_self', function()
-            // {
-            // });
-            // test('5d. link with target=_parent', function()
-            // {
-            // });
-            // test('5e. link with target=_top', function()
-            // {
-            // });
-            //
+            test('5b. link with named target - new window', function()
+            {
+                if( id_A.startsWith('F') )
+                    return;
+                const c0 = $$(`embed-page[name=C][target=${id_A.charAt(0)}]`);
+                assert( !c0 );
+                assert.include( epaA.contentWindow.location.href, urlA );
+                assert.include( epaB.contentWindow.location.href, "link=B" );
+
+                SimClick( $B('a[target=C]') );
+
+                const c1 = $$(`embed-page[name=C][target=${id_A.charAt(0)}]`);
+                assert.include( c1  .contentWindow.location.href, "link=C" );
+                assert.include( epaA.contentWindow.location.href, urlA     ); // unchanged
+                assert.include( epaB.contentWindow.location.href, "link=B" ); // unchanged
+                c1.contentWindow.close();
+            });
+            test('5c. link with target=_self', function()
+            {
+                if( id_A.startsWith('F') )
+                    return;
+                const c0 = $$(`embed-page[name=C][target=${id_A.charAt(0)}]`);
+                assert( !c0 );
+                assert.include( epaB.contentWindow.location.href, "link=B" );
+
+                SimClick( $B('a[target=_self]') );
+
+                const c1 = $$(`embed-page[name=C][target=${id_A.charAt(0)}]`);
+                assert( !c1 );
+                assert.include( epaB.contentWindow.location.href, "link=_self" ); // unchanged
+            });
+            test('5d. link with target=_parent', function()
+            {
+                if( id_A.startsWith('F') )
+                    return;
+                SimClick( $B('a[target=_parent]') );
+                assert.include( epaB.contentWindow.location.href, "link=_parent" ); // unchanged
+            });
+            test('5e. link with target=_top', function()
+            {
+                if( id_A.startsWith('F') )
+                    return;
+                SimClick( $B('a[target=_top]') );
+                assert.include( epaB.contentWindow.location.href, "link=_top" ); // unchanged
+            });
             //
             // test('6.  form with NO target', function()
             // {
@@ -208,7 +234,11 @@ suite('embed-page window frames APIs ', () =>
         });
     }
         function
-    SimClick( el ){   el.dispatchEvent( new MouseEvent( "click" )); }
+    SimClick( el )
+    {   var mouseEvent = document.createEvent('MouseEvent');
+        mouseEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        el.dispatchEvent( mouseEvent );
+    }
 
         function
     absUrl( rel )

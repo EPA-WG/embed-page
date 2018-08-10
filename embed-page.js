@@ -118,7 +118,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.addEventListener    = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener   ( type, listener, useCapture, wantsUntrusted );
             this.removeEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.removeEventListener( type, listener, useCapture, wantsUntrusted );
             this.open = ( url, windowName="", windowFeatures={} ) =>
-            {   if( windowName && app.target )
+            {
+                if( ["_self","_parent","_top"].includes(windowName) )
+                {   app.src= url;
+                    return app.contentWindow;
+                }
+                if( windowName && app.target )
                 {   const trg = document.querySelector(`embed-page[name=${windowName}][target=${app.target}]`);
                     if( trg )
                     {   trg.src= url;
@@ -555,7 +560,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             for( let el = ev.target; el && el!==$f ; el = el.parentElement )
             {   const a = { A:'href', FORM:'action'}[ el.tagName ];
                 if( a )
-                    return this._prepareTarget( el, a ) && ev.preventDefault();
+                    if( this._prepareTarget( el, a ) )
+                        ev.preventDefault();
             }
         }
         onTargetLoad(ev)
