@@ -1,3 +1,4 @@
+* unit test for document.currentScript, document.currentScript.getRootNode()
 * target attribute in content ( A & FORM )
 * epa.window.parent.location.href
 * cookies, scope impl.

@@ -531,9 +531,19 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             forEach( $scripts, s =>
             {   const clone = /** @type {!HTMLScriptElement} */( s.ownerDocument.createElement('script') );
                 forEach(s.attributes, attr => clone.setAttribute(attr.name, attr.value));
+                clone.async = s.async;
                 clone.textContent = s.textContent;
-                s.parentNode.insertBefore(clone, s);
-                s.parentNode.removeChild(s);
+                const currentScript = document.currentScript;
+                defProperty( document, 'currentScript', x => clone );
+                // todo use Object.getPrototypeOf(document).currentScript to get and later recover orig value
+                try
+                {   s.parentNode.insertBefore( clone, s );
+                    s.parentNode.removeChild( s );
+                }finally{ defProperty( document, 'currentScript', x => currentScript ); }
+
+                    function
+                defProperty( obj, name, getter )
+                    {   Object.defineProperty(obj, name, { get: getter, enumerable: false, configurable: true }); }
             });
         }
         _prepareTarget( el, attr ) // return embed-page if target defined explicitly
