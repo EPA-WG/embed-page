@@ -106,7 +106,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( this, 'target', x=> app.target);
             defProperty( this, 'opener', x=>hostWin );
             defProperty( this, 'parent', x=>hostWin );
-            defProperty( this   , 'frames', x=> forEach( [ ...this.document.querySelectorAll('embed-page') ]
+            defProperty( this, 'frames', x=> forEach( [ ...this.document.querySelectorAll('embed-page') ]
                                                          .map( f => f.window )
                                                        , (f,i,frames) => f.name && (frames[ f.name ] = f )));
             defProperty( hostWin, 'frames', x=> forEach( [ ...doc.querySelectorAll('embed-page') ]
@@ -211,16 +211,22 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 ,   querySelectorAll       : x=> f.querySelectorAll(x)
                 ,   querySelector          : x=> f.querySelector(x)
                 ,   addEventListener       : (...args) => w.addEventListener(...args)
+                ,   getRootNode            : x=> f
                 ,   write       : x=> console.error( 'document.write() is not supported yet.')
                 ,   scripts     : []
                 });
 
+            let currentScript;
+            zs.setCurrentScript = v=> currentScript = v;
             defProperty( zs, 'sessionStorage' , x=> w.sessionStorage );
             defProperty( zs, 'localStorage'   , x=> w.localStorage   );
             defProperty( zs, 'location'       , x=> w.location       , v=> w.location = v );
             defProperty( zs, 'documentURI'    , x=> w.location       ); // https://html.spec.whatwg.org/multipage/history.html#the-location-interface
             defProperty( zs, 'URL'            , x=> w.location       );
+            defProperty( zs, 'body'           , x=> f );
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
+            defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
+
             const epaDoc = createDocument(  );
             // marshal undefined yet properties to epaDoc
             Object.keys( epaDoc ).forEach( k => (k in zs) || defProperty( zs, k, x=>epaDoc[k], v=>epaDoc[k]=v ) );
@@ -668,7 +674,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             env.epc.dispatchEvent( createEv('Event','load') );
             return;
         }
-        document.scripts.push && document.scripts.push( currentScript );
+        currentScript.getRootNode = x=> document.getRootNode();
+        document.scripts.push       && document.scripts.push( currentScript );
+        document.setCurrentScript   && document.setCurrentScript( currentScript );
 
         if( currentScript.src )
         {   if( canRun( currentScript ) )
@@ -699,6 +707,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     eval( EPA_PreparseScript(txt) );
                 }
             }catch(ex){ console.error(ex) }
+            finally{ document.setCurrentScript && document.setCurrentScript(); }
+
             setTimeout( x=> EPA_runScript( arr, env, redirects ), 0 );
         }   function
         createEvent(name)
