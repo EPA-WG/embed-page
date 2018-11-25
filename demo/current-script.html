@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>embed-page demo - currentScript and rootNode</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+    </script>
+    <script src="../embed-page.js" type="module"></script>
+    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
+</head>
+<body>
+    <embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>
+    <h1>embed-page demo - SCRIPT tag, currentScript and rootNode</h1>
+    <p>
+        As html container, embed-page reads and executes content of SCRIPT tag, and since its content is a subject of
+        scope insulation, the rootNode, currentScript and other related "web page" scoped API should be scoped to
+        content of embed-page.
+    </p>
+    <p>
+        <var> script type="module"</var> meant to be run only once like with
+        will be run within each embed-page container. Within same container those will not be executed multiple times.
+        But for each container the script will be executed separately.
+    </p>
+    <b><a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/currentScript"
+        >document.currentScript</a></b> is only(?) way to get reference to current node and traverse up to find
+        the root node. For <b>embed-page</b> content it is a shadow root of EPA container.
+    <p>API
+        <ul>
+            <li>script src and embedded load is covered by <a href="index.html">main demo page</a>, a coverage for core
+                embed-page functionality.
+            </li>
+            <li>
+                <var>script type="module"</var> loaded only once per embed-page.
+            </li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/currentScript"
+                ><var>document.currentScipt</var></a> - the way to access parameters for script from calling page.</li>
+            <li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Node/rootNode"
+                ><var>document.currentScipt.getRootNode()</var></a> - the way to access current scope.
+                It is a shortcut of traversing up the dom tree to find top or content root.
+            </li>
+            <li><var>document.currentScipt.rootNode</var> - legacy replaced by getRootNode() </li>
+            <li><var>script type=module</var> </li>
+            <li><var>document.getRootNode()</var> returns EPA document</li>
+            <li><var>document.rootElement  </var> returns EPA document</li>
+
+            <li><var>document.elementFromPoint()</var> and <var>document.elementsFromPoint()</var> returns EPA document
+                    https://developer.mozilla.org/en-US/docs/Web/API/DocumentOrShadowRoot/elementsFromPoint
+                    https://developer.mozilla.org/en-US/docs/Web/API/DocumentOrShadowRoot/elementFromPoint
+            </li>
+            <li> Document.documentElement </li>
+        </ul>
+    </p>
+    <demo-snippet>
+        <h2><var>script type="module"</var> loaded only once per embed-page</h2>
+        <template>
+            <embed-page>
+                <template><!-- to prevent running script in host page -->
+                    Script <a href="current-script.html.js">current-script.html.js</a> is called <input type="number" value="0" /> times
+
+                    <script type="module" src="current-script.html.js"></script>
+                    <script type="module" src="current-script.html.js"></script>
+                </template>
+            </embed-page>
+            <embed-page src="current-script-microapp.html"></embed-page>
+        </template>
+    </demo-snippet>
+
+</body>
+</html>

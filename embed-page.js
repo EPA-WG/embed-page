@@ -212,6 +212,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 ,   querySelector          : x=> f.querySelector(x)
                 ,   addEventListener       : (...args) => w.addEventListener(...args)
                 ,   write       : x=> console.error( 'document.write() is not supported yet.')
+                ,   scripts     : []
                 });
 
             defProperty( zs, 'sessionStorage' , x=> w.sessionStorage );
@@ -599,7 +600,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         return HTMLFormElement_submit.apply( this, arguments );
     };
 
-    const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"]';
+    const scriptsSelector = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"],script[type="module"]';
 
     win.customElements.define( EmbedPage.is, EmbedPage );
 
@@ -667,17 +668,26 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             env.epc.dispatchEvent( createEv('Event','load') );
             return;
         }
+        document.scripts.push && document.scripts.push( currentScript );
+
         if( currentScript.src )
-        {
-            let url = currentScript.src;
-            let m = redirects.find( m => url.startsWith( m.from ) );
-            if( m )
-                url = m.to + url.substring( m.from.length );
-            ajax( url )
-                .then( txt => runScript.call( window, txt + "//# sourceURL=" + currentScript.src )
-                     , x => EPA_runScript( arr, env, redirects )  );
+        {   if( canRun( currentScript ) )
+            {   let url = currentScript.src;
+                let m = redirects.find( m => url.startsWith( m.from ) );
+                if( m )
+                    url = m.to + url.substring( m.from.length );
+                ajax( url )
+                    .then( txt => runScript.call( window, txt + "//# sourceURL=" + currentScript.src )
+                         , x => EPA_runScript( arr, env, redirects )  );
+            }
         }else
             runScript.call( window, currentScript.text );// todo src map
+
+            function
+        canRun( s )
+        {
+            return s.type !=='module' || document.scripts.filter( c => c.src === s.src && c.type==='module' ).length === 1
+        }
 
             function
         runScript( txt )
