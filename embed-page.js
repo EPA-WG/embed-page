@@ -117,6 +117,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
             this.addEventListener    = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener   ( type, listener, useCapture, wantsUntrusted );
             this.removeEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.removeEventListener( type, listener, useCapture, wantsUntrusted );
+            this.postMessage = ( message, targetOrigin, transfer )=> app.postMessage( message, targetOrigin, transfer );
             this.open = ( url, windowName="", windowFeatures={} ) =>
             {
                 if( ["_self","_parent","_top"].includes(windowName) )
@@ -485,7 +486,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
         onSlotChanged()
         {
-            console.log("onSlotChanged");
+            // console.log("onSlotChanged");
         }
 
         postMessage( message, targetOrigin, transfer )
