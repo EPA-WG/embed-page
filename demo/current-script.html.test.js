@@ -1,58 +1,40 @@
 suite('embed-page postMessage test ', () =>
 {
-    let e0, e1, $e0, $e1, $$ = css => document.querySelector(css);
-
-    const fr = document.querySelector('iframe')
-    , FR_URL = "postMessage-app.html?from=iframe"
-    , E0_URL = "postMessage-app.html?from=epa0"
-    , E1_URL = "postMessage-app.html?from=epa1" ;
-
+    let e0, e1, $e0, $e1, $$e0, $$e1
+    ,    $p = css => document.querySelector(css)
+    ,   $$p = css => document.querySelectorAll(css);
     let AllReady;
 
     setup( ()=> AllReady || (AllReady = wait4all().then( args =>
-                {   [  e0,  e1 ] = args;
-                    [ $e0, $e1 ] = args.map( epa => ( css => epa.shadowRoot.querySelector(css) ) );
+                {   [   e0,   e1 ] = args;
+                    [  $e0,  $e1 ] = args.map( epa => ( css => epa.shadowRoot.querySelector   (css) ) );
+                    [ $$e0, $$e1 ] = args.map( epa => ( css => epa.shadowRoot.querySelectorAll(css) ) );
                 }))
     );
 
-    test('1. initial src set', function()
+    test('1. initial scripts set', function()
     {
-                                        assert.equal( fr.getAttribute('src'), FR_URL );
-        assert.equal( e0.src, E0_URL ); assert.equal( e0.getAttribute('src'), E0_URL );
-        assert.equal( e1.src, E1_URL ); assert.equal( e1.getAttribute('src'), E1_URL );
+        assert.equal( 4, $$p('script[title]').length );
+        hasScript( $p, "non-module0"   );
+        hasScript( $p, "non-module1"   );
+        hasScript( $p, "module0"       );
+        hasScript( $p, "module1"       );
+
+        assert.equal( 4, $$e0('script[title]').length );
+        hasScript( $e0, "non-module0"   );
+        hasScript( $e0, "non-module1"   );
+        hasScript( $e0, "module0"       );
+        hasScript( $e0, "module1"       );
+
+        assert.equal( 4, $$e1('script[title]').length );
+        hasScript( $e1, "non-module0"   );
+        hasScript( $e1, "non-module1"   );
+        hasScript( $e1, "module0"       );
+        hasScript( $e1, "module1"       );
+
+        function hasScript( $, title ){ assert( $( `script[title=${title}]`) ) }
     });
 
-    test('2. from IFRAME', function()
-    {
-        assert.equal( 1, $$('table').innerText.match( /from=iframe/g ).length );
-    });
-    test('3. from epa0 & epa1', function()
-    {
-        assert.equal( 2, $$('table').innerText.match( /from=epa0/g ).length );// both(data & origin) include URL
-        assert.equal( 2, $$('table').innerText.match( /from=epa1/g ).length );
-
-        SimClick( $e0('button') );
-        assert.equal( 4, $$('table').innerText.match( /from=epa0/g ).length );
-        assert.equal( 2, $$('table').innerText.match( /from=epa1/g ).length );
-
-        SimClick( $e1('button') );
-        assert.equal( 4, $$('table').innerText.match( /from=epa0/g ).length );
-        assert.equal( 4, $$('table').innerText.match( /from=epa1/g ).length );
-    });
-    test('4. to epa0 & epa1', function()
-    {
-        assert.isNull( $e0('table').innerText.match( /from=demo/g ) );
-        assert.isNull( $e1('table').innerText.match( /from=demo/g ) );
-
-        SimClick( $$('.to-epa0') );
-        assert.equal( 1, $e0('table').innerText.match( /from=demo/g ).length );
-        assert.equal( 1, $e0('table').innerText.match( /from=demo/g ).length );
-        assert.isNull(   $e1('table').innerText.match( /from=demo/g ) );
-
-        SimClick( $$('.to-epa1') );
-        assert.equal( 1, $e0('table').innerText.match( /from=demo/g ).length );
-        assert.equal( 1, $e1('table').innerText.match( /from=demo/g ).length );
-    });
 
 
 

@@ -1,6 +1,5 @@
 * unit test for document.currentScript, document.currentScript.getRootNode()
 * provide scoped `document.getRootNode()` method and unit tests
-* support & unit test for `script type=module`
 * support integrity attribute
 * target attribute in content ( A & FORM )
 * epa.window.parent.location.href

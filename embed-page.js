@@ -688,7 +688,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 ajax( url )
                     .then( txt => runScript.call( window, txt + "//# sourceURL=" + currentScript.src )
                          , x => EPA_runScript( arr, env, redirects )  );
-            }
+            }else
+                setTimeout(x => EPA_runScript(arr, env, redirects), 0);
         }else
             runScript.call( window, currentScript.text );// todo src map
 

@@ -59,26 +59,38 @@
     <demo-snippet>
         <h2><var>script type="module"</var> loaded only once per embed-page</h2>
         <p> The script <a href="current-script.html.js">current-script.html.js</a> is called
-            <input type="number" value="0" /> times.
+            <input type="number" value="0" /> times.<br/>
             Should be 3: twice without "type" and once with type="module"
         </p>
         <template>
-            <embed-page>
-                <template><!-- to prevent running script in host page -->
-                    Script <a href="current-script.html.js">current-script.html.js</a> is called <input type="number" value="0" /> times
+            <!--<embed-page id="e0">-->
+                <!--<template>&lt;!&ndash; to prevent running script in host page &ndash;&gt;-->
+                    <!--Script <a href="current-script.html.js">current-script.html.js</a> is called <input type="number" value="0" /> times-->
 
-                    <script title="non-module0" src="current-script.html.js"></script>
-                    <script title="non-module1" src="current-script.html.js"></script>
-                    <script title="module0" type="module" src="current-script.html.js"></script>
-                    <script title="module1" type="module" src="current-script.html.js"></script><!-- should be ignored -->
-                </template>
-            </embed-page>
+                    <!--<script title="non-module0" src="current-script.html.js"></script>-->
+                    <!--<script title="non-module1" src="current-script.html.js"></script>-->
+                    <!--<script title="module0" type="module" src="current-script.html.js"></script>-->
+                    <!--<script title="module1" type="module" src="current-script.html.js"></script>&lt;!&ndash; should be ignored &ndash;&gt;-->
+                <!--</template>-->
+            <!--</embed-page>-->
+            <!--<embed-page id="e1">-->
+                <!--<template>&lt;!&ndash; to prevent running script in host page &ndash;&gt;-->
+                    <!--Script <a href="current-script.html.js">current-script.html.js</a> is called <input type="number" value="0" /> times-->
+
+                    <!--<script title="non-module0" src="current-script.html.js"></script>-->
+                    <!--<script title="non-module1" src="current-script.html.js"></script>-->
+                    <!--<script title="module0" type="module" src="current-script.html.js"></script>-->
+                    <!--<script title="module1" type="module" src="current-script.html.js"></script>&lt;!&ndash; should be ignored &ndash;&gt;-->
+                <!--</template>-->
+            <!--</embed-page>-->
             <hr />
-            <embed-page src="current-script-microapp.html"></embed-page>
+            <embed-page src="current-script-microapp.html" id="e0"></embed-page>
+            <embed-page src="current-script-microapp.html" id="e1"></embed-page>
         </template>
     </demo-snippet>
     <script src="../node_modules/wct-browser-legacy/browser.js"></script>
     <script src="current-script.html.test.js"></script>
+
 
     <script title="non-module0" src="current-script.html.js"></script>
     <script title="non-module1" src="current-script.html.js"></script>
