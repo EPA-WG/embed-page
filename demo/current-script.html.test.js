@@ -34,6 +34,13 @@ suite('embed-page postMessage test ', () =>
 
         function hasScript( $, title ){ assert( $( `script[title=${title}]`) ) }
     });
+    test('2. document.currentScript.getRootNode()', ()=>
+    {
+        assert.equal( 4, $$e0('script').length );
+        assert.equal( 4, $$e1('script').length );
+        assert.equal( 'scripts count=4', $e0('u').innerText );
+        assert.equal( 'scripts count=4', $e1('u').innerText );
+    });
 
 
 
