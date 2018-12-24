@@ -1,3 +1,4 @@
+* script nomodule support
 * support integrity attribute
 * target attribute in content ( A & FORM )
 * epa.window.parent.location.href

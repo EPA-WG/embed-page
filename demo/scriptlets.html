@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>postMessage API - embed-page demo</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+    </script>
+    <script src="../embed-page.js" type="module" ></script>
+
+    <script src="code-view.js"></script>
+    <custom-style>
+        <style is="custom-style" include="demo-pages-shared-styles"></style>
+    </custom-style>
+    <style>
+        embed-page{ box-shadow: inset 0 0 2em #000000; padding: 1em; }
+    </style>
+    <!--<script src="postMessage-app.js" ></script>-->
+</head>
+<body>
+<!--<embed-page src="demo-menu.html" scope="none"></embed-page>-->
+
+<h1>Scriptlet</h1>
+<p>
+    In context of <var>embed-page</var> the <b>scripltet</b> is a script tag acting as inline component.
+    It uses script tag attributes as parameters, is aware of DOM where it is located,
+    and modifies the surrounding DOM tree if desired.
+</p>
+<h3>Samples of scriptlets</h3>
+<p> You could think of scriptlet as light-weighted web component which does not require a separate dependency inclusion
+    as content would be used in location of SCRIPT tag.
+</p>
+<demo-snippet>
+
+    For example, script bellow
+    would render &lt;span&gt;1,234,567,890&lt;/span&gt; right before own SCRIPT tag.
+    <template>
+        <embed-page>
+            <template><!-- to prevent running in page scope -->
+                span with rendered content will be injected here :
+                <script type="module" src="scriptlets/number-format.js" value="1234567890"></script>
+                <hr/>
+                and here: <script type="module" src="scriptlets/number-format.js" value="9876543210"></script>
+            </template>
+        </embed-page>
+    </template>
+</demo-snippet>
+
+<!--<embed-page>-->
+    <!--<template>&lt;!&ndash; to prevent running in page scope &ndash;&gt;-->
+<!---->
+        <!--&lt;script type="module" src="<a href="change-bind.js">change-bind.js</a>"-->
+        <!--data-src-select="input" data-dst-select="script[src=number-format.js]"  &gt;-->
+        <!--would change <var>value</var> of previous scriptlet on change event of following input field.-->
+        <!--<input placeholder="type a number to see it formatted" />-->
+        <!--<hr/>-->
+<!---->
+        <!--<script type="module" src="scriptlets/change-bind.js"-->
+                <!--data-src-select="input"-->
+                <!--data-dst-select="script[src=number-format.js]"   ></script>-->
+        <!--<p>Of course the binding within JS framework is shorter. But this scriptlet will run with HTML without writing any-->
+            <!--JS, keeping all in HTML. Which is a sample of <u>declarative</u> programing.-->
+        <!--</p>-->
+    <!--</template>-->
+<!--</embed-page>-->
+
+<h3>Difference with W3C</h3>
+<p>
+    Scriptlet is inline, hence runs every time where it is located in DOM.
+    Scriplet could be written as in old-fashion way as in "modern" module type syntax.
+    The <var>type="module"</var> allows to use
+    modern JS features like import/export but if used outside of <var>embed-page</var> will run only once.
+</p>
+<h2> Scriptlets sources </h2>
+<h3><a href="scriptlets/number-format.js">number-format.js</a></h3>
+<code src="scriptlets/number-format.js"></code>
+<h3><a href="scriptlets/change-bind.js">change-bind.js</a></h3>
+<code src="scriptlets/change-bind.js"></code>
+
+</body>
+</html>

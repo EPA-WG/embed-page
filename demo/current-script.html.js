@@ -1,14 +1,25 @@
-if( !window.currentScriptCounter )
-    window.currentScriptCounter = 0;
-window.currentScriptCounter ++;
-document.querySelector('input').value = window.currentScriptCounter;
+var        f = document.querySelector('.document-selected')
+, parentNode = f.parentNode
+,         cs = document.currentScript;
 
-let cs = document.currentScript;
-appendText( 'div', cs ? `called script type=${cs.type} title=${cs.title}` : "currentScript undefined" );
-appendText( 'u', `scripts count=${ document.getRootNode().querySelectorAll('script').length }` );
+if( cs )
+{   parentNode = cs.parentNode;
+    f = parentNode.querySelector('.current-script-related');
+    f.value = f.value + cs.title;
+    console.log( 'executed',cs.outerHTML.substring(0,60) );
+    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+}else
+{
+    appendText( 'div', "currentScript undefined" );
+    console.log( 'executed ???' );
+}
+// debugger;
+f = document.querySelector('.document-selected');
+f.value = f.value + ( cs ? cs.title : '?' );
 
-function appendText( tag, text )
-{   var t = document.createElement(tag);
+    function
+appendText( tag, text )
+{   let t = document.createElement(tag);
     t.innerHTML = text;
-    document.body.appendChild(t);
+    parentNode.appendChild(t);
 }

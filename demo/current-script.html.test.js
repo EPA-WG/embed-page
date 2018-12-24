@@ -14,7 +14,7 @@ suite('embed-page postMessage test ', () =>
 
     test('1. initial scripts set', function()
     {
-        assert.equal( 4, $$p('script[title]').length );
+        // assert.equal( 4, $$p('script[title]').length );
         hasScript( $p, "non-module0"   );
         hasScript( $p, "non-module1"   );
         hasScript( $p, "module0"       );
@@ -42,7 +42,15 @@ suite('embed-page postMessage test ', () =>
         assert.equal( 'scripts count=4', $e1('u').innerText );
     });
 
+    test('3. currentScript.getRootNode ',()=>
+    {
+       // TBD
+    });
 
+    test('4. script type=module with import ',()=>
+    {
+       // TBD
+    });
 
 
         function
