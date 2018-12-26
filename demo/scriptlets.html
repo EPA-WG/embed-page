@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>postMessage API - embed-page demo</title>
+    <title>Scriptlet - embed-page demo</title>
 
     <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
     <script type="module">
@@ -23,9 +23,9 @@
     <!--<script src="postMessage-app.js" ></script>-->
 </head>
 <body>
-<!--<embed-page src="demo-menu.html" scope="none"></embed-page>-->
+<embed-page src="demo-menu.html" scope="none"></embed-page>
 
-<h1>Scriptlet</h1>
+<h1> Scriptlet - embed-page demo </h1>
 <p>
     In context of <var>embed-page</var> the <b>scripltet</b> is a script tag acting as inline component.
     It uses script tag attributes as parameters, is aware of DOM where it is located,
@@ -35,9 +35,10 @@
 <p> You could think of scriptlet as light-weighted web component which does not require a separate dependency inclusion
     as content would be used in location of SCRIPT tag.
 </p>
+
 <demo-snippet>
 
-    For example, script bellow
+    For example, <a href="scriptlets/number-format.js">number-format.js</a> scriptlet bellow
     would render &lt;span&gt;1,234,567,890&lt;/span&gt; right before own SCRIPT tag.
     <template>
         <embed-page>
@@ -45,29 +46,47 @@
                 span with rendered content will be injected here :
                 <script type="module" src="scriptlets/number-format.js" value="1234567890"></script>
                 <hr/>
-                and here: <script type="module" src="scriptlets/number-format.js" value="9876543210"></script>
+                Also here: <script type="module" src="scriptlets/number-format.js" value="9.876543210"
+                                   data-locales="en"
+                                   data-minimumIntegerDigits="2" data-maximumFractionDigits="3"
+                           ></script>
             </template>
         </embed-page>
     </template>
 </demo-snippet>
+<demo-snippet>
 
-<!--<embed-page>-->
-    <!--<template>&lt;!&ndash; to prevent running in page scope &ndash;&gt;-->
-<!---->
-        <!--&lt;script type="module" src="<a href="change-bind.js">change-bind.js</a>"-->
-        <!--data-src-select="input" data-dst-select="script[src=number-format.js]"  &gt;-->
-        <!--would change <var>value</var> of previous scriptlet on change event of following input field.-->
-        <!--<input placeholder="type a number to see it formatted" />-->
-        <!--<hr/>-->
-<!---->
-        <!--<script type="module" src="scriptlets/change-bind.js"-->
-                <!--data-src-select="input"-->
-                <!--data-dst-select="script[src=number-format.js]"   ></script>-->
-        <!--<p>Of course the binding within JS framework is shorter. But this scriptlet will run with HTML without writing any-->
-            <!--JS, keeping all in HTML. Which is a sample of <u>declarative</u> programing.-->
-        <!--</p>-->
-    <!--</template>-->
-<!--</embed-page>-->
+    Scriptlet <a href="change-bind.js">change-bind.js</a>
+    would change <var>value</var> of <b>number-format</b> scriptlet on change event of following input field.
+    <template>
+        <embed-page>
+            <template><!-- to prevent running in page scope -->
+                <input placeholder="type a number to see it formatted" type="number" />
+                bind unformatted: <span class="unformatted"></span>
+                <hr/>
+                formatted by scriptlet:
+                <script type="module" src="scriptlets/number-format.js" value="0"></script>
+
+                <script type="module" src="scriptlets/change-bind.js"
+                        data-src-select="input"
+                        data-src-attribute="value"
+                        data-dst-select=".unformatted"
+                ></script>
+                <script type="module" src="scriptlets/change-bind.js"
+                        data-src-select="input"
+                        data-src-attribute="value"
+                        data-dst-select="script[src='scriptlets/number-format.js']"
+                        data-dst-attribute="value"
+                ></script>
+            </template>
+        </embed-page>
+    </template>
+    <p>Of course the binding within JS framework is shorter. But this scriptlet will run with HTML without writing any
+        JS, keeping all in HTML. Which is a sample of <u>declarative</u> programing.
+    </p>
+</demo-snippet>
+
+
 
 <h3>Difference with W3C</h3>
 <p>

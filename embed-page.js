@@ -227,7 +227,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( zs, 'URL'            , x=> w.location       );
             defProperty( zs, 'body'           , x=> f );
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
-            defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
+            // defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
 
             const epaDoc = createDocument(  );
             // marshal undefined yet properties to epaDoc
@@ -551,21 +551,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 return;
             }
             const s = currentScript;
-            // if( !canRun( s ) )
-            //     return this.runScriptsRaw( arr );
 
             if( !s.src )
             {
                 runScriptAs( s, s.textContent, this  ).then( x=>this.runScriptsRaw( arr ) );
-            }
-            ajax( urlRedirectMap( currentScript.src, this.redirects ) )
+            }else
+                ajax( urlRedirectMap( currentScript.src, this.redirects ) )
                 .then( txt => runScriptAs( s, txt, this ),   err => {debugger;}  )
                 .then( x=>this.runScriptsRaw( arr ) );
-                // function
-            // canRun( s )
-            // {
-            //     return s.type !=='module' || [ ...document.scripts ].filter( c => (c.src === s.src || c.src === s.orig_src )&& c.type==='module' ).length === 1
-            // }
 
         }
         _prepareTarget( el, attr ) // return embed-page if target defined explicitly
@@ -653,34 +646,43 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         {
             const c0 = cloneScript( s, 'src' );
             c0.setAttribute('epa-script-id', ++GBL_ScriptsCount );
+            c0.setAttribute('type', 'module');
             c0.orig_src = s.src;
-            s.src && Object.defineProperty( c0, 'src', {get:()=>s.src, enumerable: false, configurable:false });
-// todo set env
-            epc.context.document.setCurrentScript && epc.context.document.setCurrentScript( c0 );
+            c0.id = 'testing';
+            c0.defer = true;
+            c0.async = true;
 
-            window[ 'epa_'+epc.uid ] = epc;
+            s.src && Object.defineProperty( c0, 'src', { get:()=>s.src, enumerable: false, configurable:false });
+
+            const c = epc.context
+            ,     d = c.document;
+            // d.setCurrentScript ?  d.setCurrentScript(c0) :
+            //     defProperty( d, 'currentScript', ()=> c0 );
+            Object.defineProperty( d, 'currentScript',{ get: ()=>c0, enumerable: false, configurable:true} );
+
+            window[ 'epa_'+epc.uid ] = c;
+
             c0.textContent = `
-            const epa_context = epa_${epc.uid}.context
-            ,  {   window          
-               ,   document        
-               ,   location        
-               ,   localStorage    
-               ,   sessionStorage  
-               ,   parent          
-               ,   frames
-               } = epa_context;
-               document.setCurrentScript( document.querySelector('script[epa-script-id="${c0.getAttribute('epa-script-id')}"]') )
-            `.replace( /\n/g , '')
+const
+{   window
+,   document
+,   location        
+,   localStorage    
+,   sessionStorage
+,   parent          
+,   frames
+} = epa_${epc.uid}; 
+const epa_getCurrentScript = ()=>document.querySelector( 'script[epa-script-id="${c0.getAttribute('epa-script-id')}"]');
+Object.defineProperty( document, 'currentScript',{ get: ()=>epa_getCurrentScript(), enumerable: false, configurable:true} );
+`
+                    // .replace( /\n/g , '')
                 + txt + "//# sourceURL=" + s.src ;
-
-            const r1 = ()=> ( c0.removeEventListener('load' ,r1), resolve(s) )
-            ,     r2 = ()=> ( c0.removeEventListener('error',r2), reject (s) );
-            c0.addEventListener('load' , r1 );
-            c0.addEventListener('error', r2 );
 
             let p = s.parentNode;
             p.insertBefore( c0, s );
             p.removeChild( s );
+            s.src && c0.setAttribute( 'src', s.getAttribute('src') );
+            resolve(c0);
         })
     }
         function
@@ -750,31 +752,11 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         document.scripts.push       && document.scripts.push( currentScript );
 
         (   currentScript.src
-            ?   (   canRun( currentScript )
-                    ?   ajax( urlRedirectMap( currentScript.src, redirects ) )
-                            .then( txt => runScriptAs( currentScript, txt, env.epc ) )
-                    :   timeoutPromise( 0 )
+            ?   (   ajax( urlRedirectMap( currentScript.src, redirects ) )
+                    .then( txt => runScriptAs( currentScript, txt, env.epc ) )
                 )
             :   runScriptAs( currentScript, currentScript.text, env.epc  ) // todo src map
         ).finally( x => EPA_runScript( arr, env, redirects ) );
-
-        // if( currentScript.src )
-        // {   if( canRun( currentScript ) )
-        //     {   ajax( urlRedirectMap( currentScript.src, redirects ) )
-        //             .then( txt => runScriptAs( currentScript, txt ) )
-        //             .finally( x => EPA_runScript( arr, env, redirects ) );
-        //     }else
-        //         timeoutPromise( 0 ).then( x => EPA_runScript(arr, env, redirects), 0);
-        // }else
-        //     runScriptAs( currentScript, currentScript.text ) // todo src map
-        //         .finally( x => EPA_runScript( arr, env, redirects ) );
-        //
-            function
-        canRun( s )
-        {
-            return s.type !=='module' || document.scripts.filter( c => c.src === s.src && c.type==='module' ).length === 1
-        }
-
     }
 
     function ajax( url, method = "GET", headers = {}, body = undefined )

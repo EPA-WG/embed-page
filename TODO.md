@@ -3,6 +3,8 @@
 * target attribute in content ( A & FORM )
 * epa.window.parent.location.href
 * cookies, scope impl.
+* window.self
+* navigator.serviceWorker.register
 * insulation layers - define dynamic change logic and restrictions. 
 * scope - docs for insulation layers
 * history
