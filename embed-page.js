@@ -644,6 +644,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     {
         return new Promise( ( resolve, reject ) =>
         {
+            const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent(type, false, false),x);
             const c0 = cloneScript( s, 'src' );
             c0.setAttribute('epa-script-id', ++GBL_ScriptsCount );
             c0.setAttribute('type', 'module');
@@ -651,15 +652,17 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             c0.id = 'testing';
             c0.defer = true;
             c0.async = true;
-
             s.src && Object.defineProperty( c0, 'src', { get:()=>s.src, enumerable: false, configurable:false });
 
             const c = epc.context
             ,     d = c.document;
-            // d.setCurrentScript ?  d.setCurrentScript(c0) :
-            //     defProperty( d, 'currentScript', ()=> c0 );
-            Object.defineProperty( d, 'currentScript',{ get: ()=>c0, enumerable: false, configurable:true} );
-
+            c0.addEventListener( 'load' , x=> resolve(c0) );
+            c0.addEventListener( 'error', x=> reject (c0) );
+            // Object.defineProperty( d, 'currentScript',{ get: ()=>c0, enumerable: false, configurable:true} );
+            c.EPA_PreparseScript = EPA_PreparseScript;
+            c.currentScript = c0;
+            c.trackExecution = function(){ this.scriptExecutionTimer = setTimeout( ()=>c0.dispatchEvent ( createEv('Event','error') )) };
+            c.onScriptExecuted = function(){ clearTimeout( this.scriptExecutionTimer); c0.dispatchEvent ( createEv('Event','load') )};
             window[ 'epa_'+epc.uid ] = c;
 
             c0.textContent = `
@@ -671,18 +674,31 @@ const
 ,   sessionStorage
 ,   parent          
 ,   frames
+,   EPA_PreparseScript
 } = epa_${epc.uid}; 
-const epa_getCurrentScript = ()=>document.querySelector( 'script[epa-script-id="${c0.getAttribute('epa-script-id')}"]');
-Object.defineProperty( document, 'currentScript',{ get: ()=>epa_getCurrentScript(), enumerable: false, configurable:true} );
+const epa_getCurrentScript = ()=>epa_${epc.uid}.currentScript;
+const epa_currentScript = epa_getCurrentScript();
+if( !epa_currentScript )
+    {debugger;}
+Object.defineProperty( document, 'currentScript',{ get: epa_currentScript, enumerable: false, configurable:true} );
+epa_${epc.uid}.trackExecution();
+
 `
                     // .replace( /\n/g , '')
-                + txt + "//# sourceURL=" + s.src ;
+                + EPA_PreparseScript( txt ) +
+` ; epa_${epc.uid}.onScriptExecuted();
+//# sourceURL=` + s.src ;
 
-            let p = s.parentNode;
-            p.insertBefore( c0, s );
-            p.removeChild( s );
-            s.src && c0.setAttribute( 'src', s.getAttribute('src') );
-            resolve(c0);
+            try
+            {   let p = s.parentNode;
+                p.insertBefore( c0, s );
+                p.removeChild( s );
+                s.src && c0.setAttribute( 'src', s.getAttribute('src') );
+            }catch( ex )
+            {   console.error( ex );
+                reject( ex )
+            }
+            // resolve(c0);
         })
     }
         function
