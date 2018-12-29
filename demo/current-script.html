@@ -96,73 +96,73 @@
             </template>
         </template>
     </demo-snippet>
-    <!--<demo-snippet>-->
-        <!--<h3>1. embed-page with inline scripts, 1st instance </h3>-->
-        <!--<template>-->
-            <!--<embed-page id="e1">-->
-                <!--<template> &lt;!&ndash; to prevent running script in host page &ndash;&gt;-->
-                    <!--<input class="current-script-related"/> expected <b>012</b> <br/>-->
-                    <!--<input class="document-selected"     /> expected <b>012</b>-->
+    <demo-snippet>
+        <h3>1. embed-page with inline scripts, 1st instance </h3>
+        <template>
+            <embed-page id="e1">
+                <template> <!-- to prevent running script in host page -->
+                    <input class="current-script-related"/> expected <b>012</b> <br/>
+                    <input class="document-selected"     /> expected <b>012</b>
 
-                    <!--<script title="0" src="current-script.html.js"></script>-->
-                    <!--<script title="1" src="current-script.html.js"></script>-->
-                    <!--<script title="2" src="current-script.html.js" type="module"></script>-->
-                    <!--<script title="3" src="current-script.html.js" type="module"></script>&lt;!&ndash; should be ignored &ndash;&gt;-->
-                <!--</template>-->
-            <!--</embed-page>-->
-        <!--</template>-->
-    <!--</demo-snippet>-->
-    <!--<demo-snippet>-->
-        <!--<h3>2. embed-page with inline scripts, 2nd instance </h3>-->
-        <!--<template>-->
-            <!--<embed-page id="e2">-->
-                <!--<template> &lt;!&ndash; to prevent running script in host page &ndash;&gt;-->
-                    <!--<input class="current-script-related"/> expected <b>456</b> <br/>-->
-                    <!--<input class="document-selected"     /> expected <b>456</b>-->
+                    <script title="0" src="current-script.html.js"></script>
+                    <script title="1" src="current-script.html.js"></script>
+                    <script title="2" src="current-script.html.js" type="module"></script>
+                    <script title="3" src="current-script.html.js" type="module"></script><!-- should be ignored -->
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>2. embed-page with inline scripts, 2nd instance </h3>
+        <template>
+            <embed-page id="e2">
+                <template> <!-- to prevent running script in host page -->
+                    <input class="current-script-related"/> expected <b>456</b> <br/>
+                    <input class="document-selected"     /> expected <b>456</b>
 
-                    <!--<script title="4" src="current-script.html.js"></script>-->
-                    <!--<script title="5" src="current-script.html.js"></script>-->
-                    <!--<script title="6" src="current-script.html.js" type="module"></script>-->
-                    <!--<script title="7" src="current-script.html.js" type="module"></script>&lt;!&ndash; should be ignored &ndash;&gt;-->
-                <!--</template>-->
-            <!--</embed-page>-->
-        <!--</template>-->
-    <!--</demo-snippet>-->
-    <!--<demo-snippet>-->
-        <!--<h3>3. embed-page with scripts in <a href="current-script-microapp.html">current-script-microapp.html</a> </h3>-->
-        <!--<template>-->
-            <!--<embed-page id="e3" src="current-script-microapp.html" ></embed-page>-->
-        <!--</template>-->
-    <!--</demo-snippet>-->
-    <!--<demo-snippet>-->
-        <!--<h3>4. unscoped embed-page with inline scripts </h3>-->
-        <!--Within unscoped embed-page the expected is different than in scoped. Actual values are "KL" and blank respectively.-->
-        <!--M,N scripts are skipped as those are a <var>type=module</var> and were executed in case 0 above.<br/>-->
-        <!--Blank value here is due to scripts looking for first occurrence of <var>input class="document-selected"</var>-->
-        <!--which is defined in case 0 above.-->
-        <!--<template>-->
-            <!--<embed-page id="e4" scope="none" >-->
-                <!--<template> &lt;!&ndash; to prevent running script in host page &ndash;&gt;-->
-                    <!--<input class="current-script-related"/> expected <b>KLM</b> <br/>-->
-                    <!--<input class="document-selected"     /> expected <b>KLM</b>-->
+                    <script title="4" src="current-script.html.js"></script>
+                    <script title="5" src="current-script.html.js"></script>
+                    <script title="6" src="current-script.html.js" type="module"></script>
+                    <script title="7" src="current-script.html.js" type="module"></script><!-- should be ignored -->
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>3. embed-page with scripts in <a href="current-script-microapp.html">current-script-microapp.html</a> </h3>
+        <template>
+            <embed-page id="e3" src="current-script-microapp.html" ></embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>4. unscoped embed-page with inline scripts </h3>
+        Within unscoped embed-page the expected is different than in scoped. Actual values are "KL" and blank respectively.
+        M,N scripts are skipped as those are a <var>type=module</var> and were executed in case 0 above.<br/>
+        Blank value here is due to scripts looking for first occurrence of <var>input class="document-selected"</var>
+        which is defined in case 0 above.
+        <template>
+            <embed-page id="e4" scope="none" >
+                <template> <!-- to prevent running script in host page -->
+                    <input class="current-script-related"/> expected <b>KLM</b> <br/>
+                    <input class="document-selected"     /> expected <b>KLM</b>
 
-                    <!--<script title="K" src="current-script.html.js"></script>-->
-                    <!--<script title="L" src="current-script.html.js"></script>-->
-                    <!--<script title="M" src="current-script.html.js" type="module"></script>-->
-                    <!--<script title="N" src="current-script.html.js" type="module"></script>&lt;!&ndash; should be ignored &ndash;&gt;-->
-                <!--</template>-->
-            <!--</embed-page>-->
-        <!--</template>-->
-    <!--</demo-snippet>-->
-    <!--<demo-snippet>-->
-        <!--<h3>5. unscoped embed-page with scripts in <a href="current-script-microapp.html">current-script-microapp.html</a>  </h3>-->
-        <!--Within unscoped embed-page the expected is different than in scoped. Actual values are "AB" and blank respectively.-->
-        <!--Blank value here is due to scripts looking for first occurrence of <var>input class="document-selected"</var>-->
-        <!--which is defined in case 0 above.-->
-        <!--<template>-->
-            <!--<embed-page id="e5" scope="none" src="current-script-microapp.html" ></embed-page>-->
-        <!--</template>-->
-    <!--</demo-snippet>-->
+                    <script title="K" src="current-script.html.js"></script>
+                    <script title="L" src="current-script.html.js"></script>
+                    <script title="M" src="current-script.html.js" type="module"></script>
+                    <script title="N" src="current-script.html.js" type="module"></script><!-- should be ignored -->
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>5. unscoped embed-page with scripts in <a href="current-script-microapp.html">current-script-microapp.html</a>  </h3>
+        Within unscoped embed-page the expected is different than in scoped. Actual values are "AB" and blank respectively.
+        Blank value here is due to scripts looking for first occurrence of <var>input class="document-selected"</var>
+        which is defined in case 0 above.
+        <template>
+            <embed-page id="e5" scope="none" src="current-script-microapp.html" ></embed-page>
+        </template>
+    </demo-snippet>
     <demo-snippet>
         <h3>6. embed-page with inline script type=module </h3>
 

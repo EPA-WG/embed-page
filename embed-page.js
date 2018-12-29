@@ -680,7 +680,7 @@ const epa_getCurrentScript = ()=>epa_${epc.uid}.currentScript;
 const epa_currentScript = epa_getCurrentScript();
 if( !epa_currentScript )
     {debugger;}
-Object.defineProperty( document, 'currentScript',{ get: epa_currentScript, enumerable: false, configurable:true} );
+Object.defineProperty( document, 'currentScript',{ get: ()=>epa_currentScript, enumerable: false, configurable:true} );
 epa_${epc.uid}.trackExecution();
 
 `

@@ -6,7 +6,9 @@
 * window.self
 * navigator.serviceWorker.register
 * insulation layers - define dynamic change logic and restrictions. 
-* scope - docs for insulation layers
+* scope 
+    * docs for insulation layers
+    * window.* insulation
 * history
 * Web Components
     * wrap window.customElements to use CustomElementRegistry for Web Components scope insulation
