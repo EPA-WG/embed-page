@@ -12,10 +12,16 @@
         import '@polymer/iron-demo-helpers/demo-snippet';
     </script>
     <script src="../embed-page.js" type="module"></script>
-    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
+    <style>textarea { height: 6em; width:32em; }
+        demo-snippet{ flex: 1; margin: 1em; }
+        demo-snippet:nth-child(3n+1){ box-shadow: 0 2px 15px 10px deepskyblue;  }
+        demo-snippet:nth-child(3n+2){ box-shadow: 0 2px 15px 10px orange;       }
+        demo-snippet:nth-child(3n+3){ box-shadow: 0 2px 15px 10px blueviolet;   }
+        .flex-row{ display: flex; flex-wrap: wrap; }
+    </style>
 </head>
 <body>
-    <!--<embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>-->
+    <embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>
     <h1>embed-page demo - SCRIPT tag, currentScript and rootNode</h1>
     <p>
         As html container, embed-page reads and executes content of SCRIPT tag, and since its content is a subject of
@@ -64,16 +70,16 @@
         </ul>
     </p>
     <h2><var>script type="module"</var> loaded only once per embed-page</h2>
-
+<div class="flex-row">
     <demo-snippet>
-        <h3> 0. Running 4 scripts on page level, standard behavior. </h3>
+        <h3> 0. Demo of browser standard behavior. Running 4 scripts on page level. </h3>
         <div>
             <input class="current-script-related"/> via currentScript should be <b>WX</b>
             : twice without "type". None with type="module" as currentScript is not set in browser page scope.
             <br/>
-            <input class="document-selected" /> via document should be <b>WX?</b>
-            : twice without "type". Once with type="module" as module script should be execute only once.
-            ( <b>WXY</b> within embed-page ).
+            <input class="document-selected" /> via document should start with <b>WX?U</b>
+            : twice without "type". Once with type="module" (Y) as module script should be execute only once.
+            <hr/>
 
             <script title="W" src="current-script.html.js"></script>
             <script title="X" src="current-script.html.js"></script>
@@ -93,6 +99,12 @@
                 <script title="X" src="current-script.html.js"></script>
                 <script title="Y" type="module" src="current-script.html.js"></script>
                 <script title="Z" type="module" src="current-script.html.js"></script>
+                <script type="module" title="U">
+                    import {appendText} from './appendText.js';
+                    var        f = document.querySelector('.document-selected');
+                    f.value = f.value + 'U';
+                    appendText( 'div', 'called inline script type="module" title="U"' );
+                </script>
             </template>
         </template>
     </demo-snippet>
@@ -101,13 +113,13 @@
         <template>
             <embed-page id="e1">
                 <template> <!-- to prevent running script in host page -->
-                    <input class="current-script-related"/> expected <b>012</b> <br/>
-                    <input class="document-selected"     /> expected <b>012</b>
+                    <input class="current-script-related"/> expected <b>0123</b> <br/>
+                    <input class="document-selected"     /> expected <b>0123</b> <hr/>
 
                     <script title="0" src="current-script.html.js"></script>
                     <script title="1" src="current-script.html.js"></script>
                     <script title="2" src="current-script.html.js" type="module"></script>
-                    <script title="3" src="current-script.html.js" type="module"></script><!-- should be ignored -->
+                    <script title="3" src="current-script.html.js" type="module"></script>
                 </template>
             </embed-page>
         </template>
@@ -117,13 +129,13 @@
         <template>
             <embed-page id="e2">
                 <template> <!-- to prevent running script in host page -->
-                    <input class="current-script-related"/> expected <b>456</b> <br/>
-                    <input class="document-selected"     /> expected <b>456</b>
+                    <input class="current-script-related"/> expected <b>4567</b> <br/>
+                    <input class="document-selected"     /> expected <b>4567</b> <hr/>
 
                     <script title="4" src="current-script.html.js"></script>
                     <script title="5" src="current-script.html.js"></script>
                     <script title="6" src="current-script.html.js" type="module"></script>
-                    <script title="7" src="current-script.html.js" type="module"></script><!-- should be ignored -->
+                    <script title="7" src="current-script.html.js" type="module"></script>
                 </template>
             </embed-page>
         </template>
@@ -144,21 +156,21 @@
             <embed-page id="e4" scope="none" >
                 <template> <!-- to prevent running script in host page -->
                     <input class="current-script-related"/> expected <b>KLM</b> <br/>
-                    <input class="document-selected"     /> expected <b>KLM</b>
+                    expected <b>KLM</b> mixed in field of sample #0 <hr/>
 
                     <script title="K" src="current-script.html.js"></script>
                     <script title="L" src="current-script.html.js"></script>
                     <script title="M" src="current-script.html.js" type="module"></script>
-                    <script title="N" src="current-script.html.js" type="module"></script><!-- should be ignored -->
+                    <script title="N" src="current-script.html.js" type="module"></script>
                 </template>
             </embed-page>
         </template>
     </demo-snippet>
     <demo-snippet>
         <h3>5. unscoped embed-page with scripts in <a href="current-script-microapp.html">current-script-microapp.html</a>  </h3>
-        Within unscoped embed-page the expected is different than in scoped. Actual values are "AB" and blank respectively.
+        Within unscoped embed-page the expected is different than in scoped. Expected "ABCD" and blank respectively.
         Blank value here is due to scripts looking for first occurrence of <var>input class="document-selected"</var>
-        which is defined in case 0 above.
+        which is defined in case 0 above. Expected <b>ABCD</b> mixed in field of sample #0 <hr/>
         <template>
             <embed-page id="e5" scope="none" src="current-script-microapp.html" ></embed-page>
         </template>
@@ -169,19 +181,19 @@
         <template>
             <embed-page id="e6" >
                 <template>
-                    <input class="current-script-related"/> expected <b>E</b> <br/>
-                    <input class="document-selected"     /> expected <b>E</b>
-                    <script type="module" title="E">
-                        import {appendText} from './appendText.js';
-                        var       cs = document.currentScript
-                        , parentNode = cs.parentNode
-                        ,          f = parentNode.querySelector('.current-script-related');
-                        f.value = f.value + cs.title;
-                        appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+<input class="current-script-related"/> expected <b>E</b> <br/>
+<input class="document-selected"     /> expected <b>E</b>
+<script type="module" title="E">
+    import {appendText} from './appendText.js';
+    var       cs = document.currentScript
+    , parentNode = cs.parentNode
+    ,          f = parentNode.querySelector('.current-script-related');
+    f.value = f.value + cs.title;
+    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
 
-                        f = document.querySelector('.document-selected');
-                        f.value = f.value + ( cs ? cs.title : '?' );
-                    </script>
+    f = document.querySelector('.document-selected');
+    f.value = f.value + ( cs ? cs.title : '?' );
+</script>
                 </template>
             </embed-page>
         </template>
@@ -192,29 +204,26 @@
         <template>
             <embed-page id="e7" scope="none" >
                 <template>
-                    <input class="current-script-related"/> expected <b>F</b> <br/>
-                    <input class="document-selected"     /> expected <b>blank</b>
-                    <script type="module" title="F">
-                        import {appendText} from './appendText.js';
-                        var       cs = document.currentScript
-                        , parentNode = cs.parentNode
-                        ,          f = parentNode.querySelector('.current-script-related');
-                        f.value = f.value + cs.title;
-                        appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+<input class="current-script-related"/> expected <b>F</b> <br/>
+expected <b>F</b> mixed in field of sample #0 <hr/>
+<script type="module" title="F">
+    import {appendText} from './appendText.js';
+    var       cs = document.currentScript
+    , parentNode = cs.parentNode
+    ,          f = parentNode.querySelector('.current-script-related');
+    f.value = f.value + cs.title;
+    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
 
-                        f = document.querySelector('.document-selected');
-                        f.value = f.value + ( cs ? cs.title : '?' );
-                    </script>
+    f = document.querySelector('.document-selected');
+    f.value = f.value + ( cs ? cs.title : '?' );
+</script>
                 </template>
             </embed-page>
         </template>
     </demo-snippet>
-TODO:
-    type=module inline
+</div>
 
-    <!--<script src="../node_modules/wct-browser-legacy/browser.js"></script>-->
-    <!--<script src="current-script.html.test.js"></script>-->
-
-
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+    <script src="current-script.html.test.js"></script>
 </body>
 </html>

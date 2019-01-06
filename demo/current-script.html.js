@@ -7,7 +7,7 @@ if( cs )
     f = parentNode.querySelector('.current-script-related');
     f.value = f.value + cs.title;
     console.log( 'executed',cs.outerHTML.substring(0,60) );
-    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+    appendText( 'div', 'called '+ cs.outerHTML.substring(0,47).replace( /</g , '&lt;') );
 }else
 {
     appendText( 'div', "currentScript undefined" );
