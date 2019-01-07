@@ -12,7 +12,13 @@
         import '@polymer/iron-demo-helpers/demo-snippet';
     </script>
     <script src="../embed-page.js" type="module"></script>
-    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
+    <style>textarea { height: 6em; width:32em; }
+        demo-snippet{ flex: 1; margin: 1em; }
+        demo-snippet:nth-child(3n+1){ box-shadow: 0 2px 15px 10px deepskyblue;  }
+        demo-snippet:nth-child(3n+2){ box-shadow: 0 2px 15px 10px orange;       }
+        demo-snippet:nth-child(3n+3){ box-shadow: 0 2px 15px 10px blueviolet;   }
+        .flex-row{ display: flex; flex-wrap: wrap; }
+    </style>
 </head>
 <body>
     <embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>
@@ -24,12 +30,19 @@
     </p>
     <p>
         <var> script type="module"</var> meant to be run only once like with
-        will be run within each embed-page container. Within same container those will not be executed multiple times.
-        But for each container the script will be executed separately.
+        will be run within each embed-page container. Within same container those will <u>not</u> be executed multiple times.
+        But for each container the script will be executed separately. Script titled Y is executed and Z would be ignored.
+    </p>
+    <p>
+        <var> script type="module"</var> does not have <var>document.currentScript</var> set under current standard.
+        Unlike in standard generic page, <u>microapplication</u> assumes minimal reuse of scripts and it is a
+        convenience feature to use module-formatted script as embedding-aware one. I.e. it could serve only element
+        it is embedded into. <br/>
+        The Y and Z titled scripts would behave differently in generic page and within embed-page.
     </p>
     <b><a href="https://developer.mozilla.org/en-US/docs/Web/API/Document/currentScript"
         >document.currentScript</a></b> is only(?) way to get reference to current node and traverse up to find
-        the root node. For <b>embed-page</b> content it is a shadow root of EPA container.
+        the root node. For <b>embed-page</b> content rootNode is a shadow root of EPA container.
     <p>API
         <ul>
             <li>script src and embedded load is covered by <a href="index.html">main demo page</a>, a coverage for core
@@ -56,45 +69,161 @@
             <li> Document.documentElement </li>
         </ul>
     </p>
+    <h2><var>script type="module"</var> loaded only once per embed-page</h2>
+<div class="flex-row">
     <demo-snippet>
-        <h2><var>script type="module"</var> loaded only once per embed-page</h2>
-        <p> The script <a href="current-script.html.js">current-script.html.js</a> is called
-            <input type="number" value="0" /> times.<br/>
-            Should be 3: twice without "type" and once with type="module"
-        </p>
+        <h3> 0. Demo of browser standard behavior. Running 4 scripts on page level. </h3>
+        <div>
+            <input class="current-script-related"/> via currentScript should be <b>WX</b>
+            : twice without "type". None with type="module" as currentScript is not set in browser page scope.
+            <br/>
+            <input class="document-selected" /> via document should start with <b>WX?U</b>
+            : twice without "type". Once with type="module" (Y) as module script should be execute only once.
+            <hr/>
+
+            <script title="W" src="current-script.html.js"></script>
+            <script title="X" src="current-script.html.js"></script>
+            <script title="Y" type="module" src="current-script.html.js"></script>
+            <script title="Z" type="module" src="current-script.html.js"></script>
+            <script type="module" title="U">
+                import {appendText} from './appendText.js';
+                var        f = document.querySelector('.document-selected');
+                f.value = f.value + 'U';
+                appendText( 'div', 'called inline script type="module" title="U"' );
+            </script>
+
+        </div>
         <template>
-            <!--<embed-page id="e0">-->
-                <!--<template>&lt;!&ndash; to prevent running script in host page &ndash;&gt;-->
-                    <!--Script <a href="current-script.html.js">current-script.html.js</a> is called <input type="number" value="0" /> times-->
-
-                    <!--<script title="non-module0" src="current-script.html.js"></script>-->
-                    <!--<script title="non-module1" src="current-script.html.js"></script>-->
-                    <!--<script title="module0" type="module" src="current-script.html.js"></script>-->
-                    <!--<script title="module1" type="module" src="current-script.html.js"></script>&lt;!&ndash; should be ignored &ndash;&gt;-->
-                <!--</template>-->
-            <!--</embed-page>-->
-            <!--<embed-page id="e1">-->
-                <!--<template>&lt;!&ndash; to prevent running script in host page &ndash;&gt;-->
-                    <!--Script <a href="current-script.html.js">current-script.html.js</a> is called <input type="number" value="0" /> times-->
-
-                    <!--<script title="non-module0" src="current-script.html.js"></script>-->
-                    <!--<script title="non-module1" src="current-script.html.js"></script>-->
-                    <!--<script title="module0" type="module" src="current-script.html.js"></script>-->
-                    <!--<script title="module1" type="module" src="current-script.html.js"></script>&lt;!&ndash; should be ignored &ndash;&gt;-->
-                <!--</template>-->
-            <!--</embed-page>-->
-            <hr />
-            <embed-page src="current-script-microapp.html" id="e0"></embed-page>
-            <embed-page src="current-script-microapp.html" id="e1"></embed-page>
+            <template><!-- to prevent running, actual scripts are in DIV above -->
+                <script title="W" src="current-script.html.js"></script>
+                <script title="X" src="current-script.html.js"></script>
+                <script title="Y" type="module" src="current-script.html.js"></script>
+                <script title="Z" type="module" src="current-script.html.js"></script>
+                <script type="module" title="U">
+                    import {appendText} from './appendText.js';
+                    var        f = document.querySelector('.document-selected');
+                    f.value = f.value + 'U';
+                    appendText( 'div', 'called inline script type="module" title="U"' );
+                </script>
+            </template>
         </template>
     </demo-snippet>
+    <demo-snippet>
+        <h3>1. embed-page with inline scripts, 1st instance </h3>
+        <template>
+            <embed-page id="e1">
+                <template> <!-- to prevent running script in host page -->
+                    <input class="current-script-related"/> expected <b>0123</b> <br/>
+                    <input class="document-selected"     /> expected <b>0123</b> <hr/>
+
+                    <script title="0" src="current-script.html.js"></script>
+                    <script title="1" src="current-script.html.js"></script>
+                    <script title="2" src="current-script.html.js" type="module"></script>
+                    <script title="3" src="current-script.html.js" type="module"></script>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>2. embed-page with inline scripts, 2nd instance </h3>
+        <template>
+            <embed-page id="e2">
+                <template> <!-- to prevent running script in host page -->
+                    <input class="current-script-related"/> expected <b>4567</b> <br/>
+                    <input class="document-selected"     /> expected <b>4567</b> <hr/>
+
+                    <script title="4" src="current-script.html.js"></script>
+                    <script title="5" src="current-script.html.js"></script>
+                    <script title="6" src="current-script.html.js" type="module"></script>
+                    <script title="7" src="current-script.html.js" type="module"></script>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>3. embed-page with scripts in <a href="current-script-microapp.html">current-script-microapp.html</a> </h3>
+        <template>
+            <embed-page id="e3" src="current-script-microapp.html" ></embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>4. unscoped embed-page with inline scripts </h3>
+        Within unscoped embed-page the expected is different than in scoped. Actual values are "KL" and blank respectively.
+        M,N scripts are skipped as those are a <var>type=module</var> and were executed in case 0 above.<br/>
+        Blank value here is due to scripts looking for first occurrence of <var>input class="document-selected"</var>
+        which is defined in case 0 above.
+        <template>
+            <embed-page id="e4" scope="none" >
+                <template> <!-- to prevent running script in host page -->
+                    <input class="current-script-related"/> expected <b>KLM</b> <br/>
+                    expected <b>KLM</b> mixed in field of sample #0 <hr/>
+
+                    <script title="K" src="current-script.html.js"></script>
+                    <script title="L" src="current-script.html.js"></script>
+                    <script title="M" src="current-script.html.js" type="module"></script>
+                    <script title="N" src="current-script.html.js" type="module"></script>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>5. unscoped embed-page with scripts in <a href="current-script-microapp.html">current-script-microapp.html</a>  </h3>
+        Within unscoped embed-page the expected is different than in scoped. Expected "ABCD" and blank respectively.
+        Blank value here is due to scripts looking for first occurrence of <var>input class="document-selected"</var>
+        which is defined in case 0 above. Expected <b>ABCD</b> mixed in field of sample #0 <hr/>
+        <template>
+            <embed-page id="e5" scope="none" src="current-script-microapp.html" ></embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>6. embed-page with inline script type=module </h3>
+
+        <template>
+            <embed-page id="e6" >
+                <template>
+<input class="current-script-related"/> expected <b>E</b> <br/>
+<input class="document-selected"     /> expected <b>E</b>
+<script type="module" title="E">
+    import {appendText} from './appendText.js';
+    var       cs = document.currentScript
+    , parentNode = cs.parentNode
+    ,          f = parentNode.querySelector('.current-script-related');
+    f.value = f.value + cs.title;
+    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+
+    f = document.querySelector('.document-selected');
+    f.value = f.value + ( cs ? cs.title : '?' );
+</script>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>7. unscoped embed-page with inline script type=module </h3>
+
+        <template>
+            <embed-page id="e7" scope="none" >
+                <template>
+<input class="current-script-related"/> expected <b>F</b> <br/>
+expected <b>F</b> mixed in field of sample #0 <hr/>
+<script type="module" title="F">
+    import {appendText} from './appendText.js';
+    var       cs = document.currentScript
+    , parentNode = cs.parentNode
+    ,          f = parentNode.querySelector('.current-script-related');
+    f.value = f.value + cs.title;
+    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+
+    f = document.querySelector('.document-selected');
+    f.value = f.value + ( cs ? cs.title : '?' );
+</script>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+</div>
+
     <script src="../node_modules/wct-browser-legacy/browser.js"></script>
     <script src="current-script.html.test.js"></script>
-
-
-    <script title="non-module0" src="current-script.html.js"></script>
-    <script title="non-module1" src="current-script.html.js"></script>
-    <script title="module0" type="module" src="current-script.html.js"></script>
-    <script title="module1" type="module" src="current-script.html.js"></script>
 </body>
 </html>

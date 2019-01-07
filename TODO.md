@@ -1,9 +1,14 @@
+* script nomodule support
 * support integrity attribute
 * target attribute in content ( A & FORM )
 * epa.window.parent.location.href
 * cookies, scope impl.
+* window.self
+* navigator.serviceWorker.register
 * insulation layers - define dynamic change logic and restrictions. 
-* scope - docs for insulation layers
+* scope 
+    * docs for insulation layers
+    * window.* insulation
 * history
 * Web Components
     * wrap window.customElements to use CustomElementRegistry for Web Components scope insulation
