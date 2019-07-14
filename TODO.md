@@ -1,3 +1,5 @@
+* webcomponents.org demo
+* 12 dwarfs demo  
 * script nomodule support
 * support integrity attribute
 * target attribute in content ( A & FORM )
