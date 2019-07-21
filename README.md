@@ -4,9 +4,8 @@ Proof of concept for
  - a microapplication container, a WebComponent acting as seamless IFRAME and html include
 
 [![NPM version][npm-image]][npm-url]
-[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page) 
+[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/embed-page) 
 [![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 
 ## Where to use?
 <code>&lt;embed-page/&gt;</code>  covers 2 extreme cases.
