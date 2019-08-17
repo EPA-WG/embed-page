@@ -446,7 +446,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
                 f.innerHTML  = '';
                 f.appendChild( el );
-                return this.runScripts( $s );
+                return EPA_runScript( [...$s], this.context, this.redirects );
             }finally
                 {  this.watchHtml(1); }
         }
@@ -530,11 +530,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     ,   frames          : this.window.frames
                     ,   epc             : this
                     } // sync code w/ runScriptAs
-        }
-        preparseScript(srciptText){ return EPA_PreparseScript(srciptText) }
-        runScripts( /** @type {!NodeList} */ pageScripts, { win, document, location, head, body } = this.context )
-        {   const env = this.context;
-            EPA_runScript( [...pageScripts], env, this.redirects );
         }
         runScriptsRaw( arr )
         {
@@ -659,7 +654,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             c0.addEventListener( 'load' , x=> resolve(c0) );
             c0.addEventListener( 'error', x=> reject (c0) );
             // Object.defineProperty( d, 'currentScript',{ get: ()=>c0, enumerable: false, configurable:true} );
-            c.EPA_PreparseScript = EPA_PreparseScript;
             c.currentScript = c0;
             c.trackExecution = function(){ this.scriptExecutionTimer = setTimeout( ()=>c0.dispatchEvent ( createEv('Event','error') )) };
             c.onScriptExecuted = function(){ clearTimeout( this.scriptExecutionTimer); c0.dispatchEvent ( createEv('Event','load') )};
@@ -674,7 +668,6 @@ const
 ,   sessionStorage
 ,   parent          
 ,   frames
-,   EPA_PreparseScript
 } = epa_${epc.uid}; 
 const epa_getCurrentScript = ()=>epa_${epc.uid}.currentScript;
 const epa_currentScript = epa_getCurrentScript();
@@ -685,7 +678,7 @@ epa_${epc.uid}.trackExecution();
 
 `
                     // .replace( /\n/g , '')
-                + EPA_PreparseScript( txt ) +
+                + txt +
 ` ; epa_${epc.uid}.onScriptExecuted();
 //# sourceURL=` + s.src ;
 
@@ -707,39 +700,6 @@ epa_${epc.uid}.trackExecution();
         return new Promise( resolve=> setTimeout( resolve, ms ) )
     }
 
-    function EPA_PreparseScript( s )
-    {
-        const s1 =  s.replace( /(^|[\{\}\\;\(\)\,])(\s*)(location\s*=)/g , '$1 location.href=');
-        // converting eval(expr) to  eval(EPA_PreparseScript( expr ))
-        const ev= s1.split( /(^|\W)(eval\s*\()/g );
-
-        return ev.map( (si,i,arr) =>
-        {   if( !si.startsWith('eval') )
-                return si;
-            const s=si+arr[i+1];
-            arr[i+1]="";
-            let start = s.indexOf( '(' )
-            ,     end = seekChar( ')',s, start+1 );
-            if( end < 0 )
-                return s;
-            return 'eval(EPA_PreparseScript' + s.substring(start,end) + '))'+s.substring(end+1);
-        }).join('');
-
-        function seekChar( c, s, start ) // position of character
-        {   let i=start;
-            for( ; i<s.length ; i++ )
-            {   if( s.startsWith('/*',i) )      // skip comment /* */
-                    i = seekChar( '*/',s,i+2 )+2;
-                else if( s.startsWith('//',i) ) // skip comment // ...
-                    i = seekChar( '\n',s,i+2 )+1;
-                if( s.charAt(i)==='(' )
-                    i = seekChar( ')',s,i+1 )+1;
-                if( s.startsWith(c,i) )
-                    return i;
-            }
-            return -1
-        }
-    }
     function urlRedirectMap( src, redirects )
     {
         let url = src;
