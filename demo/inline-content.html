@@ -85,6 +85,8 @@ JS  3. Click on 'make blue' the embedded H3 should be blue colored.
     <script>
         suite('embed-page inline content', () =>
         {
+            setup( ()=>Promise.all( [wait4load('epa-0'),wait4load('epa-1')] ) );
+
             test('1. initial src set, CSS insulated', function()
             {
                 const E = document.getElementById("epa-0");
@@ -143,6 +145,20 @@ JS  3. Click on 'make blue' the embedded H3 should be blue colored.
                 assert.notEqual( h3defaultColor, h3EmbeddedColor );
                 assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
             });
+                function
+            wait4load( id )
+            {
+                const E = document.getElementById( id );
+                assert.notEqual( E, null );
+                if( "complete" === E.readyState )
+                    return Promise.resolve(E);
+                return new Promise( function( resolve, reject )
+                {
+                    E.addEventListener( 'load' , x=> resolve(E) );
+                    E.addEventListener( 'error', x=> reject (E) );
+                } );
+            }
+
         });
     </script>
 

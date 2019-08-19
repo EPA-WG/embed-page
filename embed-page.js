@@ -9,7 +9,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     let     GBL_InstancesCount  = 0
     ,       GBL_ScriptsCount    = 0;
 
-    win.epa_currentScript=undefined;
+    // win.epa_currentScript=undefined;
+    win.EPA_PreparseScript = EPA_PreparseScript;
 
     class EpaHrefLocationHolder
     {
@@ -651,10 +652,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             c0.async = true;
             s.src && Object.defineProperty( c0, 'src', { get:()=>s.src, enumerable: false, configurable:false });
 
+            let done;
             const c = epc.context
-            ,     d = c.document;
-            c0.addEventListener( 'load' , x=> resolve(c0) );
-            c0.addEventListener( 'error', x=> reject (c0) );
+            ,     d = c.document
+            ,   triggerDone = x=> done ? 0 : (done=1);
+
+            c0.addEventListener( 'load' , x=> triggerDone() && resolve(c0) );
+            c0.addEventListener( 'error', x=> triggerDone() && reject (c0) );
             c.currentScript = c0;
             // c.trackExecution = function(){ this.scriptExecutionTimer = setTimeout( ()=>c0.dispatchEvent ( createEv('Event','error') )) };
             // c.onScriptExecuted = function(){ clearTimeout( this.scriptExecutionTimer); c0.dispatchEvent ( createEv('Event','load') )};
@@ -662,7 +666,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             const scrTxt =   (s=>s.substring(s.indexOf('{')+1,s.lastIndexOf('}')  ) )( ""+runScriptTemplate )
                             .replace("varList", Object.keys( epc.window ).filter( p=> !(p in c) && !p.startsWith('on') ).join(',') )
-                            .replace("nop();", txt )
+                            .replace("nop();", EPA_PreparseScript( txt ) )
                             .replace(/EPA_env/g ,  'epa_'+epc.uid )
                             +( s.src ? '//# sourceURL='+ s.src :'' );
             c0.textContent = scrTxt;
@@ -683,11 +687,11 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             EPA_env = globalThis.EPA_env;
 
 
-        const {document, location, localStorage, sessionStorage, parent, frames, currentScript } = EPA_env;
+        const { document, location, localStorage, sessionStorage, parent, frames, currentScript } = EPA_env;
         const window = new Proxy(EPA_env.window,
             {
                 set: (target, property, value, receiver) =>
-                    (target[property] = eval(`typeof ${property}`) === undefined
+                    ( target[property] = eval(`typeof ${property}`) === 'undefined'
                             ? value
                             : eval(`${property}=value`)
                     )
@@ -697,11 +701,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
         setTimeout( ()=>
             currentScript.dispatchEvent(
-                ( d=>
-                {   let ev = d.createEvent('Event');
-                    ev.initEvent('load', true, true);
-                    return ev;
-                })(document)),0);
+                ( d=>{   let ev = d.createEvent('Event'); ev.initEvent('load', false, false); return ev; })(document)),0);
         nop();
     }
     function nop(){}
@@ -711,7 +711,40 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     {
         return new Promise( resolve=> setTimeout( resolve, ms ) )
     }
+        function
+    EPA_PreparseScript( s )
+    {
+        const s1 =  s.replace( /(^|[\{\}\\;\(\)\,])(\s*)(location\s*=)/g , '$1 location.href=');
+        // converting eval(expr) to  eval(EPA_PreparseScript( expr ))
+        const ev= s1.split( /(^|\W)(eval\s*\()/g );
 
+        return ev.map( (si,i,arr) =>
+        {   if( !si.startsWith('eval') )
+                return si;
+            const s=si+arr[i+1];
+            arr[i+1]="";
+            let start = s.indexOf( '(' )
+            ,     end = seekChar( ')',s, start+1 );
+            if( end < 0 )
+                return s;
+            return 'eval(EPA_PreparseScript' + s.substring(start,end) + '))'+s.substring(end+1);
+        }).join('');
+
+        function seekChar( c, s, start ) // position of character
+        {   let i=start;
+            for( ; i<s.length ; i++ )
+            {   if( s.startsWith('/*',i) )      // skip comment /* */
+                    i = seekChar( '*/',s,i+2 )+2;
+                else if( s.startsWith('//',i) ) // skip comment // ...
+                    i = seekChar( '\n',s,i+2 )+1;
+                if( s.charAt(i)==='(' )
+                    i = seekChar( ')',s,i+1 )+1;
+                if( s.startsWith(c,i) )
+                    return i;
+            }
+            return -1
+        }
+    }
     function urlRedirectMap( src, redirects )
     {
         let url = src;
@@ -722,9 +755,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     }
     // outside of class to avoid strict mode
     function EPA_runScript( arr, env, redirects )
-    {   const { window, document, location,localStorage, sessionStorage, parent, frames } = env;
-        const currentScript = arr.shift();
-        const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent(type, false, false),x);
+    {   const { window, document } = env
+        , currentScript = arr.shift()
+        ,      createEv = (x,type)=>(x=doc.createEvent(x),x.initEvent(type, false, false),x);
         if( !currentScript )
         {
             try { window.dispatchEvent ( createEv('Event','DOMContentLoaded') );}
@@ -769,38 +802,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:false } )
     }
 
-    class EmbedPage0 extends HTMLElement
-    {
-        constructor()
-        {
-            super();
-            const shadowRoot     = this._shadowRoot = this.attachShadow( { mode: 'open' } );
-            shadowRoot.innerHTML = `<div id="framed" >
-                                        <div id="content"></div>
-                                        <div name="slotted" id="slotted">
-                                            <slot>...</slot>
-                                        </div>
-                                    </div>`;
-            addObservers( this, "this");
-        }
-        connectedCallback()
-        {   //super.connectedCallback();
-            console.log( "connectedCallback" );
-            const shadowRoot = this._shadowRoot
-            ,           slot = shadowRoot.querySelector('#slotted slot');
-
-            addObservers( slot, "slot");
-            slot.addEventListener('slotchange', e =>
-            {
-                console.log( 'slotchange', slot );
-                let newContent = slot.assignedNodes()[0];
-                addObservers( newContent, "slot.assignedNodes");
-            });
-            //const t = this.firstElementChild && "TEMPLATE" === this.firstElementChild.nodeName && this.firstElementChild.innerHTML;
-            //t && setContent( t );
-        }
-    }
-    customElements.define('embed-page0', EmbedPage0);
     return EmbedPage;
 })( window||globals, document );
 //});

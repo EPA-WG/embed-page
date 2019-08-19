@@ -24,10 +24,11 @@
     <demo-snippet>
         <h3>1. first SCRIPT sets <b>window.abc</b> to "ABC", second SCRIPT reads <b>abc</b> as global variable.</h3>
         <template>
-            <embed-page  id="epa-0">
+            <embed-page  id="e0">
                 <template>
                     <script>console.log( 'abc' in window, "should be",false );</script>
-                    <script>window.abc="ABC";</script>
+                    <script>
+                        window.abc="ABC";</script>
                     <script>
                         document.querySelector('.w').value = window.abc;
                         document.querySelector('.g').value = abc;
@@ -42,7 +43,7 @@
     <demo-snippet>
         <h3>2. first SCRIPT sets <b>window.abc</b> to "XYZ", second SCRIPT reads <b>abc</b> as global variable.</h3>
         <template>
-            <embed-page  id="epa-1">
+            <embed-page  id="e1">
                 <template>
                     <script>console.log( 'abc' in window, "should be",false );</script>
                     <script>window.abc="XYZ";</script>
@@ -65,66 +66,8 @@ CSS
 JS  3. Click on 'make blue' the embedded H3 should be blue colored.
     4. After 'innerHTML' click the H3 from embedded content should become green.
 </pre>
-    <script> // prototype for mapping of window object to scope variables
-        debugger;
-
-        const scope0 = epaScope( 0 );
-        const scope1 = epaScope( 1 );
-
-        console.log( scope0('win.a=0') );
-        console.log( scope0('win.a'), "should be 0" );
-        console.log( scope0('a'), "should be 0" );
-
-        console.log( scope1('win.a=1') );
-        console.log( scope1('win.a'), "should be 1" );
-        console.log( scope1('a'), "should be 1" );
-
-        console.log( scope0('a'), "still should be 0" );
-
-        function epaScope( epaId )
-        {
-            const winObj = { name:`window ${epaId}` }
-            ,  f = ()=>true
-            , ev = property=>eval( `var ${property} = winObj["${property}"];`);
-
-            let win = new Proxy( winObj,
-                {
-                    set: (target, property, value, receiver) => f(  target[property]=value, ev(property) )
-                });
-            return expr => eval( expr );
-        }
-    </script>
+    <script src="window-scope-proto.js"></script>
     <script src="../node_modules/wct-browser-legacy/browser.js"></script>
-    <script>
-        suite('embed-page inline content', () =>
-        {
-            test('1. initial src set, CSS insulated', function()
-            {
-                const E = document.getElementById("epa-0");
-                // assert.equal( E.src, undefined );
-                // assert.equal( E.getAttribute('src'), null );
-                // assert.equal( E.readyState, "complete" );
-                // const s = E.shadowRoot;
-                // const h = s.querySelector('h3');
-                // const h3defaultColor = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('color')
-                // ,    h3EmbeddedColor = window.getComputedStyle(h,null).getPropertyValue('color')
-                // ,          spanColor = window.getComputedStyle(document.querySelector('h3 span'),null).getPropertyValue('color');
-                // assert.notEqual( h3defaultColor, h3EmbeddedColor );
-                // assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
-            });
-            test('2. Insulated JS & CSS', function()
-            {
-            //     const E = document.getElementById("epa-1");
-            //     assert.equal( E.readyState, "complete" );
-            //     const s = E.shadowRoot;
-            //     const h = s.querySelector('h3');
-            //     const h3defaultFont = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('font-family')
-            //     ,    h3EmbeddedFont = window.getComputedStyle(h,null).getPropertyValue('font-family')
-            //     ,          spanFont = window.getComputedStyle(document.querySelector('h3 code'),null).getPropertyValue('font-family');
-            //     assert.notEqual( h3defaultFont, h3EmbeddedFont );
-            //     assert.equal( h3EmbeddedFont, spanFont );// 'monospace'
-            });
-        });
-    </script>
+    <script src="window-scope.html.test.js" async ></script>
 </body>
 </html>
