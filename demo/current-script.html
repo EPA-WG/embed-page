@@ -86,10 +86,10 @@
             <script title="Y" type="module" src="current-script.html.js"></script>
             <script title="Z" type="module" src="current-script.html.js"></script>
             <script type="module" title="U">
-                import {appendText} from './appendText.js';
+                import {appendTag} from './appendTag.js';
                 var        f = document.querySelector('.document-selected');
                 f.value = f.value + 'U';
-                appendText( 'div', 'called inline script type="module" title="U"' );
+                appendTag( 'div', 'called inline script type="module" title="U"' );
             </script>
 
         </div>
@@ -100,10 +100,10 @@
                 <script title="Y" type="module" src="current-script.html.js"></script>
                 <script title="Z" type="module" src="current-script.html.js"></script>
                 <script type="module" title="U">
-                    import {appendText} from './appendText.js';
+                    import {appendTag} from './appendTag.js';
                     var        f = document.querySelector('.document-selected');
                     f.value = f.value + 'U';
-                    appendText( 'div', 'called inline script type="module" title="U"' );
+                    appendTag( 'div', 'called inline script type="module" title="U"' );
                 </script>
             </template>
         </template>
@@ -184,12 +184,12 @@
 <input class="current-script-related"/> expected <b>E</b> <br/>
 <input class="document-selected"     /> expected <b>E</b>
 <script type="module" title="E">
-    import {appendText} from './appendText.js';
+    import {appendTag} from './appendTag.js';
     var       cs = document.currentScript
     , parentNode = cs.parentNode
     ,          f = parentNode.querySelector('.current-script-related');
     f.value = f.value + cs.title;
-    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+    appendTag( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
 
     f = document.querySelector('.document-selected');
     f.value = f.value + ( cs ? cs.title : '?' );
@@ -207,12 +207,12 @@
 <input class="current-script-related"/> expected <b>F</b> <br/>
 expected <b>F</b> mixed in field of sample #0 <hr/>
 <script type="module" title="F">
-    import {appendText} from './appendText.js';
+    import {appendTag} from './appendTag.js';
     var       cs = document.currentScript
     , parentNode = cs.parentNode
     ,          f = parentNode.querySelector('.current-script-related');
     f.value = f.value + cs.title;
-    appendText( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+    appendTag( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
 
     f = document.querySelector('.document-selected');
     f.value = f.value + ( cs ? cs.title : '?' );

@@ -230,7 +230,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( zs, 'URL'            , x=> w.location       );
             defProperty( zs, 'body'           , x=> f );
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
-            // defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
+            defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
 
             const epaDoc = createDocument(  );
             // marshal undefined yet properties to epaDoc
@@ -660,8 +660,21 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             c0.addEventListener( 'load' , x=> triggerDone() && resolve(c0) );
             c0.addEventListener( 'error', x=> triggerDone() && reject (c0) );
             c.currentScript = c0;
-            // c.trackExecution = function(){ this.scriptExecutionTimer = setTimeout( ()=>c0.dispatchEvent ( createEv('Event','error') )) };
-            // c.onScriptExecuted = function(){ clearTimeout( this.scriptExecutionTimer); c0.dispatchEvent ( createEv('Event','load') )};
+            if( d.setCurrentScript )
+                d.setCurrentScript(c0);
+            else
+            {   const d1 = {};
+                for( let p in d )
+                    wrap(p);
+                function wrap( p )
+                {   if( 'function' === typeof d[p] )
+                        d1[p]= function (){ return d[p].apply(d,arguments) };
+                    else
+                        'currentScript'.includes(p) || defProperty( d1, p, x => d[p], v => d[p]=v )
+                }
+                defProperty( d1, 'currentScript', x => c0);
+                c.document = d1;
+            }
             window[ 'epa_'+epc.uid ] = c;
 
             const scrTxt =   (s=>s.substring(s.indexOf('{')+1,s.lastIndexOf('}')  ) )( ""+runScriptTemplate )
