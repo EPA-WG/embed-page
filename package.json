@@ -1,7 +1,7 @@
 {
   "name": "embed-page",
   "description": "Proof of concept for Embeddable Progressive Application - a microapplication container, a WebComponent acting as seamless IFRAME or html include",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "browser": "embed-page.js",
   "repository": {
     "type": "git",
