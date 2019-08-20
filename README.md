@@ -64,7 +64,7 @@ Polymer 3 Element is a base for embed-page. No other dependencies in run time pl
 are not required to use \<embed-page/\>
 
 ## To see in action 
-See the live basic [DEMO on webcomponents.org](https://npm-demos.appspot.com/embed-page@0.0.18/demo/index.html)
+See the live basic [DEMO on webcomponents.org](https://npm-demos.appspot.com/embed-page@0.0.20/demo/index.html)
 , or locally run
 ```bash
 $ polymer serve --open

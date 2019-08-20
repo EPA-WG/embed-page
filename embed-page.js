@@ -206,13 +206,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         constructor( app, f, w )
         {   const zs = this
             , cookie = new EpaCookie(zs)
-            ,      $ = ( css, el = app.$.framed )=> el.querySelectorAll( css );
+            ,      $ = ( css, el = app.$.framed )=> el.querySelectorAll( css )
+            , epaDoc = createDocument();
             Object.assign( zs,
                 {   getElementById         : x=> $( '#'+x, f )[0]
                 ,   getElementsByTagName   : x=> $( x, f )
                 ,   getElementsByClassName : x=> f.getElementsByClassName( x )
-                ,   createElement          : x=> doc.createElement(x)
-                ,   createEvent            : x=> doc.createEvent(x)
+                ,   createElement          : x=> epaDoc.createElement(x)
+                ,   createEvent            : x=> epaDoc.createEvent(x)
                 ,   querySelectorAll       : x=> f.querySelectorAll(x)
                 ,   querySelector          : x=> f.querySelector(x)
                 ,   addEventListener       : (...args) => w.addEventListener(...args)
@@ -226,21 +227,21 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( zs, 'sessionStorage' , x=> w.sessionStorage );
             defProperty( zs, 'localStorage'   , x=> w.localStorage   );
             defProperty( zs, 'location'       , x=> w.location       , v=> w.location = v );
-            defProperty( zs, 'documentURI'    , x=> w.location       ); // https://html.spec.whatwg.org/multipage/history.html#the-location-interface
-            defProperty( zs, 'URL'            , x=> w.location       );
+            defProperty( zs, 'documentURI'    , x=> w.location.href  ); // https://html.spec.whatwg.org/multipage/history.html#the-location-interface
+            defProperty( zs, 'URL'            , x=> w.location.href  );
+            defProperty( zs, 'baseURI'        , x=> w.location.href  );
+            defProperty( zs, 'head'           , x=> f                );
             defProperty( zs, 'body'           , x=> f );
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
             defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
 
-            const epaDoc = createDocument(  );
             // marshal undefined yet properties to epaDoc
             Object.keys( epaDoc ).forEach( k => (k in zs) || defProperty( zs, k, x=>epaDoc[k], v=>epaDoc[k]=v ) );
 
             function createDocument() // https://dom.spec.whatwg.org/#document
             {
-                let   url = f.src
+                let   url = app.src
                 , baseURI = ( url && ABS_URL.test(url) ) ? url : doc.baseURI || win.location.href;
-                //  new Document()
                 const d = doc.implementation.createHTMLDocument('epa');
                 d.base  = d.createElement('base');
                 d.base.href = baseURI;
@@ -249,7 +250,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 d.body.appendChild(d.anchor);
                 d.anchor.href = f.src;
 
-                // d.body = app.$.framed;
                 // document.domain
                 // document.origin
                 return d;
@@ -318,6 +318,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.uid = uid ;
             defProperty( this, 'instanceNum' , x=> instanceNum );
             defProperty( this, '_A'  , x=> A );
+            defProperty( this, 'baseURI', x => A.href );
         }
 
         connectedCallback()
@@ -442,11 +443,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     return this.runScriptsRaw( [ ... $s ] );
                 }
                 const f = this.$f = this.$.framed;
-                let el       = doc.createElement( 'div' );
+                let el       = this.document.createElement( 'div' );
                 el.innerHTML = html;
                 this.onAfterLoad();
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
                 let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
+                [...$s].map( el => el.getAttribute('src') && el.setAttribute('src',el.src) );// convert to absolute path to honor document.baseURI
+
                 f.innerHTML  = '';
                 f.appendChild( el );
                 return EPA_runScript( [...$s], this.context, this.redirects );
@@ -688,10 +691,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                             +( s.src ? '//# sourceURL='+ s.src :'' );
             c0.textContent = scrTxt;
             try
-            {   let p = s.parentNode;
+            {   let  p = s.parentNode
+                , attr = ( a, v=s.getAttribute(a) ) => v && c0.setAttribute( a , v );
+
                 p.insertBefore( c0, s );
                 p.removeChild( s );
-                s.src && c0.setAttribute( 'src', s.getAttribute('src') );
+                attr('nomodule');
+                attr('type');
+                attr('src');
             }catch( ex )
             {   console.error( ex );
                 reject( ex )
@@ -787,6 +794,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             return;
         }
         currentScript.getRootNode = x => document.getRootNode();
+        defProperty( currentScript, 'baseURI', x => document.baseURI );
+
         document.scripts.push       && document.scripts.push( currentScript );
 
         (   currentScript.src
