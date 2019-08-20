@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>embed-page demo - window scope</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+        import './inline-demo-component.js';
+    </script>
+    <script src="../embed-page.js" type="module"></script>
+    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
+</head>
+<body>
+    <embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>
+    <h1>embed-page demo - window scope</h1>
+    <b>embed-page</b> populates <b>window</b> object members as "global" to microapplication variable.
+    <p>NOTE: the scope variables are populated in beginning of &lt;<var>script</var>&gt; section. Hence the window object members are not immediately available after assignment.</p>
+
+    <demo-snippet>
+        <h3>1. first SCRIPT sets <b>window.abc</b> to "ABC", second SCRIPT reads <b>abc</b> as global variable.</h3>
+        <template>
+            <embed-page  id="e0">
+                <template>
+                    <script>console.log( 'abc' in window, "should be",false );</script>
+                    <script>
+                        window.abc="ABC";</script>
+                    <script>
+                        document.querySelector('.w').value = window.abc;
+                        document.querySelector('.g').value = abc;
+                    </script>
+                    <input class="w"/> window.abc, "should be","ABC"<br/>
+                    <input class="g"/> global abc, "should be","ABC"<br/>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+
+    <demo-snippet>
+        <h3>2. first SCRIPT sets <b>window.abc</b> to "XYZ", second SCRIPT reads <b>abc</b> as global variable.</h3>
+        <template>
+            <embed-page  id="e1">
+                <template>
+                    <script>console.log( 'abc' in window, "should be",false );</script>
+                    <script>window.abc="XYZ";</script>
+                    <script>
+                        document.querySelector('.w').value = window.abc;
+                        document.querySelector('.g').value = abc;
+                    </script>
+                    <input class="w"/> window.abc, "should be","XYZ"<br/>
+                    <input class="g"/> global abc, "should be","XYZ"<br/>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <h3>Visual demo steps</h3>
+<pre>
+CSS
+    1. The H3 header above should be intact(default) in color and text size
+        AND h3 within embed-page use chocolate text color.
+    2. The H3 from embedded content should be in monospace font.
+JS  3. Click on 'make blue' the embedded H3 should be blue colored.
+    4. After 'innerHTML' click the H3 from embedded content should become green.
+</pre>
+    <script src="window-scope-proto.js"></script>
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
+    <script src="window-scope.html.test.js" async ></script>
+</body>
+</html>

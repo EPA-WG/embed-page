@@ -2,17 +2,17 @@
 {
     const cssText=`
     <style> 
-        @import "../../codemirror/lib/codemirror.css";
-        @import "../../codemirror/theme/abcdef.css";
+        @import "../node_modules/codemirror/lib/codemirror.css";
+        @import "../node_modules/codemirror/theme/abcdef.css";
         .CodeMirror{ height: auto; }
     </style>`;
-    const arr = [   "../../codemirror/lib/codemirror.js"
-                ,   "../../codemirror/addon/selection/selection-pointer.js"
-                ,   "../../codemirror/mode/xml/xml.js"
-                ,   "../../codemirror/mode/javascript/javascript.js"
-                ,   "../../codemirror/mode/css/css.js"
-                ,   "../../codemirror/mode/vbscript/vbscript.js"
-                ,   "../../codemirror/mode/htmlmixed/htmlmixed.js"
+    const arr = [   "../node_modules/codemirror/lib/codemirror.js"
+                ,   "../node_modules/codemirror/addon/selection/selection-pointer.js"
+                ,   "../node_modules/codemirror/mode/xml/xml.js"
+                ,   "../node_modules/codemirror/mode/javascript/javascript.js"
+                ,   "../node_modules/codemirror/mode/css/css.js"
+                ,   "../node_modules/codemirror/mode/vbscript/vbscript.js"
+                ,   "../node_modules/codemirror/mode/htmlmixed/htmlmixed.js"
                 ];
     loadScript();
 
