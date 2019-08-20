@@ -74,7 +74,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 else // clear
                     eachKey( k => storage.removeItem( app.getEpaPrefix() + k ) );
 
-                ev.initStorageEvent( "storage", !1, !1, k, oldVal, val, app.src, this );
+                ev.initStorageEvent( "storage", !1, !1, k, oldVal, val, app.src, storage );
                 ev.epa_uid = app.uid;
                 try{  win.dispatchEvent( ev ) }
                 catch( ev ){ console.error(ev) }
