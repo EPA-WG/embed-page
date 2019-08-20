@@ -678,9 +678,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             window[ 'epa_'+epc.uid ] = c;
 
             const scrTxt =   (s=>s.substring(s.indexOf('{')+1,s.lastIndexOf('}')  ) )( ""+runScriptTemplate )
-                            .replace("varList", Object.keys( epc.window ).filter( p=> !(p in c) && !p.startsWith('on') ).join(',') )
-                            .replace("nop();", EPA_PreparseScript( txt ) )
-                            .replace(/EPA_env/g ,  'epa_'+epc.uid )
+                            .replace(   "varList"
+                                    ,   Object.keys( epc.window )
+                                              .filter( p=> !(p in c) && !p.startsWith('on') && 'function' !== typeof epc.window[p] )
+                                              .join(',')
+                                    )
+                            .replace("nop();"   , EPA_PreparseScript( txt ) )
+                            .replace(/EPA_env/g ,  'epa_'+epc.uid           )
                             +( s.src ? '//# sourceURL='+ s.src :'' );
             c0.textContent = scrTxt;
             try
