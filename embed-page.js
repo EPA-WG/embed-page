@@ -206,13 +206,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         constructor( app, f, w )
         {   const zs = this
             , cookie = new EpaCookie(zs)
-            ,      $ = ( css, el = app.$.framed )=> el.querySelectorAll( css );
+            ,      $ = ( css, el = app.$.framed )=> el.querySelectorAll( css )
+            , epaDoc = createDocument();
             Object.assign( zs,
                 {   getElementById         : x=> $( '#'+x, f )[0]
                 ,   getElementsByTagName   : x=> $( x, f )
                 ,   getElementsByClassName : x=> f.getElementsByClassName( x )
-                ,   createElement          : x=> doc.createElement(x)
-                ,   createEvent            : x=> doc.createEvent(x)
+                ,   createElement          : x=> epaDoc.createElement(x)
+                ,   createEvent            : x=> epaDoc.createEvent(x)
                 ,   querySelectorAll       : x=> f.querySelectorAll(x)
                 ,   querySelector          : x=> f.querySelector(x)
                 ,   addEventListener       : (...args) => w.addEventListener(...args)
@@ -232,7 +233,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
             defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
 
-            const epaDoc = createDocument(  );
             // marshal undefined yet properties to epaDoc
             Object.keys( epaDoc ).forEach( k => (k in zs) || defProperty( zs, k, x=>epaDoc[k], v=>epaDoc[k]=v ) );
 
