@@ -240,9 +240,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             function createDocument() // https://dom.spec.whatwg.org/#document
             {
-                let   url = f.src
+                let   url = app.src
                 , baseURI = ( url && ABS_URL.test(url) ) ? url : doc.baseURI || win.location.href;
-                //  new Document()
                 const d = doc.implementation.createHTMLDocument('epa');
                 d.base  = d.createElement('base');
                 d.base.href = baseURI;
@@ -251,7 +250,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 d.body.appendChild(d.anchor);
                 d.anchor.href = f.src;
 
-                // d.body = app.$.framed;
                 // document.domain
                 // document.origin
                 return d;
@@ -320,6 +318,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.uid = uid ;
             defProperty( this, 'instanceNum' , x=> instanceNum );
             defProperty( this, '_A'  , x=> A );
+            defProperty( this, 'baseURI', x => A.href );
         }
 
         connectedCallback()
