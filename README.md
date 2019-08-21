@@ -4,9 +4,8 @@ Proof of concept for
  - a microapplication container, a WebComponent acting as seamless IFRAME and html include
 
 [![NPM version][npm-image]][npm-url]
-[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/EPA-WG/embed-page) 
+[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/embed-page) 
 [![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 
 ## Where to use?
 <code>&lt;embed-page/&gt;</code>  covers 2 extreme cases.
@@ -65,8 +64,7 @@ Polymer 3 Element is a base for embed-page. No other dependencies in run time pl
 are not required to use \<embed-page/\>
 
 ## To see in action 
-See the live basic [DEMO](https://raw-dot-custom-elements.appspot.com/EPA-WG/embed-page/v0.0.19/embed-page/demo/index.html)
-, check the [demo page on webcomponents.org](https://www.webcomponents.org/element/EPA-WG/embed-page/demo/demo/index.html)
+See the live basic [DEMO on webcomponents.org](https://npm-demos.appspot.com/embed-page@0.0.20/demo/index.html)
 , or locally run
 ```bash
 $ polymer serve --open

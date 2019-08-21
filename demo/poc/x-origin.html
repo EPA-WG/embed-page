@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cross-domain js module dependency</title>
+</head>
+<body>
+<title>cross-domain js module dependency load</title>
+<p>baseUrl</p>
+
+<script>
+let doc = document, win = window, url="mod-page.html";
+// 1. create doc with baseUrl from another domain
+// 2. read JS
+// 3. wrap into context guard
+// 4. create script by doc
+// 5. set script.baseUrl
+// 6. set script text
+// 7. insert into host html
+// 8. validate script dependency is executed ( i.e. baseUrl is honored )
+
+    function createDocument() // https://dom.spec.whatwg.org/#document
+    {
+        let   url = app.src
+            , baseURI = ( url && ABS_URL.test(url) ) ? url : doc.baseURI || win.location.href;
+        const d = doc.implementation.createHTMLDocument('epa');
+        d.base  = d.createElement('base');
+        d.base.href = baseURI;
+        d.head.appendChild(d.base);
+        d.anchor = d.createElement('a');
+        d.body.appendChild(d.anchor);
+        d.anchor.href = f.src;
+
+        // document.domain
+        // document.origin
+        return d;
+    }
+</script>
+</body>
+</html>
