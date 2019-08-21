@@ -227,8 +227,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( zs, 'sessionStorage' , x=> w.sessionStorage );
             defProperty( zs, 'localStorage'   , x=> w.localStorage   );
             defProperty( zs, 'location'       , x=> w.location       , v=> w.location = v );
-            defProperty( zs, 'documentURI'    , x=> w.location       ); // https://html.spec.whatwg.org/multipage/history.html#the-location-interface
-            defProperty( zs, 'URL'            , x=> w.location       );
+            defProperty( zs, 'documentURI'    , x=> w.location.href  ); // https://html.spec.whatwg.org/multipage/history.html#the-location-interface
+            defProperty( zs, 'URL'            , x=> w.location.href  );
+            defProperty( zs, 'baseURI'        , x=> w.location.href  );
+            defProperty( zs, 'head'           , x=> f                );
             defProperty( zs, 'body'           , x=> f );
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
             defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
