@@ -443,11 +443,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     return this.runScriptsRaw( [ ... $s ] );
                 }
                 const f = this.$f = this.$.framed;
-                let el       = doc.createElement( 'div' );
+                let el       = this.document.createElement( 'div' );
                 el.innerHTML = html;
                 this.onAfterLoad();
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
                 let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
+                [...$s].map( el => el.getAttribute('src') && el.setAttribute('src',el.src) );// convert to absolute path to honor document.baseURI
+
                 f.innerHTML  = '';
                 f.appendChild( el );
                 return EPA_runScript( [...$s], this.context, this.redirects );
@@ -689,10 +691,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                             +( s.src ? '//# sourceURL='+ s.src :'' );
             c0.textContent = scrTxt;
             try
-            {   let p = s.parentNode;
+            {   let  p = s.parentNode
+                , attr = ( a, v=s.getAttribute(a) ) => v && c0.setAttribute( a , v );
+
                 p.insertBefore( c0, s );
                 p.removeChild( s );
-                s.src && c0.setAttribute( 'src', s.getAttribute('src') );
+                attr('nomodule');
+                attr('type');
+                attr('src');
             }catch( ex )
             {   console.error( ex );
                 reject( ex )
@@ -788,6 +794,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             return;
         }
         currentScript.getRootNode = x => document.getRootNode();
+        defProperty( currentScript, 'baseURI', x => document.baseURI );
+
         document.scripts.push       && document.scripts.push( currentScript );
 
         (   currentScript.src
