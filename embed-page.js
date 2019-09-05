@@ -88,6 +88,17 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
     }
 
+    class EpaCustomElementRegistry
+    {
+        constructor( customElements, /** EmbedPage */ app )
+        {
+            defProperty( this, 'customElements', x=> customElements );
+        }
+        define( name, constructor, options ){ return this.customElements.get(name) || this.customElements.define(name, constructor, options) }
+        get( name ){ return this.customElements.get(name) }
+        upgrade(root){ return this.customElements.upgrade(root) }
+        whenDefined(name){ return this.customElements.whenDefined(name) }
+    }
     class EpaWindow
     {
         constructor( /** EmbedPage */ app, a )
@@ -100,7 +111,22 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                          ,   name: app.name
                          ,   target: app.target
                          };
+            Object.assign( this,
+                {    decodeURIComponent : (...args) => win.decodeURIComponent(...args)
+                ,   matchMedia:(...args) => win.matchMedia(...args)
+                ,   requestAnimationFrame:(...args) => win.requestAnimationFrame(...args)
+                ,   cancelAnimationFrame:(...args) => win.cancelAnimationFrame(...args)
+                ,   setTimeout:(...args) => win.setTimeout(...args)
+                ,   clearTimeout :(...args) => win.clearTimeout (...args)
+                });
             let closed;
+            this.globals = app.globals;
+            const customElements = //new CustomElementRegistry(win.customElements);
+                                     new EpaCustomElementRegistry(win.customElements, app );
+            defProperty( this, 'customElements'     , x=> customElements        );
+            defProperty( this, 'MutationObserver'   , x=> win.MutationObserver  );
+            defProperty( this, 'performance'        , x=> win.performance       );
+
             parentLoc.href = win.location.href;
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
@@ -213,11 +239,15 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 ,   getElementsByTagName   : x=> $( x, f )
                 ,   getElementsByClassName : x=> f.getElementsByClassName( x )
                 ,   createElement          : x=> epaDoc.createElement(x)
+                ,   createTextNode         : x=> epaDoc.createTextNode(x)
                 ,   createEvent            : x=> epaDoc.createEvent(x)
                 ,   querySelectorAll       : x=> f.querySelectorAll(x)
                 ,   querySelector          : x=> f.querySelector(x)
                 ,   addEventListener       : (...args) => w.addEventListener(...args)
+                ,   removeEventListener    : (...args) => w.removeEventListener(...args)
+                ,   importNode             : (...args) => epaDoc.importNode(...args)
                 ,   getRootNode            : x=> f
+                ,   dispatchEvent          : function (){   return epaDoc.dispatchEvent.apply( epaDoc, arguments ) }
                 ,   write       : x=> console.error( 'document.write() is not supported yet.')
                 ,   scripts     : []
                 });
@@ -232,6 +262,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( zs, 'baseURI'        , x=> w.location.href  );
             defProperty( zs, 'head'           , x=> f                );
             defProperty( zs, 'body'           , x=> f );
+            defProperty( zs, 'documentElement', x=> f );
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
             defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
 
@@ -294,7 +325,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     ,   scope:  {   type: String    , value: 'instance' }
                     ,   name:   {   type: String    , value: ''         }
                     ,   target: {   type: String    , value: ''         }
-                    ,redirects: {   type: Array     , value:  ()=>[]    }
+                    ,globalsCsv:{   type: Array     , value: ''         } // parsed to .globals, used when window.xxx is assigned in one SCRIPT tag and XXX used as global in following
+                    ,  globals: {   type: Object    , value: ()=>({})   } // map var name to value
+                    ,redirects: {   type: Array     , value: ()=>[]     }
                     ,      uid: {   type: String, reflectToAttribute: true }
                     };
         }
@@ -327,6 +360,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
         ready()
         {   super.ready();
+
+            ( this.globalsCsv || '' ).split(',')
+                .filter(k=>k).map( k=> this.globals[k] || (this.globals[k]='') );
 
             const //body = doc.createElement('body'),
                 src = this.src || '';
@@ -534,6 +570,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     ,   sessionStorage  : this.window.sessionStorage
                     ,   parent          : this.window.parent
                     ,   frames          : this.window.frames
+                    ,   customElements  : this.window.customElements
                     ,   epc             : this
                     } // sync code w/ execScriptAsTag
         }
@@ -679,56 +716,58 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 c.document = d1;
             }
             window[ 'epa_'+epc.uid ] = c;
-
-            const scrTxt =   (s=>s.substring(s.indexOf('{')+1,s.lastIndexOf('}')  ) )( ""+runScriptTemplate )
-                            .replace(   "varList"
-                                    ,   Object.keys( epc.window )
-                                              .filter( p=> !(p in c) && !p.startsWith('on') && 'function' !== typeof epc.window[p] )
-                                              .join(',')
-                                    )
-                            .replace("nop();"   , EPA_PreparseScript( txt ) )
-                            .replace(/EPA_env/g ,  'epa_'+epc.uid           )
+            const scrTxt =  (   (s=>s.substring(s.indexOf('{')+1,s.lastIndexOf('}')  ) )( ""+runScriptTemplate )
+                                .replace(   /varList\s?:\s?varList/
+                                        ,   Object.keys( epc.globals )
+                                                  // .filter( p=> !(p in c) && !p.startsWith('on') && 'function' !== typeof epc.window[p] )
+                                                  .join(',')
+                                        )
+                                + EPA_PreparseScript( txt )
+                            ).replace(/EPA_env/g ,  'epa_'+epc.uid           )
                             +( s.src ? '//# sourceURL='+ s.src :'' );
-            c0.textContent = scrTxt;
-            try
-            {   let  p = s.parentNode
-                , attr = ( a, v=s.getAttribute(a) ) => v && c0.setAttribute( a , v );
+                c0.textContent = scrTxt;
+                try
+                {   let  p = s.parentNode
+                    , attr = ( a, v=s.getAttribute(a) ) => v && c0.setAttribute( a , v );
 
-                p.insertBefore( c0, s );
-                p.removeChild( s );
-                attr('nomodule');
-                attr('type');
-                attr('src');
-            }catch( ex )
-            {   console.error( ex );
-                reject( ex )
-            }
+                    p.insertBefore( c0, s );
+                    p.removeChild( s );
+                    attr('nomodule');
+                    attr('type');
+                    attr('src');
+                }catch( ex )
+                {   console.error( ex );
+                    reject( ex )
+                }
         })
     }
     function runScriptTemplate( arr, EPA_env, redirects )
     {
         if( typeof EPA_env === "undefined" )
-            EPA_env = globalThis.EPA_env;
+            {   var EPA_env = globalThis.EPA_env; }
 
-
-        const { document, location, localStorage, sessionStorage, parent, frames, currentScript } = EPA_env;
-        const window = new Proxy(EPA_env.window,
-            {
-                set: (target, property, value, receiver) =>
-                    ( target[property] = eval(`typeof ${property}`) === 'undefined'
-                            ? value
-                            : eval(`${property}=value`)
-                    )
-            });
-        var {varList} = {...EPA_env.window};
+        const EPA_local=EPA_env;
         EPA_env = undefined;
 
+        const { document, location, localStorage, sessionStorage, parent, frames, currentScript, customElements } = EPA_local;
+        const window = new Proxy(EPA_local.window,
+            {
+                set: (target, property, value, receiver) =>
+                {   return target.globals[property]= ( target[property] =
+                        (
+                            eval(`typeof target["${property}"]`) === 'undefined'
+                            ? value
+                            : eval(`${property}=value`)
+                        )
+                    )
+                }
+// todo preserve explicitly set properties( including functions) to scope those in following scripts
+            });
+        var {varList:varList} = {...EPA_local.window};
         setTimeout( ()=>
             currentScript.dispatchEvent(
                 ( d=>{   let ev = d.createEvent('Event'); ev.initEvent('load', false, false); return ev; })(document)),0);
-        nop();
     }
-    function nop(){}
 
         function
     timeoutPromise( ms )
