@@ -4,5 +4,49 @@
     "rules": [
       "polymer-3"
     ]
-  }
+  },
+  "entrypoint": "demo/index.html",
+  "shell": "embed-page.js",
+  "sources": [
+    "demo/**/*",
+    "demo/*.*",
+    "test/**/*"
+  ],
+  "extraDependencies": [
+    "node_modules/@webcomponents/webcomponentsjs/*.js",
+    "node_modules/wct-browser-legacy/*.js",
+    "node_modules/codemirror/lib/*.js",
+    "node_modules/@polymer/iron-demo-helpers/*.js",
+    "node_modules/@polymer/iron-demo-helpers/node_modules/@polymer/font-roboto/*.*",
+    "node_modules/@polymer/test-fixture/*.*",
+    "node_modules/**/*",
+    "!node_modules/@webcomponents/webcomponentsjs/gulpfile.js",
+    "node_modules/@webcomponents/webcomponentsjs/bundles/*.js"
+  ],
+  "builds": [
+    {
+      "name": "esm-unbundled",
+      "browserCapabilities": [
+        "es2015",
+        "modules"
+      ],
+      "js"  : { "minify": false },
+      "css" : { "minify": false },
+      "html": { "minify": false },
+      "bundle": false,
+      "addServiceWorker": false
+    },
+    {
+      "name": "esm-bundled",
+      "browserCapabilities": [
+        "es2015",
+        "modules"
+      ],
+      "js"  : { "minify": true },
+      "css" : { "minify": true },
+      "html": { "minify": true },
+      "bundle": false,
+      "addServiceWorker": true
+    }
+  ]
 }
