@@ -1,5 +1,5 @@
+* HTML-as-component, using global event handlers & inline onXXX event script
 * window.customElements API
-* populate window properties into local scope before running next script ( window.define is used by polymer build )
 * move demo to CDN, wc.org does not serve URL params
 * document.head implementation (as script injection node in microapp)
 * disable 'serviceWorker' in navigator until implemented
