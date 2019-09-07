@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>HTML as Component</title>
+    <style>a{   border-radius: 0.3em; margin: 0.2rem;
+                padding: 0.2em; cursor: pointer; background: silver;
+            }
+    </style>
+</head>
+<body>
+Set background to:
+<!-- advised with tabindex attribute and `cursor:pointer` css -->
+<a onclick="setBackground(this)"     tabindex="0"           >green  </a>
+
+<!-- too verbose  -->
+<a href='javascript:void(0)' onclick="setBackground(this)"  >yellow </a>
+
+<!-- violates Content Security Policy on CSP-enabled HTTPS pages, does not provide event context -->
+<a href="javascript:setBackground({innerText:'blue'})"      >blue   </a>
+<button onclick="document.querySelector('input').value = lastColor" >get last color</button>
+<input placeholder="click button to see" />
+<a href="html-as-component.html?bla"       >reload page</a>
+<a href="html-as-component.html?color=blue">color=blue</a>
+<script>
+    var lastColor, color ;
+    document.body.style.background =color;
+    function setBackground(a)
+    {
+        document.body.style.background = lastColor = a.innerText;
+    }
+
+</script>
+</body>
+</html>

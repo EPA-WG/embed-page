@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>Plain HTML as Component - embed-page demo</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+    </script>
+
+    <script src="../embed-page.js" type="module"></script>
+    <script src="code-view.js"></script>
+
+    <custom-style>
+        <style is="custom-style" include="demo-pages-shared-styles"></style>
+    </custom-style>
+    <style>
+        @import "page.css";
+
+        iframe {
+            width: 100%;
+        }
+
+        fieldset {
+            display: inline-block;
+            border-bottom: none;
+            border-right: none;
+        }
+
+        embed-page {
+            box-shadow: inset 0 0 2em #000000;
+            padding: 1em;
+        }
+
+        dl {
+            border-left: 1em solid lightgray;
+            padding-left: 1em;
+        }
+
+        @media (max-width: 500px) {
+            body, fieldset {
+                padding: 0;
+                border-left: none
+            }
+        }
+
+        @media (min-width: 100em) {
+            fieldset {
+                width: 46%
+            }
+        }
+
+        #purple-color {
+            color: purple;
+        }
+
+        #violet-color {
+            color: violet;
+        }
+    </style>
+</head>
+<body>
+
+
+<embed-page src="demo-menu.html" scope="none"></embed-page>
+<h1> &lt;embed-page&gt; demo: plain HTML as Component</h1>
+<p> The <code>&lt;embed-page/&gt;</code> gives ability to use primitive HTML with global variables and event handlers as
+    web page Component. It insulates global variables and functions and let then be used in onXXX event handlers.</p>
+<dl>
+    <dt> Globals.</dt>
+    <dd> In micro-frontend hosted by  &lt;embed-page&gt; there is no need to worry about scoping of variables.
+        Globals could be defined as using <var>var/let/const</var> as just by <var>name</var>:<br/>
+        <code src="html-events-globals-sample1.js"></code><br/>
+        While in complex page it is a bad habit to use globals, in microapplication served by embed-page or IFRAME
+        it is <u>safe and advised</u> as reduces the code complexity, hence increase readability and reliability.<br/>
+        As long as UI follows the microapplication pattern: serve only own limited content.
+    </dd>
+    <dt> Event handlers.</dt>
+    <dd> Could be written as html onXXX attributes.
+        See <a href="html-as-component.html">html-as-component.html</a> sample bellow <br/>
+        While in complex page it is a bad habit to mix JS and HTML, in microapplication served by embed-page or IFRAME
+        it is <u>safe and advised</u> as reduces the code complexity, hence increase readability and reliability.<br/>
+        As long as UI follows the microapplication pattern: serve only own limited content.
+    </dd>
+    <dt> Globals across pages  </dt>
+    <dd> Additional perk of  &lt;embed-page&gt; : globals as uninitialized variables keep values across page navigation.<br/>
+        Of course be careful when appending data without trimming: JS memory pool is limited.
+    </dd>
+</dl>
+<h2>Where to use?</h2>
+<code>&lt;embed-page/&gt;</code> covers 2 extreme cases.
+<ol>
+    <li>Super-<b>simple</b> development with library of pre-made microapplications and plain html codebase.
+        It assumes no web component knowledge and development.
+    </li>
+    <li>Super-<b>complex</b> apps where on same page need to mix UX made with different frameworks and their
+        incompatible otherwise revisions.<br/>
+        The JS Context insulation of embed-page provides "evolutionary architecture" support to web page.
+    </li>
+</ol>
+<h2>Demo cases</h2>
+
+<fieldset>
+    <label>First instance of <a href="html-as-component.html">html-as-component.html</a></label>
+    <demo-snippet>
+        <template>
+            <embed-page src="html-as-component.html" id="epa-0"></embed-page>
+        </template>
+    </demo-snippet>
+</fieldset>
+
+<fieldset>
+    <label>Second instance of <a href="html-as-component.html">html-as-component.html</a></label>
+    <demo-snippet>
+        <template>
+            <embed-page src="html-as-component.html" id="epa-1"></embed-page>
+        </template>
+    </demo-snippet>
+</fieldset>
+<br/>
+
+<fieldset>
+    <legend> in IFRAME</legend>
+    <iframe src="html-as-component.html"></iframe>
+    <legend> Source</legend>
+
+    <code src="./html-as-component.html"></code>
+</fieldset>
+
+
+<fieldset>
+    <legend>Demo(this) page</legend>
+    <div style="display: inline-block">
+        <h3>Visual demo</h3>
+        <pre>
+<b>IFRAME</b>s are given as reference to desired behavior. Meaning same actions on IFRAME and <var>embed-page</var>
+    should have identical outcome in own UI.
+
+CSS
+    1. The header above should be intact(default) in color and text size.
+    2. Colors in demo components and IFRAMEs should match the page name: <i id="purple-color">purple</i>, <i
+                id="violet-color">violet</i> .
+
+JS
+    1. Checkboxes on page(in this section) should not be affected by <var>embed-page</var> content
+        and checked as labeled. Click on "Toggle" button from <var>embed-page</var> should trigger
+        checkmark only for own checkbox and not affect similar checkboxes in this section
+        or another <var>embed-page</var>.
+    2. Similarly toggling checkboxes here should not affect the <var>embed-page</var> intestines.
+
+Links
+    1. Click on link will replace the component content with page from <var>href</var> attribute.
+
+Form
+    1. GET and POST will replace content according to FORM <var>action</var> attribute.
+
+location & window.location & document.location
+    1. page in component populates text box with value matching SRC attribute of component.
+    2. clear the text box, click on GET. The full URL matching SRC attribute
+       should be placed in text box
+    3. change text box to <var>page-purple.html</var>, click on SET. The content of component
+       should load the page
+    4. repeat step 1-3 with 'href-get', 'href-set', 'location get', 'location set'
+    5. add URL properties like hash, port#, query parameters, user, password.
+       'other properties' should place matching key-value in text box.
+    6. change URL in text box, press 'assign()' or 'replace(), matching content
+       should be fetched.
+    7. 'reload()' should re-fetch and re-render content. See it in network and UI.
+    8. 'location-win-doc' should give true for identical 'location', 'window.location'
+       , and 'document.location'
+    9. 'this===window' should give true
+Cookies
+    1. set cookies <var>a=b</var>, set cookies <var>c=d</var>
+    2. get cookie should have both key/values presented
+    3. refresh page, get cookies should have both key/values presented
+
+
+</pre>
+    </div>
+
+</fieldset>
+<script src="../node_modules/wct-browser-legacy/browser.js"></script>
+<script src="index.html.test.js"></script>
+</body>
+</html>
