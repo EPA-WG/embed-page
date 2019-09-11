@@ -5,9 +5,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 {
     const   FRAME_HASH_PREFIX   = '#embed-page='
     ,       FRAME_BLANK         = "about:blank"
+    ,       EPA_KEYWORDS            = {}
     ,       ABS_URL = /(^\/)|(^#)|(^[\w-\d]*:)/;
     let     GBL_InstancesCount  = 0
     ,       GBL_ScriptsCount    = 0;
+
+    "break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield"
+    .split(',').map( k => EPA_KEYWORDS[k]=k );
+    win.EPA_KEYWORDS = EPA_KEYWORDS;
 
     // win.epa_currentScript=undefined;
     win.EPA_PreparseScript = EPA_PreparseScript;
@@ -716,7 +721,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 c.document = d1;
             }
             window[ 'epa_'+epc.uid ] = c;
-            const scrTxt =  (   (s=>s.substring(s.indexOf('{')+1,s.lastIndexOf('}')  ) )( ""+runScriptTemplate )
+            const scrTxt =  (   getBodyStr( runScriptTemplate )
                                 .replace(   /varList\s?:\s?varList/
                                         ,   Object.keys( epc.globals )
                                                   // .filter( p=> !(p in c) && !p.startsWith('on') && 'function' !== typeof epc.window[p] )
@@ -724,6 +729,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                         )
                                 + EPA_PreparseScript( txt )
                             ).replace(/EPA_env/g ,  'epa_'+epc.uid           )
+                            + parseVars( txt )
+                            + getBodyStr( postRunTemplate )
                             +( s.src ? '//# sourceURL='+ s.src :'' );
                 c0.textContent = scrTxt;
                 try
@@ -741,7 +748,23 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 }
         })
     }
-    function runScriptTemplate( arr, EPA_env, redirects )
+    function parseVars( txt ){  return 'var EPA_allWords ="'+  txt.match( /([0-9a-zA-Z_\$])+/g ).join(',')+'";' }
+    function getBodyStr( func ){ let s = ''+func; return s.substring( s.indexOf('{')+1,s.lastIndexOf('}')  ) }
+    function postRunTemplate( EPA_allWords, EPA_local )
+    {
+        const kw = globalThis.EPA_KEYWORDS;
+        for( let w of EPA_allWords.split(',') )
+        {
+            if( w in kw || w in EPA_local )
+                continue;
+            if( eval( 'typeof ' + w + '!=="undefined"' ) )
+                EPA_local.window.globals[ w ] = eval( w );
+            else try
+                {   EPA_local.window.globals[ w ] = eval( w ); }
+            catch(ex){}
+        }
+    }
+    function runScriptTemplate( arr, EPA_env, redirects, EPA_allWords )
     {
         if( typeof EPA_env === "undefined" )
             {   var EPA_env = globalThis.EPA_env; }
@@ -753,7 +776,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         const window = new Proxy(EPA_local.window,
             {
                 set: (target, property, value, receiver) =>
-                {   return target.globals[property]= ( target[property] =
+                {   return target.globals[property]=
+                    (   target[property] =
                         (
                             eval(`typeof target["${property}"]`) === 'undefined'
                             ? value
@@ -761,7 +785,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                         )
                     )
                 }
-// todo preserve explicitly set properties( including functions) to scope those in following scripts
             });
         var {varList:varList} = {...EPA_local.window};
         setTimeout( ()=>
