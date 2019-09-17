@@ -1,3 +1,7 @@
+ensure script would execute **before** handlers generated
+all event handlers in single script
+
+
 * HTML-as-component, using global event handlers & inline onXXX event script
 * window.customElements API
 * move demo to CDN, wc.org does not serve URL params
