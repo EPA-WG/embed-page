@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global scope insulation POC - embed-page</title>
+</head>
+<body>
+    <h1>Global scope insulation POC</h1>
+    <iframe name="_refWindow"></iframe>
+
+    <script>
+        window._scopes=[ code=>eval(code) ];
+        const _log = (...args)=>console.log.apply( console, args );
+        function _clearGlobal(  )
+        {
+            const transient = {frames:0, innerHeight:0,outerHeight:0}
+            ,         props = {} // properties of window before brushing up
+            ,    _refWindow = window.frames[0];
+            for( let k in window )
+                if( !k.startsWith('_') // epa poc tools starting w/ underscore, keep them
+                    && !( k in transient )
+                    && !(  k in _refWindow ) )// keep clean window properties
+                {
+                    props[ k ] = window[ k ];
+                    window[k]=undefined;      // delete operator does not work on global variables in window
+                    delete window[k];         // remove other properties
+                }
+            return ()=>Object.keys(props).map( k=> window[k]=props[k] )
+        }
+    </script>
+    <script id="scope0">
+        // global scope, the vars not to be leaked to scope 1 & 2
+        // which requires to preserve 'clean' set of window members for window object,
+        // perhaps possible via obtaining clean reference to iframe window or window.open()
+        var v0;
+        var v1="v0";
+        undeclared = "u0";
+        var global="gl";
+
+    </script>
+    <script  id="scope1">
+        const _restoreGlobals = _clearGlobal();
+        try
+        {   const scopeEval = code=>eval(code);
+            window._scopes.push( scopeEval);
+            var v0;
+            var v1=1;
+            undeclared = "u1";
+            _log( 'v0=', v0 , 'expected undefined');
+            _log( 'v1=', v1 , 'expected 1');
+            _log( 'undeclared=', undeclared , 'u1' );
+            _log( 'typeof global=',typeof global , 'expected undefined' );
+
+            v0="v01";
+        }finally{ _restoreGlobals(); }
+    </script>
+    <script type="module" id="scope2">
+        const _restoreGlobals = _clearGlobal();
+        import dep from './mod-page-dep.js';
+        try
+        {   const scopeEval = code=>eval(code);
+            window._scopes.push( scopeEval);
+            var v0;
+            var v1="v12";
+            // undeclared = "u1"; load error in script type=module
+            _log( 'v0=', v0 , 'expected undefined');
+            _log( 'v1=', v1 , 'expected 1');
+            _log( 'typeof undeclared=',typeof undeclared , 'expected undefined' );
+            _log( 'typeof global=',typeof global , 'expected undefined' );
+            v0=dep("v02");
+        }finally{ _restoreGlobals(); }
+    </script>
+    <script>
+        // to make script run last
+        document.body.onload=()=>
+        {
+            _log( 'v0=', v0 , 'expected undefined');
+            _log( 'v1=', v1 , 'expected v0');
+            _log( 'typeof undeclared=', typeof undeclared , 'expected string');
+            _log( 'undeclared=', undeclared , 'expected u0' );
+            _log( 'global=', global , 'expected gl' );
+        }
+    </script>
+    <br/>
+<button onclick="_scopes[0]('_log(v0,v1,undeclared)')" >log scope 0 - global    </button> |
+<button onclick="_scopes[1]('_log(v0,v1,undeclared)')" >log scope 1 - non-module</button> |
+<button onclick="_scopes[2]('_log(v0,v1,undeclared)')" >log scope 2 - module JS </button> <hr/>
+
+    In each scope:
+<button onclick="_scopes[0]('v0=10;')" > v0=10 </button> |
+<button onclick="_scopes[1]('v0=11;')" > v0=11 </button> |
+<button onclick="_scopes[2]('v0=12;')" > v0=12 </button> <hr/>
+    The <code>SCRIPT type=module</code> has proper insulation without the need for recover own context(globals)
+    before running event handler. It also support the 'import' syntax for modules.
+
+</body>
+</html>
