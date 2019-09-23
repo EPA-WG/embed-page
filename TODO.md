@@ -1,4 +1,5 @@
 * HTML-as-component, using global event handlers & inline onXXX event script
+    * 
 * window.customElements API
 * move demo to CDN, wc.org does not serve URL params
 * document.head implementation (as script injection node in microapp)
