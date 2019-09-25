@@ -16,7 +16,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     .split(',').map( k => EPA_KEYWORDS[k]=k );
     win.EPA_KEYWORDS = EPA_KEYWORDS;
 
-    // win.epa_currentScript=undefined;
+    // win.EPA_currentScript=undefined;
     win.EPA_PreparseScript = EPA_PreparseScript;
 
     class EpaHrefLocationHolder
@@ -82,7 +82,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     eachKey( k => storage.removeItem( app.getEpaPrefix() + k ) );
 
                 ev.initStorageEvent( "storage", !1, !1, k, oldVal, val, app.src, storage );
-                ev.epa_uid = app.uid;
+                ev.EPA_uid = app.uid;
                 try{  win.dispatchEvent( ev ) }
                 catch( ev ){ console.error(ev) }
             };
@@ -346,7 +346,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 </style>
                 <div id="framed" ><slot name="slotted" id="slotted"><slot>...</slot></slot></div>
                 <!--base target="target-frame"/-->
-                <iframe id="targetframe" name$="target-frame[[getInstanceNum()]]" on-load="onTargetLoad" src=""></iframe>`;
+                <iframe id="targetframe" name$="target-frame[[getInstanceNum()]]" on-load="onTargetLoad" src=""></iframe>
+                <iframe id="blankframe" ></iframe>`;
         }
         constructor()
         {   super();
@@ -390,7 +391,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             win.addEventListener('storage', e =>
             {   const pr = this.getEpaPrefix();
-                if( !e.key || !e.key.startsWith( pr ) || this.uid === e.epa_uid )
+                if( !e.key || !e.key.startsWith( pr ) || this.uid === e.EPA_uid )
                     return;
                 var   key = e.key.substring( pr.length )
                 //,     url = e.url.substring( pr.length )
@@ -495,7 +496,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
                 f.innerHTML  = '';
                 f.appendChild( el );
-
+                globalThis[ 'EPA_'+this.uid ] = this;
                 this._initEventHadlers();
                 return this._loadScriptsCode($s)
                            .then( arr => this._extractVars(arr) )
@@ -532,7 +533,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     epc._extractVars( [code] );
                     node.removeAttribute(a);
                     node.addEventListener( a.substring(2)
-                        , ev=> epc._handleEvent( node, ev, code, a ) )
+                        , ev=> epc._handleEvent.call( node, ev, code, a ) )
                 }) );
         }
         _handleEvent( node, ev, code, eventAttr ){}// stub to be replaced by scoped implementation after _loadHtml
@@ -674,28 +675,33 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         _sanitizeWindow()
         {
             const transient = {frames:0, innerHeight:0,outerHeight:0}
-                ,         props = {} // properties of window before brushing up
-                ,    _refWindow = window.frames[0];
+            ,         props = {} // properties of window before brushing up
+            ,    _refWindow = this.$.blankframe.contentWindow;
             forEach(window, (k,w)=>
             {
+                if( k in _refWindow )
+                    return;
                 props[ k ] = window[ k ];
                 w[k]=undefined;      // delete operator does not work on global variables in window
-                delete w[k];         // remove other properties
+                // delete w[k];         // remove other properties
             });
             return ()=>
             {   forEach(window, (k,w)=>
-            {   if( !( k in props ) )
-                delete w[k]; // remove injected in scope window.xxx vars
-            });
+                {   if( !( k in props ) )
+                        delete w[k]; // remove injected in scope window.xxx vars
+                });
                 Object.keys( props ).map( k => window[ k ] = props[ k ] );
-            }
+            };
             function forEach( w, cb )
             {
                 for( let k in w )
-                    if( !k.startsWith('_') // epa poc tools starting w/ underscore, keep them
+                {   let c = k.charAt(0);
+                    if( !k.startsWith( 'EPA_')
+                        && !( c >= '0' && c <= '9' )
                         && !( k in transient )
-                        && !(  k in _refWindow ) )// keep clean window properties
+                        && !( k in _refWindow ) )// keep clean window properties
                         cb( k, w )
+                }
             }
         }
 
@@ -787,7 +793,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 defProperty( d1, 'currentScript', x => c0);
                 c.document = d1;
             }
-            window[ 'epa_'+epc.uid ] = c;
+            window[ 'EPA_'+epc.uid ] = c;
             const scrTxt =  (   getBodyStr( runScriptTemplate )
                                 .replace(   /varList\s?:\s?varList/
                                         ,   Object.keys( epc.globals )
@@ -795,7 +801,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                   .join(',')
                                         )
                                 + EPA_PreparseScript( txt )
-                            ).replace(/EPA_env/g ,  'epa_'+epc.uid           )
+                            ).replace(/EPA_env/g ,  'EPA_'+epc.uid           )
                             + parseVars( txt )
                             + getBodyStr( postRunTemplate )
                             +( s.src ? '//# sourceURL='+ s.src :'' );
@@ -824,7 +830,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                              // .filter( p=> !(p in c) && !p.startsWith('on') && 'function' !== typeof epc.window[p] )
                              .join( ',' )
                  )
-                 + EPA_PreparseScript( code )).replace(/EPA_env/g , 'epa_'+epc.uid );
+                 + EPA_PreparseScript( code )).replace(/EPA_env/g , 'EPA_'+epc.uid );
     }
     function parseVars( txt ){  return 'var EPA_allWords ="'+  txt.match( /([0-9a-zA-Z_\$])+/g ).join(',')+'";' }
     function getBodyStr( func ){ let s = ''+func; return s.substring( s.indexOf('{')+1,s.lastIndexOf('}')  ) }
@@ -844,13 +850,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     }
 
     // todo disable optimization pragma
-    function runScriptTemplate( arr, EPA_env, redirects, EPA_allWords )
+    function runScriptTemplate( arr, EPA_env, redirects, EPA_allWords, EPA_local )
     {
-        if( typeof EPA_env === "undefined" )
-            {   var EPA_env = globalThis.EPA_env; }
-
-        const EPA_local=EPA_env;
-        EPA_env = undefined;
+        // if( typeof EPA_env === "undefined" )
+        //     {   var EPA_env = globalThis.EPA_env; }
 
         // const { document, location, localStorage, sessionStorage, parent, frames, currentScript, customElements } = EPA_local;
         const window = new Proxy(EPA_local.window,
@@ -866,7 +869,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     )
                 }
             });
-        ({varList:varList} = {...EPA_local.window});
+        // ({va rList:va rList} = {...EPA_local.window});
+debugger;
+        for( let k in EPA_local.globals )
+            if( eval( 'typeof '+k) !== 'function' )
+                eval( k + '=EPA_local.window.' + k );
+
         setTimeout( ()=>
             currentScript.dispatchEvent(
                 ( d=>{   let ev = d.createEvent('Event'); ev.initEvent('load', false, false); return ev; })(document)),0);
@@ -922,31 +930,45 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         function
     EPA_generateInjectScript( epa, $s )
     {
-debugger;
         if( !$s.length )
             return;
-        const codeArr = [ ';var ', Object.keys( epa.globals ).filter( k=>!( k in epa.window ) ).join(',')
-                        , ';const EPA_local=epa_', epa.uid
-                        , ',EPA_restoreWindowState=EPA_local._sanitizeWindow();try{'
-                        ]
-        ,         add = x=>codeArr.push(x);
+        const codeArr = []
+        ,     add = x=>codeArr.push(x)
+        ,    wrap = code => {   add( ';try{ debugger;\nEPA_globals2Vars();\n');
+                                add( code );
+                                add( '\n;for( let w in EPA_local.globals )EPA_local.globals[ w ] = eval( w );');
+                                add( '\n}catch(ex){ console.error(ex) }finally{');
+                                add( '}');
+                            };
+        codeArr.push(  ';try{const EPA_local=EPA_', epa.uid
+                    , ';const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && eval( w+"=EPA_local.globals."+w ) );'
+                    , ';var ', Object.keys( epa.globals ).join(',')
+                    , ';const currentScript=EPA_local._currentScript;'
+                    , ';var EPA_restoreWindowState=EPA_local._sanitizeWindow();'
+                    , ';EPA_local._handleEvent=function( ev, code, eventAttr ){ \n'
+                    );
+                    wrap( 'eval(code)' );
+                    add( '\n};' );
+        ;
         for( let s of $s )
-        {   add( ';try{ for( let w of EPA_local.globals ) eval( w+"=EPA_local.globals["+w+"]" );');
-            add(  getPreparedScript( s.EPA_code, epa ) );// +( s.src ? '//# sourceURL='+ s.src :'' );
-            add( '}catch(ex){ console.error(ex) }finally{');
-            add( 'for( let w of EPA_local.globals )EPA_local.globals[ w ] = eval( w );');
-            add( '}');
-        }
+            wrap( getPreparedScript( s.EPA_code, epa ) );
+        // {   add( ';try{ for( let w in EPA_local.globals ) eval( w+"=EPA_local.globals["+w+"]" );');
+        //     add(  getPreparedScript( s.EPA_code, epa ) );// +( s.src ? '//# sourceURL='+ s.src :'' );
+        //     add( '}catch(ex){ console.error(ex) }finally{');
+        //     add( 'for( let w in EPA_local.globals )EPA_local.globals[ w ] = eval( w );');
+        //     add( '}');
+        // }
         add('}finally{EPA_restoreWindowState()}');
         // todo emit "load" event
         const code = codeArr.join('');
 
         let s = $s[0]
         ,   c = doc.createElement('script');
-            c.setAttribute('type','');
+            c.setAttribute('type','module');
             c.async = true;
             c.defer = true;
             c.textContent = code;
+        epa._currentScript = c;
         s.parentNode.insertBefore(c, s);
     }
 
