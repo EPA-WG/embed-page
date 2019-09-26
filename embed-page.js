@@ -7,6 +7,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     ,       FRAME_BLANK         = "about:blank"
     ,       EPA_KEYWORDS            = {}
     ,       ABS_URL = /(^\/)|(^#)|(^[\w-\d]*:)/
+    ,       HREF_JS_SELECTOR = '*[href^=javascript]'
     ,       EVENTS_SELECTOR = Object.keys(window).filter( k=>k.startsWith('on') ).map(k=>'*['+k+']').join(',');
     ;
     let     GBL_InstancesCount  = 0
@@ -335,7 +336,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     ,      uid: {   type: String, reflectToAttribute: true }
                     };
         }
-        static get template() {
+        static get template()
+        {
             return html`
                 <style>
                     :host { display: block; }
@@ -532,6 +534,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     node.addEventListener( a.substring(2)
                         , ev=> epc._handleEvent.call( node, ev, code, a ) )
                 }) );
+            $( HREF_JS_SELECTOR, epc.$f ).map( node=>
+                {   const code = node.getAttribute( 'href' ).substring( 'javascript:'.length );
+                    epc._extractVars( [code] );
+
+                    node.removeAttribute('href');
+                    node.addEventListener( 'click', ev=>( ev.preventDefault(), (code !=='void(0)' && epc._handleEvent.call( node, ev, code, 'href' ) ) ) )
+                });
         }
         _handleEvent( node, ev, code, eventAttr ){}// stub to be replaced by scoped implementation after _loadHtml
 
@@ -806,10 +815,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     // todo disable optimization pragma
     function runScriptTemplate( arr, EPA_env, redirects, EPA_allWords, EPA_local )
     {
-        // if( typeof EPA_local === "undefined" )
-        //     {   var EPA_local = globalThis.EPA_env; }
-
-        // const { document, location, localStorage, sessionStorage, parent, frames, currentScript, customElements } = EPA_local;
         const window = new Proxy(EPA_local.window,
             {
                 set: (target, property, value, receiver) =>
@@ -824,7 +829,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 }
             });
         for( let k in EPA_local.globals )
-            if( eval( 'typeof '+k) !== 'function' )
+            if( !"0123456789".includes( k.charAt(0) ) && eval( 'typeof '+k) !== 'function' )
                 eval( k + '=EPA_local.window.' + k );
 
         setTimeout( ()=>
@@ -888,13 +893,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         ,     add = x=>codeArr.push(x)
         ,    wrap = code => {   add( ';try{ EPA_globals2Vars();\n');
                                 add( code );
-                                add( '\n;for( let w in EPA_local.globals )EPA_local.globals[ w ] = eval( w );');
+                                add( '\n;for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );');
                                 add( '\n}catch(ex){ console.error(ex) }finally{');
                                 add( '}');
                             };
         codeArr.push(  ';try{const EPA_local=EPA_', epa.uid
-                    , ';const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && eval( w+"=EPA_local.globals."+w ) );'
-                    , ';var ', Object.keys( epa.globals ).join(',')
+                    , ';const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && !"0123456789".includes( w.charAt(0) ) && eval( w+"=EPA_local.globals."+w ) );'
+                    , ';var ', Object.keys( epa.globals ).filter( w=>!"0123456789".includes( w.charAt(0) ) ).join(',')
                     , ';const currentScript=EPA_local._currentScript;'
                     , ';var EPA_restoreWindowState=EPA_local._sanitizeWindow();'
                     , ';EPA_local._handleEvent=function( ev, code, eventAttr ){ \n'
