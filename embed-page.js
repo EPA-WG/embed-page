@@ -16,9 +16,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     .split(',').map( k => EPA_KEYWORDS[k]=k );
     win.EPA_KEYWORDS = EPA_KEYWORDS;
 
-    // win.EPA_currentScript=undefined;
-    win.EPA_PreparseScript = EPA_PreparseScript;
-
     class EpaHrefLocationHolder
     {
         constructor( app, a )
@@ -575,7 +572,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
         onSlotChanged()
         {
-            // console.log("onSlotChanged");
+            // log("onSlotChanged");
         }
 
         postMessage( message, targetOrigin, transfer )
@@ -607,19 +604,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 }
             });
         }
-        get context()
-        {   return  {   window          : this.window
-                    ,   document        : this.document
-                    ,   location        : this.window.location
-                    ,   localStorage    : this.window.localStorage
-                    ,   sessionStorage  : this.window.sessionStorage
-                    ,   parent          : this.window.parent
-                    ,   frames          : this.window.frames
-                    ,   customElements  : this.window.customElements
-                    ,   epc             : this
-                    } // sync code w/ execScriptAsTag
-        }
-        runScriptsRaw( arr )
+        runScriptsRaw( arr ) // unscoped
         {
             const currentScript = arr.shift();
             const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent(type, false, false),x);
@@ -756,7 +741,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         return c;
     }
         function
-    execScriptAsTag( s, txt, epc )
+    execScriptAsTag( s, txt, epc )// unscoped
     {
         return new Promise( ( resolve, reject ) =>
         {
@@ -771,13 +756,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             s.src && Object.defineProperty( c0, 'src', { get:()=>s.src, enumerable: false, configurable:false });
 
             let done;
-            const c = epc.context
-            ,     d = c.document
+            const d = epc.document
             ,   triggerDone = x=> done ? 0 : (done=1);
 
             c0.addEventListener( 'load' , x=> triggerDone() && resolve(c0) );
             c0.addEventListener( 'error', x=> triggerDone() && reject (c0) );
-            c.currentScript = c0;
+            epc.currentScript = c0;
             if( d.setCurrentScript )
                 d.setCurrentScript(c0);
             else
@@ -791,19 +775,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                         'currentScript'.includes(p) || defProperty( d1, p, x => d[p], v => d[p]=v )
                 }
                 defProperty( d1, 'currentScript', x => c0);
-                c.document = d1;
+                epc.document = d1;
             }
-            window[ 'EPA_'+epc.uid ] = c;
-            const scrTxt =  (   getBodyStr( runScriptTemplate )
-                                .replace(   /varList\s?:\s?varList/
-                                        ,   Object.keys( epc.globals )
-                                                  // .filter( p=> !(p in c) && !p.startsWith('on') && 'function' !== typeof epc.window[p] )
-                                                  .join(',')
-                                        )
-                                + EPA_PreparseScript( txt )
-                            ).replace(/EPA_env/g ,  'EPA_'+epc.uid           )
-                            + parseVars( txt )
-                            + getBodyStr( postRunTemplate )
+            window[ 'EPA_'+epc.uid ] = epc;
+            const scrTxt =  txt
                             +( s.src ? '//# sourceURL='+ s.src :'' );
                 c0.textContent = scrTxt;
                 try
@@ -824,36 +799,15 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     function getPreparedScript( code, epc )
     {
         return ( getBodyStr( runScriptTemplate )
-                 .replace( /varList\s?:\s?varList/
-                     , Object.keys( epc.globals )
-                             .filter( p=> !p.startsWith('EPA_') )
-                             // .filter( p=> !(p in c) && !p.startsWith('on') && 'function' !== typeof epc.window[p] )
-                             .join( ',' )
-                 )
                  + EPA_PreparseScript( code )).replace(/EPA_env/g , 'EPA_'+epc.uid );
     }
-    function parseVars( txt ){  return 'var EPA_allWords ="'+  txt.match( /([0-9a-zA-Z_\$])+/g ).join(',')+'";' }
     function getBodyStr( func ){ let s = ''+func; return s.substring( s.indexOf('{')+1,s.lastIndexOf('}')  ) }
-    function postRunTemplate( EPA_allWords, EPA_local )
-    {
-        const kw = globalThis.EPA_KEYWORDS;
-        for( let w of EPA_allWords.split(',') )
-        {
-            if( w in kw || w in EPA_local )
-                continue;
-            if( eval( 'typeof ' + w + '!=="undefined"' ) )
-                EPA_local.window.globals[ w ] = eval( w );
-            else try
-                {   EPA_local.window.globals[ w ] = eval( w ); }
-            catch(ex){}
-        }
-    }
 
     // todo disable optimization pragma
     function runScriptTemplate( arr, EPA_env, redirects, EPA_allWords, EPA_local )
     {
-        // if( typeof EPA_env === "undefined" )
-        //     {   var EPA_env = globalThis.EPA_env; }
+        // if( typeof EPA_local === "undefined" )
+        //     {   var EPA_local = globalThis.EPA_env; }
 
         // const { document, location, localStorage, sessionStorage, parent, frames, currentScript, customElements } = EPA_local;
         const window = new Proxy(EPA_local.window,
@@ -869,8 +823,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     )
                 }
             });
-        // ({va rList:va rList} = {...EPA_local.window});
-debugger;
         for( let k in EPA_local.globals )
             if( eval( 'typeof '+k) !== 'function' )
                 eval( k + '=EPA_local.window.' + k );
@@ -934,7 +886,7 @@ debugger;
             return;
         const codeArr = []
         ,     add = x=>codeArr.push(x)
-        ,    wrap = code => {   add( ';try{ debugger;\nEPA_globals2Vars();\n');
+        ,    wrap = code => {   add( ';try{ EPA_globals2Vars();\n');
                                 add( code );
                                 add( '\n;for( let w in EPA_local.globals )EPA_local.globals[ w ] = eval( w );');
                                 add( '\n}catch(ex){ console.error(ex) }finally{');
@@ -952,12 +904,6 @@ debugger;
         ;
         for( let s of $s )
             wrap( getPreparedScript( s.EPA_code, epa ) );
-        // {   add( ';try{ for( let w in EPA_local.globals ) eval( w+"=EPA_local.globals["+w+"]" );');
-        //     add(  getPreparedScript( s.EPA_code, epa ) );// +( s.src ? '//# sourceURL='+ s.src :'' );
-        //     add( '}catch(ex){ console.error(ex) }finally{');
-        //     add( 'for( let w in EPA_local.globals )EPA_local.globals[ w ] = eval( w );');
-        //     add( '}');
-        // }
         add('}finally{EPA_restoreWindowState()}');
         // todo emit "load" event
         const code = codeArr.join('');
@@ -970,35 +916,6 @@ debugger;
             c.textContent = code;
         epa._currentScript = c;
         s.parentNode.insertBefore(c, s);
-    }
-
-    // outside of class to avoid strict mode
-    function EPA_runScript( arr, epa, redirects )
-    {   const { window, document } = epa
-        , currentScript = arr.shift()
-        ,      createEv = (x,type)=>(x=doc.createEvent(x),x.initEvent(type, false, false),x);
-        if( !currentScript )
-        {
-            try { window.dispatchEvent ( createEv('Event','DOMContentLoaded') );}
-            catch(ex)
-                { console.error(ex); }
-
-            epa._setReadyState('complete');
-            window.dispatchEvent ( createEv('Event','load') );
-            epa.dispatchEvent( createEv('Event','load') );
-            return;
-        }
-        currentScript.getRootNode = x => document.getRootNode();
-        defProperty( currentScript, 'baseURI', x => document.baseURI );
-
-        document.scripts.push       && document.scripts.push( currentScript );
-
-        (   currentScript.src
-            ?   (   ajax( urlRedirectMap( currentScript.src, redirects ) )
-                    .then( txt => execScriptAsTag( currentScript, txt, env.epc ) )
-                )
-            :   execScriptAsTag( currentScript, currentScript.text, env.epc  ) // todo src map
-        ).finally( x => EPA_runScript( arr, env, redirects ) );
     }
 
     function ajax( url, method = "GET", headers = {}, body = undefined )
