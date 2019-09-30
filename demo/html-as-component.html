@@ -23,10 +23,12 @@ Set background to:
 <a href="html-as-component.html?color=blue">color=blue</a>
 <script>
     var lastColor, color ;
+debugger;
     document.body.style.background = color;
     function setBackground(a)
     {
         document.body.style.background = lastColor = a.innerText;
+debugger;
     }
 </script>
 </body>

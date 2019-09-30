@@ -371,22 +371,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             ( this.globalsCsv || '' ).split(',')
                 .filter(k=>k).map( k=> this.globals[k] || (this.globals[k]='') );
 
-            const //body = doc.createElement('body'),
-                src = this.src || '';
-            // body.appendChild( this.$.framed.firstChild );
-            // this.$.framed = body;
-
-            this._A.href = src;
-
-            const scoped = this.isScoped()
-            ,     f = this.$.framed
-            ,     w = scoped ? new EpaWindow( this, this._A ) : win
-            ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
-            defProperty( this, 'window'         , x=> w );
-            defProperty( this, 'contentWindow'  , x=> w );
-            defProperty( this, 'document'       , x=> d );
-            scoped && defProperty( w, 'document', x=> d );
-            f.epa = this;
+            this.$.framed.epa = this;
 
             win.addEventListener('storage', e =>
             {   const pr = this.getEpaPrefix();
@@ -423,12 +408,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             }
             if( this.src )
             {
-                this.fetch();
+                // this.fetch();
             }else if( !this.html && !this.childNodes.length )
             {
                 this.onHtmlAttrChange();
             }
-            scoped && this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
+            this.isScoped() && this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
 
             let sh= this.$.slotted;
 
@@ -475,8 +460,22 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
 
         _loadHtml( html )
-        {   try
+        {
+            try
             {   this.watchHtml(0);
+                const src = this.src || '';
+
+                this._A.href = src;
+
+                const scoped = this.isScoped()
+                ,     f = this.$f = this.$.framed
+                ,     w = scoped ? new EpaWindow( this, this._A ) : win
+                ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
+                defProperty( this, 'window'         , x=> w );
+                defProperty( this, 'contentWindow'  , x=> w );
+                defProperty( this, 'document'       , x=> d );
+                scoped && defProperty( w, 'document', x=> d );
+
                 if( !this.isScoped() )
                 {
                     const el     = this.getCreateInlineElement();
@@ -485,7 +484,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     let $s       = $( scriptsSelector, el );
                     return this.runScriptsRaw( $s );
                 }
-                const f = this.$f = this.$.framed;
                 let el       = this.document.createElement( 'div' );
                 el.innerHTML = html;
                 this.onAfterLoad();
@@ -493,8 +491,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
                 $s.map( el => el.getAttribute('src') && el.setAttribute('src',el.src) );// convert to absolute path to honor document.baseURI
 
-                f.innerHTML  = '';
-                f.appendChild( el );
+debugger;
+                 f.lastElementChild ? f.replaceChild( el, f.lastElementChild ).remove() : f.appendChild( el );
                 globalThis[ 'EPA_'+this.uid ] = this;
                 this._initEventHadlers();
                 return this._loadScriptsCode($s)
@@ -516,13 +514,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         _extractVars( codeArr )
         {
             const kw = EPA_KEYWORDS
-            ,   vars = this.globals || {}
+            ,   vars = {}
             ,  undef = undefined;
 
             for( let c of codeArr )
                 c.match( /([0-9a-zA-Z_\$])+/g )
-                 .forEach( w=> !( w in kw || w in vars ) && (vars[w]=undef) );
-            this.globals = vars;
+                .forEach( w=> !( w in kw || w in vars ) && (vars[w]=undef) );
+            Object.assign( this.globals, vars );
         }
         _initEventHadlers()
         {   const epc = this;
@@ -546,9 +544,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
         fetch()
         {
-            if( !this.document )
-                return;
-            const f = this.$f = this.$.framed;
+            // if( !this.document )
+            //     return;
+            const f = this.$.framed;
             this._A.href = this.src;
 
             this.onBeforeLoad();
@@ -660,7 +658,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         {   const $f = this.$.framed;
             for( let el = ev.target; el && el!==$f ; el = el.parentElement )
             {   const a = { A:'href', FORM:'action'}[ el.tagName ];
-                if( a )
+                if( a && !a.startsWith('javascript:') )
                     if( this._prepareTarget( el, a ) )
                         ev.preventDefault();
             }
@@ -894,8 +892,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         ,    wrap = code => {   add( ';try{ EPA_globals2Vars();\n');
                                 add( code );
                                 add( '\n;for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );');
-                                add( '\n}catch(ex){ console.error(ex) }finally{');
-                                add( '}');
+                                add( '\n}catch(ex){ console.error(ex) }');
                             };
         codeArr.push(  ';try{const EPA_local=EPA_', epa.uid
                     , ';const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && !"0123456789".includes( w.charAt(0) ) && eval( w+"=EPA_local.globals."+w ) );'
@@ -942,7 +939,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     }
     function defProperty( obj, name, getter, setter=getter  )
     {
-        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:false } )
+        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:true } )
     }
 
     return EmbedPage;

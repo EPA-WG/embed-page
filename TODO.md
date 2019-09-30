@@ -1,5 +1,7 @@
 * HTML-as-component, using global event handlers & inline onXXX event script
     * 
+    
+* use    view-source: http schema ( instead of page execution) for fetching targetFrame  and onTargetLoad(), only in browsers which support view-source:(Chrome,FF, does not work in Edge)
 * window.customElements API
 * move demo to CDN, wc.org does not serve URL params
 * document.head implementation (as script injection node in microapp)
