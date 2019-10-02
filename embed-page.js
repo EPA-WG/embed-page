@@ -149,9 +149,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                          .map( f => f.window )
                                                        , (f,i,frames) => f.name && (frames[ f.name ] = f )));
 
-            this.dispatchEvent = event => app.$.framed.dispatchEvent( event );
-            this.addEventListener    = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.addEventListener   ( type, listener, useCapture, wantsUntrusted );
-            this.removeEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.framed.removeEventListener( type, listener, useCapture, wantsUntrusted );
+            this.dispatchEvent = event => app.$.body.dispatchEvent( event );
+            this.addEventListener    = ( type, listener, useCapture, wantsUntrusted ) => app.$.body.addEventListener   ( type, listener, useCapture, wantsUntrusted );
+            this.removeEventListener = ( type, listener, useCapture, wantsUntrusted ) => app.$.body.removeEventListener( type, listener, useCapture, wantsUntrusted );
             this.postMessage = ( message, targetOrigin, transfer )=> app.postMessage( message, targetOrigin, transfer );
             this.open = ( url, windowName="", windowFeatures={} ) =>
             {
@@ -237,7 +237,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         constructor( app, f, w )
         {   const zs = this
             , cookie = new EpaCookie(zs)
-            ,      $ = ( css, el = app.$.framed )=> el.querySelectorAll( css )
+            ,      $ = ( css, el = app.$.body )=> el.querySelectorAll( css )
             , epaDoc = createDocument();
             Object.assign( zs,
                 {   getElementById         : x=> $( '#'+x, f )[0]
@@ -266,7 +266,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( zs, 'URL'            , x=> w.location.href  );
             defProperty( zs, 'baseURI'        , x=> w.location.href  );
             defProperty( zs, 'head'           , x=> f                );
-            defProperty( zs, 'body'           , x=> f );
+            defProperty( zs, 'body'           , x=> f.querySelector('body') );
             defProperty( zs, 'documentElement', x=> f );
             defProperty( zs, 'cookie'         , x=> cookie.toString(), v=> cookie.set(v) );
             defProperty( zs, 'currentScript'  , x=> currentScript, zs.setCurrentScript );
@@ -343,7 +343,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     :host { display: block; }
                     iframe{display: none;}
                 </style>
-                <div id="framed" ><slot name="slotted" id="slotted"><slot>...</slot></slot></div>
+                <slot id="body"></slot>
                 <!--base target="target-frame"/-->
                 <iframe id="targetframe" name$="target-frame[[getInstanceNum()]]" on-load="onTargetLoad" src=""></iframe>
                 <iframe id="blankframe" ></iframe>`;
@@ -371,7 +371,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             ( this.globalsCsv || '' ).split(',')
                 .filter(k=>k).map( k=> this.globals[k] || (this.globals[k]='') );
 
-            this.$.framed.epa = this;
+            this.$.body.epa = this;
 
             win.addEventListener('storage', e =>
             {   const pr = this.getEpaPrefix();
@@ -413,14 +413,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             {
                 this.onHtmlAttrChange();
             }
-            this.isScoped() && this.$.framed.addEventListener( 'click', this._onClick.bind(this), true );
-
-            let sh= this.$.slotted;
-
-            const slot = sh.querySelector('slot');
-            slot.addEventListener('slotchange', e =>
+            this.isScoped() && this.$.body.addEventListener( 'click', this._onClick.bind(this), true );
+            this.$.body.addEventListener('slotchange', e =>
                 {   setTimeout( ()=>  this.onSlotChanged(), 0 ) });
-            //this.$.slot.addEventListener('slotchange', this.onSlotChanged.bind(this));
         }
         getInstanceNum(){ return this.instanceNum }
         isScoped(){ return this.scope !== 'none' }
@@ -468,7 +463,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 this._A.href = src;
 
                 const scoped = this.isScoped()
-                ,     f = this.$f = this.$.framed
+                ,     f = this.$.body
                 ,     w = scoped ? new EpaWindow( this, this._A ) : win
                 ,     d = scoped ? new EpaDocument( this, f, w  ) : doc ;
                 defProperty( this, 'window'         , x=> w );
@@ -484,15 +479,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     let $s       = $( scriptsSelector, el );
                     return this.runScriptsRaw( $s );
                 }
-                let el       = this.document.createElement( 'div' );
+                let el       = this.document.createElement( 'body' );
                 el.innerHTML = html;
                 this.onAfterLoad();
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
                 let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
                 $s.map( el => el.getAttribute('src') && el.setAttribute('src',el.src) );// convert to absolute path to honor document.baseURI
 
-debugger;
-                 f.lastElementChild ? f.replaceChild( el, f.lastElementChild ).remove() : f.appendChild( el );
+                f.lastElementChild ? f.replaceChild( el, f.lastElementChild ).remove() : f.appendChild( el );
                 globalThis[ 'EPA_'+this.uid ] = this;
                 this._initEventHadlers();
                 return this._loadScriptsCode($s)
@@ -524,7 +518,7 @@ debugger;
         }
         _initEventHadlers()
         {   const epc = this;
-            $( EVENTS_SELECTOR, epc.$f ).map( node=>
+            $( EVENTS_SELECTOR, epc.$.body ).map( node=>
                 node.getAttributeNames().filter(a=>a.startsWith('on')).forEach( a=>
                 {   const code = node.getAttribute( a );
                     epc._extractVars( [code] );
@@ -532,7 +526,7 @@ debugger;
                     node.addEventListener( a.substring(2)
                         , ev=> epc._handleEvent.call( node, ev, code, a ) )
                 }) );
-            $( HREF_JS_SELECTOR, epc.$f ).map( node=>
+            $( HREF_JS_SELECTOR, epc.$.body ).map( node=>
                 {   const code = node.getAttribute( 'href' ).substring( 'javascript:'.length );
                     epc._extractVars( [code] );
 
@@ -546,7 +540,7 @@ debugger;
         {
             // if( !this.document )
             //     return;
-            const f = this.$.framed;
+            const f = this.$.body;
             this._A.href = this.src;
 
             this.onBeforeLoad();
@@ -558,8 +552,8 @@ debugger;
                         this._setReadyState('error');
                     });
         }
-        onBeforeLoad(){ addClass   ( this.$.framed,'loading');this._setReadyState('loading') }
-        onAfterLoad (){ removeClass( this.$.framed,'loading');this._setReadyState('interactive') }
+        onBeforeLoad(){ addClass   ( this.$.body,'loading');this._setReadyState('loading') }
+        onAfterLoad (){ removeClass( this.$.body,'loading');this._setReadyState('interactive') }
 
         onHtmlChange()
         {   this.onBeforeLoad();
@@ -583,7 +577,7 @@ debugger;
         }
 
         postMessage( message, targetOrigin, transfer )
-            {   return postMessageTo( message, targetOrigin, transfer, this._A.href, this.$.framed );  }
+            {   return postMessageTo( message, targetOrigin, transfer, this._A.href, this.$.body );  }
         get promise()
         {   if( "complete" === this.readyState )
                 return Promise.resolve(this);
@@ -655,7 +649,7 @@ debugger;
                 el.setAttribute( attr, this.src );
         }
         _onClick(ev)
-        {   const $f = this.$.framed;
+        {   const $f = this.$.body;
             for( let el = ev.target; el && el!==$f ; el = el.parentElement )
             {   const a = { A:'href', FORM:'action'}[ el.tagName ];
                 if( a && !a.startsWith('javascript:') )

@@ -2,6 +2,8 @@
     * 
     
 * use    view-source: http schema ( instead of page execution) for fetching targetFrame  and onTargetLoad(), only in browsers which support view-source:(Chrome,FF, does not work in Edge)
+* populate el.id attribute as variable https://javascript.info/slots-composition
+
 * window.customElements API
 * move demo to CDN, wc.org does not serve URL params
 * document.head implementation (as script injection node in microapp)
