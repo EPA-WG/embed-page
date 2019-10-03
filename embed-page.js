@@ -421,7 +421,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         isScoped(){ return this.scope !== 'none' }
         inScope( url )
         {   const a = this.document.createElement('a');
-            a.setAttribute( 'href',url );
+            a.setAttribute( 'href', url );
             switch( this.scope )
             {   case 'none'     :   return true;
                 case 'named'    :   return false;
@@ -488,6 +488,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
                 f.lastElementChild ? f.replaceChild( el, f.lastElementChild ).remove() : f.appendChild( el );
                 globalThis[ 'EPA_'+this.uid ] = this;
+                this._extractVars( $( "*[id]", this.$.body ).map( n=>n.id ) );
                 this._initEventHadlers();
                 return this._loadScriptsCode($s)
                            .then( arr => this._extractVars(arr) )
@@ -823,6 +824,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         for( let k in EPA_local.globals )
             if( !"0123456789".includes( k.charAt(0) ) && eval( 'typeof '+k) !== 'function' )
                 eval( k + '=EPA_local.window.' + k );
+        [...document.querySelectorAll("*[id]")].map( el=>"0123456789".includes( el.id.charAt(0) ) || eval( el.id+"=el" ));
 
         setTimeout( ()=>
             currentScript.dispatchEvent(
