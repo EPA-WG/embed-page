@@ -74,7 +74,7 @@
 <dl>
     <dt> Globals.</dt>
     <dd> In micro-frontend hosted by  &lt;embed-page&gt; there is no need to worry about scoping of variables.
-        Globals could be defined as using <var>var/let/const</var> as just by <var>name</var>:<br/>
+        Globals could be defined by element <var>id</var> attribute, by using <var>var/let/const</var>, or just by <var>name</var>:<br/>
         <code src="html-events-globals-sample1.js"></code><br/>
         While in complex page it is a bad habit to use globals, in microapplication served by embed-page or IFRAME
         it is <u>safe and advised</u> as reduces the code complexity, hence increase readability and reliability.<br/>

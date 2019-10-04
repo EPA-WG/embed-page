@@ -13,6 +13,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     let     GBL_InstancesCount  = 0
     ,       GBL_ScriptsCount    = 0;
 
+    const createEv = (x,type)=>(x=doc.createEvent(x),x.initEvent(type, false, false),x);
+
     "get,eval,set,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield"
     .split(',').map( k => EPA_KEYWORDS[k]=k );
     win.EPA_KEYWORDS = EPA_KEYWORDS;
@@ -359,6 +361,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             A.toString = function(){ return this.href };
 
             this.uid = uid ;
+            this.EPA_PreparseScript = EPA_PreparseScript;
             defProperty( this, 'instanceNum' , x=> instanceNum );
             defProperty( this, '_A'  , x=> A );
             defProperty( this, 'baseURI', x => A.href );
@@ -887,42 +890,46 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             url = m.to + url.substring( m.from.length );
         return url;
     }
+
         function
     EPA_generateInjectScript( epa, $s )
     {
-        if( !$s.length )
-            return;
-        const codeArr = []
-        ,     add = x=>codeArr.push(x)
-        ,    wrap = code => {   add( ';try{ EPA_globals2Vars();\n');
-                                add( code );
-                                add( '\n;for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );');
-                                add( '\n}catch(ex){ console.error(ex) }');
-                            };
-        codeArr.push(  ';try{const EPA_local=EPA_', epa.uid
-                    , ';const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && !"0123456789".includes( w.charAt(0) ) && eval( w+"=EPA_local.globals."+w ) );'
-                    , ';var ', Object.keys( epa.globals ).filter( w=>!"0123456789".includes( w.charAt(0) ) ).join(',')
-                    , ';const currentScript=EPA_local._currentScript;'
-                    , ';var EPA_restoreWindowState=EPA_local._sanitizeWindow();'
-                    , ';EPA_local._handleEvent=function( ev, code, eventAttr ){ \n'
-                    );
-                    wrap( 'eval(code)' );
-                    add( '\n};' );
-        ;
-        for( let s of $s )
-            wrap( getPreparedScript( s.EPA_code, epa ) );
-        add('}finally{EPA_restoreWindowState()}');
-        // todo emit "load" event
-        const code = codeArr.join('');
+        if( $s.length )
+        {
+            const codeArr = []
+            ,     add = x=>codeArr.push(x)
+            ,    wrap = code => {   add( ';try{ EPA_globals2Vars();\n');
+                                    add( code );
+                                    add( '\n;for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );');
+                                    add( '\n}catch(ex){ console.error(ex) }');
+                                };
+            codeArr.push(  ';try{const EPA_local=EPA_', epa.uid
+                        , ';const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && !"0123456789".includes( w.charAt(0) ) && eval( w+"=EPA_local.globals."+w ) );'
+                        , ';var ', Object.keys( epa.globals ).filter( w=>!"0123456789".includes( w.charAt(0) ) ).join(',')
+                        , ';const currentScript=EPA_local._currentScript;'
+                        , ';var EPA_PreparseScript=EPA_local.EPA_PreparseScript,EPA_restoreWindowState=EPA_local._sanitizeWindow();'
+                        , ';EPA_local._handleEvent=function( ev, code, eventAttr ){ \n'
+                        );
+                        wrap( 'eval(code)' );
+                        add( '\n};' );
 
-        let s = $s[0]
-        ,   c = doc.createElement('script');
-            c.setAttribute('type','module');
-            c.async = true;
-            c.defer = true;
-            c.textContent = code;
-        epa._currentScript = c;
-        s.parentNode.insertBefore(c, s);
+            for( let s of $s )
+                wrap( getPreparedScript( s.EPA_code, epa ) );
+            add('}finally{EPA_restoreWindowState()}');
+            // todo emit "load" event
+            const code = codeArr.join('');
+
+            let s = $s[0]
+            ,   c = doc.createElement('script');
+                c.setAttribute('type','module');
+                c.async = true;
+                c.defer = true;
+                c.textContent = code;
+            epa._currentScript = c;
+            s.parentNode.insertBefore(c, s);
+        }
+        epa._setReadyState('complete');
+        epa.dispatchEvent( createEv('Event','load') );
     }
 
     function ajax( url, method = "GET", headers = {}, body = undefined )
