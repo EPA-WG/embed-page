@@ -13,7 +13,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     let     GBL_InstancesCount  = 0
     ,       GBL_ScriptsCount    = 0;
 
-    "break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield"
+    "get,eval,set,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield"
     .split(',').map( k => EPA_KEYWORDS[k]=k );
     win.EPA_KEYWORDS = EPA_KEYWORDS;
 
@@ -116,6 +116,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                          ,   name: app.name
                          ,   target: app.target
                          };
+            let cons = {}; Object.keys(console).forEach( function(f){ if( typeof(cons[f]==='function') )cons[f]=( ...args ) => win.console[f]( app,  ...args )} );
             Object.assign( this,
                 {    decodeURIComponent : (...args) => win.decodeURIComponent(...args)
                 ,   matchMedia:(...args) => win.matchMedia(...args)
@@ -123,7 +124,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 ,   cancelAnimationFrame:(...args) => win.cancelAnimationFrame(...args)
                 ,   setTimeout:(...args) => win.setTimeout(...args)
                 ,   clearTimeout :(...args) => win.clearTimeout (...args)
+                ,   console :   cons
                 });
+
             let closed;
             this.globals = app.globals;
             const customElements = //new CustomElementRegistry(win.customElements);
@@ -342,8 +345,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 <style>
                     :host { display: block; }
                     iframe{display: none;}
-                </style>
-                <slot id="body"></slot>
+                </style><slot></slot>
+                <div id="body"></div>
                 <!--base target="target-frame"/-->
                 <iframe id="targetframe" name$="target-frame[[getInstanceNum()]]" on-load="onTargetLoad" src=""></iframe>
                 <iframe id="blankframe" ></iframe>`;
@@ -410,7 +413,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             {
                 // this.fetch();
             }else if( !this.html && !this.childNodes.length )
-            {
+            {   this._setReadyState('initial');
                 this.onHtmlAttrChange();
             }
             this.isScoped() && this.$.body.addEventListener( 'click', this._onClick.bind(this), true );
@@ -564,7 +567,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 this._loadHtml( this.innerHTML.trim().replace('<template>','').replace('</template>','') );
         }
         onHtmlAttrChange()
-        {   if( !this.document )
+        {   if( this.readyState === 'loading' )
                 return;
             this.onBeforeLoad();
             if( this.html )
@@ -822,8 +825,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 }
             });
         for( let k in EPA_local.globals )
-            if( !"0123456789".includes( k.charAt(0) ) && eval( 'typeof '+k) !== 'function' )
-                eval( k + '=EPA_local.window.' + k );
+            try
+            {
+                if( k !== 'window' && !"0123456789".includes( k.charAt( 0 ) ) && eval( 'typeof ' + k ) !== 'function' )
+                    eval( k + '=EPA_local.window.' + k );
+            }catch(ex)
+            {   if( !ex.message.includes('before initialization') )// legitimate case "Cannot access 'XXX' before initialization"
+                    debugger;
+            }
         [...document.querySelectorAll("*[id]")].map( el=>"0123456789".includes( el.id.charAt(0) ) || eval( el.id+"=el" ));
 
         setTimeout( ()=>
