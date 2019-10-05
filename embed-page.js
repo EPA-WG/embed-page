@@ -622,7 +622,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 catch(ex)
                     { console.error(ex); }
                 this._setReadyState('complete');
-                this.dispatchEvent( createEv('Event','load') );
+                setTimeout( ()=>this._emitEvent( this,'load' ), 10 );
                 return;
             }
             const s = currentScript;
@@ -697,7 +697,11 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 }
             }
         }
-
+        _emitEvent( el, evName )
+        {   let ev = doc.createEvent("Event");
+            ev.initEvent(evName, false, false);
+            el.dispatchEvent(ev)
+        }
         onTargetLoad(ev)
         {
             const   fr  = ev.target
@@ -837,10 +841,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     debugger;
             }
         [...document.querySelectorAll("*[id]")].map( el=>"0123456789".includes( el.id.charAt(0) ) || eval( el.id+"=el" ));
-
-        setTimeout( ()=>
-            currentScript.dispatchEvent(
-                ( d=>{   let ev = d.createEvent('Event'); ev.initEvent('load', false, false); return ev; })(document)),0);
     }
 
         function
@@ -903,8 +903,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                     add( '\n;for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );');
                                     add( '\n}catch(ex){ console.error(ex) }');
                                 };
-            codeArr.push(  ';try{const EPA_local=EPA_', epa.uid
-                        , ';const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && !"0123456789".includes( w.charAt(0) ) && eval( w+"=EPA_local.globals."+w ) );'
+            codeArr.push(  ';const EPA_local=EPA_', epa.uid
+                        , ';try{const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && !"0123456789".includes( w.charAt(0) ) && eval( w+"=EPA_local.globals."+w ) );'
                         , ';var ', Object.keys( epa.globals ).filter( w=>!"0123456789".includes( w.charAt(0) ) ).join(',')
                         , ';const currentScript=EPA_local._currentScript;'
                         , ';var EPA_PreparseScript=EPA_local.EPA_PreparseScript,EPA_restoreWindowState=EPA_local._sanitizeWindow();'
@@ -915,8 +915,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             for( let s of $s )
                 wrap( getPreparedScript( s.EPA_code, epa ) );
-            add('}finally{EPA_restoreWindowState()}');
-            // todo emit "load" event
+            add('}finally{');
+            add(    'EPA_restoreWindowState();');
+            add(    'EPA_local._setReadyState("complete");');
+            add(    'setTimeout( ()=>EPA_local._emitEvent( EPA_local._currentScript,"load" ), 10);');
+            add(    'setTimeout( ()=>EPA_local._emitEvent( EPA_local    ,"load" ),20);');
+            add('}');
             const code = codeArr.join('');
 
             let s = $s[0]
@@ -928,8 +932,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             epa._currentScript = c;
             s.parentNode.insertBefore(c, s);
         }
-        epa._setReadyState('complete');
-        epa.dispatchEvent( createEv('Event','load') );
     }
 
     function ajax( url, method = "GET", headers = {}, body = undefined )

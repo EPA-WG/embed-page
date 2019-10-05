@@ -10,22 +10,22 @@
 <body>
 Set background to:
 <!-- advised with tabindex attribute and `cursor:pointer` css -->
-<a class="green" onclick="setBackground(this)"     tabindex="0"           >green  </a>
+<a class="green" onclick="setBackground(this)"     tabindex="0"           >green</a>
 
 <!-- too verbose  -->
-<a class="yellow" href='javascript:void(0)' onclick="setBackground(this)"  >yellow </a>
+<a class="yellow" href='javascript:void(0)' onclick="setBackground(this)"  >yellow</a>
 
 <!-- violates Content Security Policy on CSP-enabled HTTPS pages, does not provide event context -->
-<a class="blue" href="javascript:setBackground({innerText:'blue'})"      >blue   </a>
+<a class="blue" href="javascript:setBackground({innerText:'blue'})"      >blue</a>
 <button onclick="document.querySelector('input').value = lastColor" >get last color</button>
 <input placeholder="click button to see" id="byId"/>
-<a href="html-as-component.html?bla"       >reload page</a>
+<a href="html-as-component.html?bla"  id="reload" >reload page</a>
 <script>
     var lastColor, color ;
     document.body.style.background = color;
     function setBackground(a)
     {
-        byId.style.background = lastColor = a.innerText;
+        byId.value = byId.style.background = lastColor = a.innerText.trim();
     }
 </script>
 </body>
