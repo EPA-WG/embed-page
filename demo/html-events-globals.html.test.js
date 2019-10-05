@@ -25,7 +25,7 @@ suite('embed-page basics IFRAME test ', () =>
     test('3. <a href="javascript:void(0)" onclick="gblFunc()" ', function()
     {
         SimClick( $0('.yellow') );
-        assert.equal( $0('input').style.background, 'yellow' );
+        assert( $0('input').style.background.includes('yellow') );
         assert.notEqual( $1('input').value, 'yellow' );
         SimClick( $1('.yellow') );
         assert.equal( $1('input').value, 'yellow' );
@@ -33,7 +33,7 @@ suite('embed-page basics IFRAME test ', () =>
     test('4. <a href="javascript:gblFunc()" ', function()
     {
         SimClick( $0('.blue') );
-        assert.equal( $0('input').style.background, 'blue' );
+        assert.equal( $0('input').value, 'blue' );
     });
 
     test('5. global lastColor, <button onclick="document.querySelector(...)" > ', ()=>
@@ -47,7 +47,6 @@ suite('embed-page basics IFRAME test ', () =>
         SimClick( $0('#reload') );
         return ret.then( x=>
         {
-            assert.equal( $0('input').style.background, '' );
             assert.equal( $0('input').value, '' );
         });
     });
