@@ -16,7 +16,7 @@
     <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; margin: 1em; }</style>
 </head>
 <body>
-    <embed-page src="demo-menu.html" scope="none" id="html-include-test"></embed-page>
+    <embed-page src="demo-menu.html" scope="none"></embed-page>
     <h1>HTML include - embed-page demo </h1>
 
         <p><var>src</var> attribute along with <var>scope="none"</var>
@@ -50,7 +50,7 @@
         <p>embed-page demo uses menu from <a href="demo-menu.html" > demo-menu.html </a>
             which holds as menu content as common styling for demo pages as inner shadow for embed-page </p>
         <template>
-                <embed-page src="demo-menu.html?inline" scope="none" ></embed-page>
+                <embed-page src="demo-menu.html?inline" scope="none"  id="html-include-test" ></embed-page>
         </template>
     </demo-snippet>
     <h3>Visual demo steps</h3>
@@ -74,8 +74,8 @@ JS  3. current page( HTML include ) on menu should be in bold.
             test('initial src set, loaded event fired & content ready', function(done)
             {
                 const E = document.querySelector('#html-include-test');
-                assert.equal(E.src, "demo-menu.html");
-                assert.equal( E.getAttribute('src'), "demo-menu.html" );
+                assert.equal(E.src, "demo-menu.html?inline");
+                assert.equal( E.getAttribute('src'), "demo-menu.html?inline" );
                 if( E.readyState === "complete")
                 {
                     const m = document.querySelector('nav');

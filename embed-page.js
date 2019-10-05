@@ -614,27 +614,15 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
         runScriptsRaw( arr ) // unscoped
         {
-            const currentScript = arr.shift();
+            const s = arr.shift();
             const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent(type, false, false),x);
-            if( !currentScript )
-            {
-                try { window.dispatchEvent ( createEv('Event','DOMContentLoaded') );}
-                catch(ex)
-                    { console.error(ex); }
-                this._setReadyState('complete');
-                setTimeout( ()=>this._emitEvent( this,'load' ), 10 );
-                return;
+            if( !s )
+            {   this._setReadyState('complete');
+                return this._emitEvent( this,'load' )
             }
-            const s = currentScript;
-
-            if( !s.src )
-            {
-                execScriptAsTag( s, s.textContent, this  ).then( x=>this.runScriptsRaw( arr ) );
-            }else
-                ajax( urlRedirectMap( currentScript.src, this.redirects ) )
+            Promise.resolve(s.src ? ajax( urlRedirectMap( s.src, this.redirects ) ) : s.textContent )
                 .then( txt => execScriptAsTag( s, txt, this ),   err => {debugger;}  )
                 .then( x=>this.runScriptsRaw( arr ) );
-
         }
         _prepareTarget( el, attr ) // return embed-page if target defined explicitly
         {   var v = el.getAttribute(attr)
@@ -770,9 +758,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             let done;
             const d = epc.document
             ,   triggerDone = x=> done ? 0 : (done=1);
-
-            c0.addEventListener( 'load' , x=> triggerDone() && resolve(c0) );
-            c0.addEventListener( 'error', x=> triggerDone() && reject (c0) );
+            if( s.src )
+            {   c0.addEventListener( 'load' , x=> triggerDone() && resolve(c0) );
+                c0.addEventListener( 'error', x=> triggerDone() && reject (c0) );
+            }
             epc.currentScript = c0;
             if( d.setCurrentScript )
                 d.setCurrentScript(c0);
@@ -792,20 +781,14 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             window[ 'EPA_'+epc.uid ] = epc;
             const scrTxt =  txt
                             +( s.src ? '//# sourceURL='+ s.src :'' );
-                c0.textContent = scrTxt;
-                try
-                {   let  p = s.parentNode
-                    , attr = ( a, v=s.getAttribute(a) ) => v && c0.setAttribute( a , v );
-
-                    p.insertBefore( c0, s );
-                    p.removeChild( s );
-                    attr('nomodule');
-                    attr('type');
-                    attr('src');
-                }catch( ex )
-                {   console.error( ex );
-                    reject( ex )
-                }
+            c0.textContent = scrTxt;
+            try
+            {   s.parentNode.replaceChild( c0, s );
+                s.src || resolve(c0);//epc._emitEvent( c0, 'load' );
+            }catch( ex )
+            {   console.error( ex );
+                reject( ex )
+            }
         })
     }
     function getPreparedScript( code, epc )
