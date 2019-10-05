@@ -914,6 +914,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 c.textContent = code;
             epa._currentScript = c;
             s.parentNode.insertBefore(c, s);
+        }else
+        {   epa._setReadyState("complete");
+            epa._emitEvent( epa, "load" )
         }
     }
 
