@@ -51,16 +51,14 @@
             <embed-page id="epa-1">
                 <template><!-- encapsulate the insulated content into TEMPLATE tag to prevent execution in page context -->
                     <h3> 2nd instance. Insulated HTML in monospace font set by embedded JS</h3>
-                    <button> 3. Make H3 blue </button>
+                    <button onclick="mkH3Blue()"> 3. Make H3 blue </button>
                     <script>
                         // all H3 to monospace
                         [...document.querySelectorAll('h3') ].map( el=> el.style.fontFamily = "monospace" );
-                        document.querySelector('button').onclick =
-                            ()=> [...document.getElementsByTagName('h3')].map(h3=>h3.style.color ='Blue');
+                        function mkH3Blue(){ [...document.getElementsByTagName('h3')].map(h3=>h3.style.color ='Blue') }
                     </script>
                 </template>
             </embed-page>
-
 
         </template>
     </demo-snippet>
