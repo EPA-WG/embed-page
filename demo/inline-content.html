@@ -13,7 +13,7 @@
         import './inline-demo-component.js';
     </script>
     <script src="../embed-page.js" type="module"></script>
-    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
+    <style>textarea { height: 6em; width:32em;display:block;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
 </head>
 <body>
     <embed-page src="demo-menu.html" scope="none"  id="epa-menu"></embed-page>
@@ -44,14 +44,12 @@
     </demo-snippet>
 
     <demo-snippet>
-        <h3>2. This H3 element should NOT be in Courier(<code>monospace</code>) font and NOT in green
-            and <i style="color: Blue">blue</i> on button click
-        </h3>
+        <h3>2. This H3 element should NOT be in Courier(<code>monospace</code>) font and NOT in green.</h3>
         <template>
             <embed-page id="epa-1">
                 <template><!-- encapsulate the insulated content into TEMPLATE tag to prevent execution in page context -->
                     <h3> 2nd instance. Insulated HTML in monospace font set by embedded JS</h3>
-                    <button onclick="mkH3Blue()"> 3. Make H3 blue </button>
+                    <button onclick="mkH3Blue()"> 3. Make H3 above blue </button>
                     <script>
                         // all H3 to monospace
                         [...document.querySelectorAll('h3') ].map( el=> el.style.fontFamily = "monospace" );
@@ -62,14 +60,26 @@
 
         </template>
     </demo-snippet>
-    <button onclick="document.getElementById('epa-1').innerHTML=document.getElementById('epa-1-content').value"
-                >4. change via innerHTML to <i style="color: green">green</i> </button> by setting content from from text area:<br/>
-    <textarea id="epa-1-content">
+
+    <demo-snippet>
+        <button onclick="document.getElementById('epa-2').innerHTML=document.getElementById('epa-2-content').value"
+        >4. change via innerHTML to <i style="color: green">green</i> </button> by setting content from from text area:<br/>
+
+        <textarea id="epa-2-content">
         <template>
             <style>h3{color:green}</style>
             <h3>Should become green</h3>
         </template>
     </textarea>
+        <template>
+            <embed-page id="epa-2">
+                <template>
+                    <h3> 3rd instance. Should be changed by setting innerHTML from textarea content above</h3>
+                </template>
+            </embed-page>
+
+        </template>
+    </demo-snippet>
     <h3>Visual demo steps</h3>
 <pre>
 CSS
@@ -79,6 +89,7 @@ CSS
 JS  3. Click on 'make blue' the embedded H3 should be blue colored.
     4. After 'innerHTML' click the H3 from embedded content should become green.
 </pre>
+    <a href="inline-content.html?test">Run manual tests with unit test.</a>
     <script src="../node_modules/wct-browser-legacy/browser.js"></script>
     <script>
         suite('embed-page inline content', () =>
@@ -111,9 +122,9 @@ JS  3. Click on 'make blue' the embedded H3 should be blue colored.
                 assert.notEqual( h3defaultFont, h3EmbeddedFont );
                 assert.equal( h3EmbeddedFont, spanFont );// 'monospace'
             });
-            if( !window.parent.location.href.includes('/test') ) // skip if from within demo where click is manual
-                return;
 
+            if( !window.parent.location.href.includes('test') ) // skip if from within demo where click is manual
+                return;
             test('3. onClick', function()
             {
                 const E = document.getElementById("epa-1");
@@ -128,20 +139,22 @@ JS  3. Click on 'make blue' the embedded H3 should be blue colored.
                 assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
             });
 
-            0 && // manually works, need async wait for innerHTML change
             test('4. set by innerHTML', function()
             {
-                const E = document.getElementById("epa-1");
-                E.innerHTML = document.getElementById('epa-1-content').value;
-                debugger;
-                assert.equal( E.readyState, "complete" );
-                const s = E.shadowRoot;
-                const h = s.querySelector('h3');
-                const h3defaultColor = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('color')
-                ,    h3EmbeddedColor = window.getComputedStyle(h,null).getPropertyValue('color')
-                ,          spanColor = window.getComputedStyle(document.querySelector('button i'),null).getPropertyValue('color');
-                assert.notEqual( h3defaultColor, h3EmbeddedColor );
-                assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
+                const E = document.getElementById("epa-2");
+                let ret = E.promiseNext.then(x=>
+                {
+                    assert.equal( E.readyState, "complete" );
+                    const s = E.shadowRoot;
+                    const h = s.querySelector('h3');
+                    const h3defaultColor = window.getComputedStyle( document.querySelector('h3'),null ).getPropertyValue('color')
+                    ,    h3EmbeddedColor = window.getComputedStyle(h,null).getPropertyValue('color')
+                    ,          spanColor = window.getComputedStyle(document.querySelector('button i'),null).getPropertyValue('color');
+                    assert.notEqual( h3defaultColor, h3EmbeddedColor );
+                    assert.equal( h3EmbeddedColor, spanColor );// 'chocolate'
+                });
+                E.innerHTML = document.getElementById('epa-2-content').value;
+                return ret;
             });
                 function
             wait4load( id )
