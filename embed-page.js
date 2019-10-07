@@ -486,7 +486,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     return this.runScriptsRaw( $s );
                 }
                 let el       = this.document.createElement( 'body' );
-                el.innerHTML = html;
+                el.innerHTML = '<script id="epa-events"></script>'+html;
                 this.onAfterLoad();
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
                 let $s       = $( scriptsSelector, el );// skip detach() as code could expect script tags present;
@@ -519,8 +519,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             ,  undef = undefined;
 
             for( let c of codeArr )
-                c.match( /([0-9a-zA-Z_\$])+/g )
+            {
+                let code = c.replace( /[\W]import(.*?)(".*?"|'.*?')/g , ";");
+                ( code.match( /([0-9a-zA-Z_\$])+/g ) || [] )
                 .forEach( w=> !( w in kw || w in vars ) && (vars[w]=undef) );
+
+            }
             Object.assign( this.globals, vars );
         }
         _initEventHadlers()
@@ -817,15 +821,19 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         for( let k in EPA_local.globals )
             try
             {
-                if( k !== 'window' && !"0123456789".includes( k.charAt( 0 ) ) && eval( 'typeof ' + k ) !== 'function' )
+                if( k !== 'window' && EPA_isVar(k) && eval( 'typeof ' + k ) !== 'function' )
                     eval( k + '=EPA_local.window.' + k );
             }catch(ex)
             {   if( !ex.message.includes('before initialization') )// legitimate case "Cannot access 'XXX' before initialization"
                     debugger;
             }
-        [...document.querySelectorAll("*[id]")].map( el=>"0123456789".includes( el.id.charAt(0) ) || eval( el.id+"=el" ));
+        [...EPA_local.document.querySelectorAll("*[id]")].map( el=>EPA_isVar(el.id) &&  eval( el.id+"=el" ));
     }
-
+        function
+    EPA_isVar( s )
+    {
+        return 'window'!==s && ( /^[a-zA-Z_$][0-9a-zA-Z_$]+$/ ).test(s)
+    }
         function
     timeoutPromise( ms )
     {
@@ -877,47 +885,54 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         function
     EPA_generateInjectScript( epa, $s )
     {
-        if( $s.length )
+        for( let s of $s )
         {
+            const orig_code = s.EPA_code;
+
             const codeArr = []
             ,     add = x=>codeArr.push(x)
-            ,    wrap = code => {   add( ';try{ EPA_globals2Vars();\n');
+            ,    wrap = code => {   add( ';const EPA_restoreWindowState=EPA_local._sanitizeWindow();EPA_globals2Vars();setTimeout(EPA_vars2globals,0);\n');
                                     add( code );
-                                    add( '\n;for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );');
-                                    add( '\n}catch(ex){ console.error(ex) }');
+                                    add( '\n;EPA_vars2globals();');
                                 };
-            codeArr.push(  ';const EPA_local=EPA_', epa.uid
-                        , ';try{const EPA_globals2Vars=()=>Object.keys(EPA_local.globals ).forEach( w=> ( eval( "typeof "+w) !== "function" ) && !"0123456789".includes( w.charAt(0) ) && eval( w+"=EPA_local.globals."+w ) );'
-                        , ';var ', Object.keys( epa.globals ).filter( w=>!"0123456789".includes( w.charAt(0) ) ).join(',')
-                        , ';const currentScript=EPA_local._currentScript;'
-                        , ';var EPA_PreparseScript=EPA_local.EPA_PreparseScript,EPA_restoreWindowState=EPA_local._sanitizeWindow();'
-                        , ';EPA_local._handleEvent=function( ev, code, eventAttr ){ \n'
+            codeArr.push( ';const EPA_local=EPA_', epa.uid
+                        , ', EPA_isVar=s=>( /^[a-zA-Z_$][0-9a-zA-Z_$]+$/ ).test(s)'
+                        , ';var EPA_currentScript=EPA_local._currentScript;EPA_currentScript.epa_started=0'
+                        , ';const EPA_globals2Vars=()=>{EPA_currentScript.epa_started++;Object.keys(EPA_local.globals ).forEach( w=> EPA_isVar(w) && ( eval( "typeof "+w) !== "function" ) && eval( w+"=EPA_local.globals."+w ) )};'
+                        , ';const EPA_vars2globals=()=>{if(EPA_currentScript.epa_started-- >0){for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );EPA_restoreWindowState()}};'
+                        , ';var ', Object.keys( epa.globals )
+                                         .filter( w=>EPA_isVar( w ) )
+                                         .filter( w=>{
+                                             // if( !orig_code ) return true;
+                                             // debugger;
+                                             return !orig_code || !new RegExp( "function\\s?"+w).test( orig_code )
+                                         } )
+                                         .join(',')
+                        , ';var EPA_PreparseScript=EPA_local.EPA_PreparseScript;'
                         );
-                        wrap( 'eval(code)' );
-                        add( '\n};' );
+            if( s.id==='epa-events' )
+            {
+                add('EPA_local._handleEvent=function( ev, code, eventAttr ){ \n' );
+                wrap( 'eval(code)' );
+                add( '\n};' );
+            }
 
-            for( let s of $s )
-                wrap( getPreparedScript( s.EPA_code, epa ) );
-            add('}finally{');
-            add(    'EPA_restoreWindowState();');
-            add(    'EPA_local._setReadyState("complete");');
-            add(    'setTimeout( ()=>EPA_local._emitEvent( EPA_local._currentScript,"load" ), 10);');
-            add(    'setTimeout( ()=>EPA_local._emitEvent( EPA_local    ,"load" ),20);');
-            add('}');
+            wrap( getPreparedScript( orig_code, epa ) );
+
+            add( 'EPA_vars2globals();');
+            add( 'EPA_local._emitEvent( EPA_local._currentScript,"load" );');
             const code = codeArr.join('');
 
-            let s = $s[0]
-            ,   c = doc.createElement('script');
+            let c = doc.createElement('script');
                 c.setAttribute('type','module');
                 c.async = true;
                 c.defer = true;
                 c.textContent = code;
             epa._currentScript = c;
-            s.parentNode.insertBefore(c, s);
-        }else
-        {   epa._setReadyState("complete");
-            epa._emitEvent( epa, "load" )
+            s.parentNode.replaceChild(c, s);
         }
+        epa._setReadyState("complete");
+        epa._emitEvent( epa, "load" )
     }
 
     function ajax( url, method = "GET", headers = {}, body = undefined )
