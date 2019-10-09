@@ -6,9 +6,11 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     const   FRAME_HASH_PREFIX   = '#embed-page='
     ,       FRAME_BLANK         = "about:blank"
     ,       EPA_KEYWORDS            = {}
-    ,       ABS_URL = /(^\/)|(^#)|(^[\w-\d]*:)/
+    ,       ABS_URL      = /(^\/)|(^#)|(^[\w-\d]*:)/
+    ,       VAR_REGEX    = /[a-zA-Z_\$][0-9a-zA-Z_\$]*/g
+    ,       IMPORT_REGEX = /[\W]import(.*?)(".*?"|'.*?')/g
     ,       HREF_JS_SELECTOR = '*[href^=javascript]'
-    ,       EVENTS_SELECTOR = Object.keys(window).filter( k=>k.startsWith('on') ).map(k=>'*['+k+']').join(',');
+    ,       EVENTS_SELECTOR  = Object.keys(window).filter( k=>k.startsWith('on') ).map(k=>'*['+k+']').join(',');
     ;
     let     GBL_InstancesCount  = 0
     ,       GBL_ScriptsCount    = 0;
@@ -361,7 +363,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             A.toString = function(){ return this.href };
 
             this.uid = uid ;
-            this.EPA_PreparseScript = EPA_PreparseScript;
             defProperty( this, 'instanceNum' , x=> instanceNum );
             defProperty( this, '_A'  , x=> A );
             defProperty( this, 'baseURI', x => A.href );
@@ -497,6 +498,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 this._extractVars( $( "*[id]", this.$.body ).map( n=>n.id ) );
                 this._initEventHadlers();
                 return this._loadScriptsCode($s)
+                           .then( arr => this._extractImports($s) )
                            .then( arr => this._extractVars(arr) )
                            .then( x=> EPA_generateInjectScript( this, $s ) );
             }finally
@@ -512,6 +514,29 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                     ?   ajax(scr.src).then( code=> scr.EPA_code = code ) // todo error events
                                     :   Promise.resolve(scr.EPA_code = scr.textContent) ) )
         }
+        _extractImports( $s )
+        {
+            const ret = []
+            ,   undef = undefined;
+            for( let s of $s )
+            {   const imports = []
+                , importVars = {};
+                let code = s.EPA_code;
+                const noImportsCode = code.replace( IMPORT_REGEX, (match, vars, url, offset, string) =>
+                {
+                    ( vars.match( VAR_REGEX ) || [] )
+                        .forEach( w=>  (importVars[w]=undef) );
+                    imports.push( match+';' );
+                    return ""
+                });
+                s.EPA_code       = noImportsCode;
+                s.EPA_imports    = imports;
+                s.EPA_importVars = importVars;
+
+                ret.push( noImportsCode );
+            }
+            return ret
+        }
         _extractVars( codeArr )
         {
             const kw = EPA_KEYWORDS
@@ -520,8 +545,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             for( let c of codeArr )
             {
-                let code = c.replace( /[\W]import(.*?)(".*?"|'.*?')/g , ";");
-                ( code.match( /([0-9a-zA-Z_\$])+/g ) || [] )
+                let code = c;//.replace( IMPORT_REGEX , ";");
+                ( code.match( VAR_REGEX ) || [] )
                 .forEach( w=> !( w in kw || w in vars ) && (vars[w]=undef) );
 
             }
@@ -795,44 +820,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             }
         })
     }
-    function getPreparedScript( code, epc )
-    {
-        return ( getBodyStr( runScriptTemplate )
-                 + EPA_PreparseScript( code )).replace(/EPA_env/g , 'EPA_'+epc.uid );
-    }
     function getBodyStr( func ){ let s = ''+func; return s.substring( s.indexOf('{')+1,s.lastIndexOf('}')  ) }
 
-    // todo disable optimization pragma
-    function runScriptTemplate( arr, EPA_env, redirects, EPA_allWords, EPA_local )
-    {
-        const window = new Proxy(EPA_local.window,
-            {
-                set: (target, property, value, receiver) =>
-                {   return target.globals[property]=
-                    (   target[property] =
-                        (
-                            eval(`typeof target["${property}"]`) === 'undefined'
-                            ? value
-                            : eval(`${property}=value`)
-                        )
-                    )
-                }
-            });
-        for( let k in EPA_local.globals )
-            try
-            {
-                if( k !== 'window' && EPA_isVar(k) && eval( 'typeof ' + k ) !== 'function' )
-                    eval( k + '=EPA_local.window.' + k );
-            }catch(ex)
-            {   if( !ex.message.includes('before initialization') )// legitimate case "Cannot access 'XXX' before initialization"
-                    debugger;
-            }
-        [...EPA_local.document.querySelectorAll("*[id]")].map( el=>EPA_isVar(el.id) &&  eval( el.id+"=el" ));
-    }
         function
     EPA_isVar( s )
     {
-        return 'window'!==s && ( /^[a-zA-Z_$][0-9a-zA-Z_$]+$/ ).test(s)
+        return 'window'!==s && ( /^[a-zA-Z_$][0-9a-zA-Z_$]*$/ ).test(s)
     }
         function
     timeoutPromise( ms )
@@ -887,46 +880,25 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     {
         for( let s of $s )
         {
-            const orig_code = s.EPA_code;
+            const   orig_code = s.EPA_code
+            ,         varList = Object.keys( epa.globals )
+                                  .filter( w=>EPA_isVar( w ) )
+                                  .filter( w=> !(w in s.EPA_importVars) )
+                                  .filter( w=>{
+                                      // if( !orig_code ) return true;
+                                      // debugger;
+                                      return !orig_code || !new RegExp( "function\\s?"+w).test( orig_code )
+                                  } )
+                                  .join(',')
+            ,   code = s.EPA_imports.join('\n')
+                        + getBodyStr( scriptTemplate )
+                            .replace( 'TMPL_EPA', 'EPA_'+epa.uid )
+                            .replace( 'TMPL_VARS', varList )
+                            .replace( 'TMPL_HAS_EV', s.id==='epa-events' )
+                            .replace( 'TMPL_CODE', EPA_PreparseScript(orig_code) )
+            ,   c = doc.createElement('script');
 
-            const codeArr = []
-            ,     add = x=>codeArr.push(x)
-            ,    wrap = code => {   add( ';const EPA_restoreWindowState=EPA_local._sanitizeWindow();EPA_globals2Vars();setTimeout(EPA_vars2globals,0);\n');
-                                    add( code );
-                                    add( '\n;EPA_vars2globals();');
-                                };
-            codeArr.push( ';const EPA_local=EPA_', epa.uid
-                        , ', EPA_isVar=s=>( /^[a-zA-Z_$][0-9a-zA-Z_$]+$/ ).test(s)'
-                        , ';var EPA_currentScript=EPA_local._currentScript;EPA_currentScript.epa_started=0'
-                        , ';const EPA_globals2Vars=()=>{EPA_currentScript.epa_started++;Object.keys(EPA_local.globals ).forEach( w=> EPA_isVar(w) && ( eval( "typeof "+w) !== "function" ) && eval( w+"=EPA_local.globals."+w ) )};'
-                        , ';const EPA_vars2globals=()=>{if(EPA_currentScript.epa_started-- >0){for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w );EPA_restoreWindowState()}};'
-                        , ';var ', Object.keys( epa.globals )
-                                         .filter( w=>EPA_isVar( w ) )
-                                         .filter( w=>{
-                                             // if( !orig_code ) return true;
-                                             // debugger;
-                                             return !orig_code || !new RegExp( "function\\s?"+w).test( orig_code )
-                                         } )
-                                         .join(',')
-                        , ';var EPA_PreparseScript=EPA_local.EPA_PreparseScript;'
-                        );
-            if( s.id==='epa-events' )
-            {
-                add('EPA_local._handleEvent=function( ev, code, eventAttr ){ \n' );
-                wrap( 'eval(code)' );
-                add( '\n};' );
-            }
-
-            wrap( getPreparedScript( orig_code, epa ) );
-
-            add( 'EPA_vars2globals();');
-            add( 'EPA_local._emitEvent( EPA_local._currentScript,"load" );');
-            const code = codeArr.join('');
-
-            let c = doc.createElement('script');
                 c.setAttribute('type','module');
-                c.async = true;
-                c.defer = true;
                 c.textContent = code;
             epa._currentScript = c;
             s.parentNode.replaceChild(c, s);
@@ -934,7 +906,65 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         epa._setReadyState("complete");
         epa._emitEvent( epa, "load" )
     }
+        function // todo disable optimisation
+    scriptTemplate( TMPL_EPA,  TMPL_VARS, TMPL_HAS_EV, TMPL_CODE )
+    {   const    EPA_local = TMPL_EPA;
+        let EPA_EndScope;
+        try
+        {   var TMPL_VARS;
+            const    EPA_isVar = s => ( /^[a-zA-Z_$][0-9a-zA-Z_$]*$/ ).test( s )
+            , EPA_globals2Vars = () => Object.keys( EPA_local.globals ).forEach( w => EPA_isVar( w ) && ( eval( "typeof " + w ) !== "function" ) && eval( w + "=EPA_local.globals." + w ) )
+            , EPA_vars2globals = () =>{    for( let w in EPA_local.globals ) EPA_local.globals[ w ] = eval( w ); }
+            , EPA_StartScope   = ()=>
+                                    {   let epa_started = 1;
+                                        const restoreWindowState = EPA_local._sanitizeWindow();
+                                        EPA_globals2Vars();
+                                        for( let k in EPA_local.globals )
+                                            try
+                                            {
+                                                if( k !== 'window' && !"0123456789".includes( k.charAt( 0 ) ) && eval( 'typeof ' + k ) !== 'function' )
+                                                    eval( k + '=EPA_local.window.' + k );
+                                            }catch(ex)
+                                            {   if( !ex.message.includes('before initialization') )// legitimate case "Cannot access 'XXX' before initialization"
+                                                debugger;
+                                            }
+                                        [...document.querySelectorAll("*[id]")].map( el=>"0123456789".includes( el.id.charAt(0) ) || eval( el.id+"=el" ));
 
+                                        return function EPA_EndScope()
+                                        {
+                                            if( !epa_started )
+                                                return;
+                                            epa_started=0;
+                                            EPA_vars2globals();
+                                            restoreWindowState();
+                                        }
+                                    }
+            , window = new Proxy( EPA_local.window,
+                {
+                    set : ( target, property, value/*, receiver*/ ) =>
+                    {
+                        return target.globals[ property ] = target[ property ] = eval( `typeof target["${ property }"]` ) === 'undefined'
+                                                                                 ? value : eval( `${ property }=value` );
+                    }
+                } );
+
+            EPA_EndScope = EPA_StartScope();
+
+            if( TMPL_HAS_EV )
+                EPA_local._handleEvent = function( ev, code/*, eventAttr */)
+                {
+                    const EPA_EndScope = EPA_StartScope();
+                    try{ eval( code ) }
+                    finally{ EPA_EndScope(); }
+                };
+
+            TMPL_CODE;
+        }finally
+        {
+            EPA_EndScope();
+            EPA_local._emitEvent( EPA_local._currentScript, "load" );
+        }
+    }
     function ajax( url, method = "GET", headers = {}, body = undefined )
     {
         return new Promise( ( resolve, reject ) =>
