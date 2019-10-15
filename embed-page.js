@@ -920,10 +920,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             , EPA_globals2Vars = () => Object.keys( EPA_local.globals )
                                              .filter( w => EPA_isVar( w ) )
                                              .forEach(  w=>
-                                                {   try
-                                                    {
-                                                        let fl = eval(w)
-                                                        ,   gv = EPA_local.globals[w];
+                                                {   let gv = EPA_local.globals[w];
+                                                    try
+                                                    {   let fl = eval(w);
                                                         if( typeof fl === "function"  )
                                                         {   // do not override local func
                                                         }else
@@ -974,7 +973,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                 {   if( !ex.message.includes('before initialization') )// legitimate case "Cannot access 'XXX' before initialization"
                                                     debugger;
                                                 }
-                                        [...document.querySelectorAll("*[id]")].map( el=> EPA_isVar( el.id ) && eval( el.id+"=el" ));
+                                        [...EPA_local.window.document.querySelectorAll("*[id]")].map( el=> EPA_isVar( el.id ) && eval( el.id+"=el" ));
                                         let executed = 0;
                                         return function EPA_EndScope()
                                         {
