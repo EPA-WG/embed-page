@@ -17,7 +17,7 @@ Set background to:
 
 <!-- violates Content Security Policy on CSP-enabled HTTPS pages, does not provide event context -->
 <a class="blue" href="javascript:setBackground({innerText:'blue'})"      >blue</a>
-<button onclick="debugger;document.querySelector('input').value = lastColor" >get last color</button>
+<button onclick="document.querySelector('input').value = lastColor" >get last color</button>
 <input placeholder="click button to see" id="byId"/>
 <a href="html-as-component.html?bla"  id="reload" >reload page</a>
 <script>
@@ -26,8 +26,6 @@ Set background to:
     function setBackground(a)
     {
         byId.value = byId.style.background = lastColor = a.innerText.trim();
-console.log(lastColor);
-debugger;
     }
 </script>
 </body>
