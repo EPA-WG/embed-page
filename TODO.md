@@ -1,6 +1,4 @@
-* replace globals preserving w/ elements referenced by `id` attribute
-* HTML-as-component, using global event handlers & inline onXXX event script
-    * 
+* load optimisation: simultaneous injection of scripts delays whole page until all scripts are executed
     
 * use    view-source: http schema ( instead of page execution) for fetching targetFrame  and onTargetLoad(), only in browsers which support view-source:(Chrome,FF, does not work in Edge)
 * console methods test

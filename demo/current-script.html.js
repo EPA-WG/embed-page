@@ -6,14 +6,14 @@ if( cs )
 {   parentNode = cs.parentNode;
     f = parentNode.querySelector('.current-script-related');
     f.value = f.value + cs.title;
-    console.log( 'executed',cs.outerHTML.substring(0,60) );
+    // console.log( 'executed',cs.outerHTML.substring(0,60) );
     appendTag1( 'div', 'called '+ cs.outerHTML.substring(0,47).replace( /</g , '&lt;') );
 }else
 {
     appendTag1( 'div', "currentScript undefined" );
-    console.log( 'executed ???' );
+    // console.log( 'executed ???' );
 }
-// debugger;
+
 f = document.querySelector('.document-selected');
 f.value = f.value + ( cs ? cs.title : '?' );
 

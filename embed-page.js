@@ -133,7 +133,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 });
 
             let closed;
-            this.globals = app.globals;
+//            this.globals = app.globals;
             const customElements = //new CustomElementRegistry(win.customElements);
                                      new EpaCustomElementRegistry(win.customElements, app );
             defProperty( this, 'customElements'     , x=> customElements        );
@@ -365,6 +365,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             this.uid = uid ;
             this.loadCount = 0;
+            this.preparseScript = EPA_PreparseScript;
             defProperty( this, 'instanceNum' , x=> instanceNum );
             defProperty( this, '_A'  , x=> A );
             defProperty( this, 'baseURI', x => A.href );
@@ -523,11 +524,17 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         _loadScriptsCode( scriptNodes )
         {
             return Promise  .all( scriptNodes.map( scr =>
-                                scr.type && scr.type !=='module'
-                                ?   Promise.resolve("")
-                                :   scr.src
-                                    ?   ajax(scr.src).then( code=> scr.EPA_code = code ) // todo error events
-                                    :   Promise.resolve(scr.EPA_code = scr.textContent) ) )
+            {
+                if( scr.type && scr.type !=='module' )
+                    return Promise.resolve("");
+                if( scr.src )
+                {   let url=scr.src;
+                    scr.src="";
+                    scr.removeAttribute('src');
+                    return ajax(url).then( code=> scr.EPA_code = code ) // todo error events
+                }
+                return Promise.resolve(scr.EPA_code = scr.textContent)
+            }))
         }
         _extractImports( $s )
         {
@@ -891,7 +898,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         function
     EPA_generateInjectScript( epa, $s )
     {
-        for( let s of $s )
+        epa._scripts=$s;
+        $s.forEach( (s, i )=>
         {
             const   orig_code = s.EPA_code
             ,         varList = Object.keys( epa.globals )
@@ -903,21 +911,27 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                         + getBodyStr( scriptTemplate )
                             .replace( 'TMPL_EPA', 'EPA_'+epa.uid )
                             .replace( 'TMPL_LOAD_COUNT', epa.loadCount )
+                            .replace( 'TMPL_CUR_SCRIPT', i )
                             .replace( 'TMPL_VARS', varList )
                             .replace( 'TMPL_HAS_EV', s.id==='epa-events' )
                             .replace( 'TMPL_CODE', EPA_PreparseScript(orig_code) )
             ,   c = doc.createElement('script');
-            epa._currentScript = c;
+            $s[i] = c;
             c.setAttribute('type','module');
             c.textContent = code;
+            for( let a of s.attributes )
+                if( !'src|type'.includes(a.name) )
+                    c.setAttribute( a.name, a.value );
+
             s.parentNode.replaceChild(c, s);
-        }
+        })
     }
         function // todo disable optimisation
     scriptTemplate( TMPL_EPA,  TMPL_VARS, TMPL_HAS_EV, TMPL_CODE, TMPL_LOAD_COUNT )
     {   const   EPA_local     = TMPL_EPA
         ,       EPA_loadCount = TMPL_LOAD_COUNT
-        ,   EPA_currentScript = EPA_local._currentScript;
+        ,       EPA_PreparseScript = EPA_local.preparseScript
+        ,   EPA_currentScript = EPA_local._scripts[TMPL_CUR_SCRIPT];
 
         let EPA_EndScope, EPA_globals2Vars, EPA_vars2globals, EPA_StartScope;
         var TMPL_VARS;
@@ -1000,8 +1014,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 {
                     set : ( target, property, value/*, receiver*/ ) =>
                     {
-                        return target.globals[ property ] = target[ property ] = typeof target[ property ] === 'undefined'
-                        // return target.globals[ property ] = target[ property ] = eval( `typeof target["${ property }"]` ) === 'undefined'
+                        return EPA_local.globals[ property ] = target[ property ] = typeof target[ property ] === 'undefined'
                                                                                  ? value : eval( `${ property }=value` );
                     }
                 } );
@@ -1038,6 +1051,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     try{ eval( code ); }
                     finally{ EPA_EndScope(); }
                 };
+            var document = window.document;
+            document.setCurrentScript(EPA_currentScript);
 //####################################
             TMPL_CODE;
         }finally
