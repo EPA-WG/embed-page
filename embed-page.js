@@ -956,8 +956,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                          eval( w + "=gv" )
                                                      }
                                                  }catch( ex )
-                                                 {   if( !ex.message.includes('before initialization') )// legitimate case "Cannot access 'XXX' before initialization"
-                                                     debugger;
+                                                 {   if( !ex.message.includes('before initialization') && !ex.message.includes('ssignment to const') )// legitimate case "Cannot access 'XXX' before initialization" or "invalid assignment to const XXX"
+                                                        debugger;
                                                  }
 
                                                  function EPA_wrap_caller()
