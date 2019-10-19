@@ -426,6 +426,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.isScoped() && this.$.body.addEventListener( 'click', this._onClick.bind(this), true );
             this.$.body.addEventListener('slotchange', e =>
                 {   setTimeout( ()=>  this.onSlotChanged(), 0 ) });
+            this.addEventListener('load', e =>this._emitEvent( this.$.body,'load') );
         }
         getInstanceNum(){ return this.instanceNum }
         isScoped(){ return this.scope !== 'none' }
