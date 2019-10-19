@@ -398,7 +398,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                         return;
                     const ev = new StorageEvent( e.type );
                     ev.initStorageEvent( e.type, e.bubbles, e.cancelBubble, key, e.oldValue, e.newValue, origin, e.storageArea );
-                    try{  w.dispatchEvent( ev ) }
+                    try{  this.window.dispatchEvent( ev ) }
                     catch( ev ){ console.error(ev) }
                 };
                 switch( this.scope )
@@ -499,9 +499,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 }
 
                 let el       = this.document.createElement( 'body' );
-                el.innerHTML = '<script id="epa-events"></script>'
-                               +htmlStr
-                               +'<script>EPA_local._setReadyState( "complete" );EPA_local._emitEvent( EPA_local, "load" )</script>';
+                el.innerHTML = htmlStr;
                 this.onAfterLoad();
                 // todo link[rel=stylesheet] to <style> @import "../my/path/style.css"; </style>
                 let $s       = $( SCRIPTS_SELECTOR, el );// skip detach() as code could expect script tags present;
@@ -913,7 +911,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                             .replace( 'TMPL_LOAD_COUNT', epa.loadCount )
                             .replace( 'TMPL_CUR_SCRIPT', i )
                             .replace( 'TMPL_VARS', varList )
-                            .replace( 'TMPL_HAS_EV', s.id==='epa-events' )
+                            .replace( 'TMPL_HAS_EV', !i )
+                            .replace( 'TMPL_FINAL', i==$s.length-1 )
                             .replace( 'TMPL_CODE', EPA_PreparseScript(orig_code) )
             ,   c = doc.createElement('script');
             $s[i] = c;
@@ -927,7 +926,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         })
     }
         function // todo disable optimisation
-    scriptTemplate( TMPL_EPA,  TMPL_VARS, TMPL_HAS_EV, TMPL_CODE, TMPL_LOAD_COUNT )
+    scriptTemplate( TMPL_EPA,  TMPL_VARS, TMPL_HAS_EV, TMPL_CODE, TMPL_LOAD_COUNT, TMPL_FINAL )
     {   const   EPA_local     = TMPL_EPA
         ,       EPA_loadCount = TMPL_LOAD_COUNT
         ,       EPA_PreparseScript = EPA_local.preparseScript
@@ -1058,7 +1057,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }finally
         {
             EPA_EndScope();
-
+            if( TMPL_FINAL )
+            {   EPA_local._setReadyState( "complete" );
+                EPA_local._emitEvent( EPA_local, "load" )
+            }
         }
     }
     function ajax( url, method = "GET", headers = {}, body = undefined )
