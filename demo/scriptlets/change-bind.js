@@ -44,4 +44,3 @@ const bind = ( srcEl, srcAttr ) =>
 [ ...document.querySelectorAll( scr.getAttribute('data-src-select') ) ]
     .map( el => bind( el, scr.getAttribute('data-src-attribute') ) );
 
-export const ChangeBind = bind;

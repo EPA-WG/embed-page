@@ -65,17 +65,20 @@
                 bind unformatted: <span class="unformatted"></span>
                 <hr/>
                 formatted by scriptlet:
-                <script type="module" src="scriptlets/number-format.js" value="0"></script>
+                <script id="number-format-scriptlet"
+                        src="scriptlets/number-format.js"
+                        value="0"
+                ></script>
 
-                <script type="module" src="scriptlets/change-bind.js"
+                <script src="scriptlets/change-bind.js"
                         data-src-select="input"
                         data-src-attribute="value"
                         data-dst-select=".unformatted"
                 ></script>
-                <script type="module" src="scriptlets/change-bind.js"
+                <script src="scriptlets/change-bind.js"
                         data-src-select="input"
                         data-src-attribute="value"
-                        data-dst-select="script[src='scriptlets/number-format.js']"
+                        data-dst-select="#number-format-scriptlet"
                         data-dst-attribute="value"
                 ></script>
             </template>
@@ -93,7 +96,8 @@
     Scriptlet is inline, hence runs every time where it is located in DOM.
     Scriplet could be written as in old-fashion way as in "modern" module type syntax.
     The <var>type="module"</var> allows to use
-    modern JS features like import/export but if used outside of <var>embed-page</var> will run only once.
+    modern JS features like import/export but if used outside of <var>embed-page</var> will run only once.<br/>
+    <b>document.currentScript</b> is not available in  <var>script type="module"</var>  if used outside of <var>embed-page</var>.
 </p>
 <h2> Scriptlets sources </h2>
 <h3><a href="scriptlets/number-format.js">number-format.js</a></h3>
