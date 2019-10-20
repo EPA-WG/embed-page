@@ -898,6 +898,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     EPA_generateInjectScript( epa, $s )
     {
         epa._scripts=$s;
+        if( !$s.length )
+        {   epa._setReadyState( "complete" );
+            epa._emitEvent( epa, "load" );
+            return;
+        }
+
         $s.forEach( (s, i )=>
         {
             const   orig_code = s.EPA_code
