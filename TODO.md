@@ -2,6 +2,7 @@
 
 * fix SCRIPT type!=module : keep original,do not create wrap, unit test
 * unit test 4 failed to load JS(incorrect syntax & r/t exception)
+* URL mapping and relative URLs resolving
     
 * use    view-source: http schema ( instead of page execution) for fetching targetFrame  and onTargetLoad(), only in browsers which support view-source:(Chrome,FF, does not work in Edge)
 * console methods test

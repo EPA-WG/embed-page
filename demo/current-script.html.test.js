@@ -54,7 +54,7 @@ suite('embed-page postMessage test ', () =>
     });
     test('7. unscoped embed-page with inline script type=module', function()
     {
-        assert.equal( "", $p('#e7 .current-script-related').value );
+        assert.equal( "F", $p('#e7 .current-script-related').value );
     });
 
         function
