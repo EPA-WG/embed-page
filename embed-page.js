@@ -810,11 +810,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             let done;
             const d = epc.document;
-            if( s.src )
-            {   c0.addEventListener( 'load' , x=>  resolve(c0) );
-                c0.addEventListener( 'error', x=>  reject (c0) );
-            }
-            epc.currentScript = c0;
             if( d.setCurrentScript )
                 d.setCurrentScript(c0);
             else
@@ -836,7 +831,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             c0.textContent = scrTxt;
             try
             {   s.parentNode.replaceChild( c0, s );
-                s.src || resolve(c0) ;
+                resolve(c0) ;
             }catch( ex )
             {   console.error( ex );
                 reject( ex )
