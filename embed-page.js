@@ -369,6 +369,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( this, 'instanceNum' , x=> instanceNum );
             defProperty( this, '_A'  , x=> A );
             defProperty( this, 'baseURI', x => A.href );
+
+            const w = new EpaWindow( this, this._A ) ;
+            defProperty( this, 'window'         , x=> this.isScoped() ? w : win );
+            defProperty( this, 'contentWindow'  , x=> this.isScoped() ? w : win );
         }
 
         connectedCallback()
