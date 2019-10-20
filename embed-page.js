@@ -13,8 +13,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     ,       EVENTS_SELECTOR  = Object.keys(window).filter( k=>k.startsWith('on') ).map(k=>'*['+k+']').join(',')
     ,       SCRIPTS_SELECTOR = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"],script[type="module"]';
     ;
-    let     GBL_InstancesCount  = 0
-    ,       GBL_ScriptsCount    = 0;
+    let     GBL_InstancesCount  = 0;
 
     const createEv = (x,type)=>(x=doc.createEvent(x),x.initEvent(type, false, false),x);
 
@@ -499,8 +498,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     const el     = this.getCreateInlineElement();
                     el.innerHTML = htmlStr;
                     this.onAfterLoad();
+                    this._scripts =[];
                     let $s       = $( SCRIPTS_SELECTOR, el );
-                    return this.runScriptsRaw( $s );
+                    return this.runScriptsRaw(  $s );
                 }
 
                 let el       = this.document.createElement( 'body' );
@@ -800,7 +800,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         {
             const createEv = (x,type)=>(x=document.createEvent(x),x.initEvent(type, false, false),x);
             const c0 = cloneScript( s, 'src' );
-            c0.setAttribute('epa-script-id', ++GBL_ScriptsCount );
             c0.setAttribute('type', 'module');
             c0.orig_src = s.src;
             c0.id = 'testing';
@@ -810,10 +809,11 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             let done;
             const d = epc.document;
+
             if( d.setCurrentScript )
                 d.setCurrentScript(c0);
             else
-            {   const d1 = {};
+            {   const d1 = { setCurrentScript: s=>defProperty( d1, 'currentScript', x => s) };
                 for( let p in d )
                     wrap(p);
                 function wrap( p )
@@ -822,11 +822,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                     else
                         'currentScript'.includes(p) || defProperty( d1, p, x => d[p], v => d[p]=v )
                 }
-                defProperty( d1, 'currentScript', x => c0);
-                epc.document = d1;
+                defProperty( epc, 'document', x => d1);
+
             }
             window[ 'EPA_'+epc.uid ] = epc;
-            const scrTxt =  txt
+            const N = epc._scripts.push( c0 )-1;
+            const scrTxt =  'var document=EPA_'+epc.uid+'.document;document.setCurrentScript(EPA_'+epc.uid+'._scripts['+N+']);'
+                            +txt
                             +( s.src ? '//# sourceURL='+ s.src :'' );
             c0.textContent = scrTxt;
             try
@@ -902,14 +904,13 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             epa._emitEvent( epa, "load" );
             return;
         }
-
         $s.forEach( (s, i )=>
         {
             const   orig_code = s.EPA_code
             ,         varList = Object.keys( epa.globals )
                                   .filter( w=>EPA_isVar( w ) )
                                   .filter( w=> !(w in s.EPA_importVars) )
-                                  .filter( w=>!orig_code || !new RegExp( "function\\s?"+w).test( orig_code ) )
+                                  .filter( w=>!orig_code || !new RegExp( "function\\s?"+w+"\\W").test( orig_code ) )
                                   .join(',')
             ,   code = s.EPA_imports.join('\n')
                         + getBodyStr( scriptTemplate )
@@ -1036,7 +1037,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                   EPA_globals2Vars();
                                   return EPA_func.apply( this, arguments )
                               }finally
-                              { EPA_vars2globals() }
+                                { EPA_vars2globals() }
                           }
                           EPA_script_scope_wrapper.EPA_script_scope_wrapper=1;
                           if( !(EPA_local.globals[w] ||{} ).EPA_script_scope_wrapper )

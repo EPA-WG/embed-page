@@ -1,25 +1,24 @@
-var        f = document.querySelector('.document-selected')
-, parentNode = f.parentNode
-,         cs = document.currentScript;
+var  cs = document.currentScript;
 
 if( cs )
-{   parentNode = cs.parentNode;
-    f = parentNode.querySelector('.current-script-related');
-    f.value = f.value + cs.title;
-    // console.log( 'executed',cs.outerHTML.substring(0,60) );
-    appendTag1( 'div', 'called '+ cs.outerHTML.substring(0,47).replace( /</g , '&lt;') );
+{   scriptTitle2Input('.current-script-related', cs.parentNode );
+    // console.log( 'executed',cs );
+    appendText( 'called ' + cs.outerHTML.substring(0,47).replace( /</g , '&lt;') );
 }else
-{
-    appendTag1( 'div', "currentScript undefined" );
+{   appendText(  "currentScript undefined" );
     // console.log( 'executed ???' );
 }
-
-f = document.querySelector('.document-selected');
-f.value = f.value + ( cs ? cs.title : '?' );
+scriptTitle2Input('.document-selected', document);
 
     function
-appendTag1( tag, text )
-{   let t = document.createElement(tag);
+scriptTitle2Input( css, root )
+{
+    f = root.querySelector(css );
+    f.value = f.value + ( cs ? cs.title : '?' );
+}
+    function
+appendText( text )
+{   let t = document.createElement('div');
     t.innerHTML = text;
-    parentNode.appendChild(t);
+    document.querySelector('.document-selected').parentNode.appendChild(t);
 }
