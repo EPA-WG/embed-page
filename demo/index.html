@@ -24,7 +24,7 @@
         iframe { width: 100%; }
         fieldset { display: inline-block; border-bottom: none; border-right: none; }
         embed-page { box-shadow: inset 0 0 2em #000000;  padding: 1em; }
-        demo-snippet { width: 60rem; display: inline-block;}
+        demo-snippet { width: 45rem; display: inline-block;}
         dl { border-left: 1em solid lightgray; padding-left: 1em; }
 
         @media (max-width: 640px) {
@@ -98,7 +98,10 @@ to support the cause.
         <template>
             <embed-page>
                 <template>
-                    <style>a{   border-radius: 0.3em; margin: 0.2rem; padding: 0.2em; cursor: pointer; background: silver; }</style>
+                    <style>a{   border-radius: 0.3em; margin: 0.2rem; padding: 0.2em;
+                                cursor: pointer; background: silver;
+                            }
+                    </style>
                     Set background to:
                     <a class="green" onclick="setBackground(this)"     tabindex="0"           >green </a>
                     <a class="yellow" href='javascript:void(0)' onclick="setBackground(this)" >yellow</a>

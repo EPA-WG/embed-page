@@ -1,4 +1,3 @@
-* bug: fast change( by inner link click ) leads to double body
 * load optimisation: all vars marshalling is not needed, it is sufficient to marshall only vars from particular script
 * load optimisation: container window sanitizing is not needed if insulation done properly. Make it optional for hacky or suspicious code. Paranoid security mode.
 * load optimisation: simultaneous injection of scripts delays whole page until all scripts are executed

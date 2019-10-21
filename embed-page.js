@@ -162,7 +162,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             this.postMessage = ( message, targetOrigin, transfer )=> app.postMessage( message, targetOrigin, transfer );
             this.open = ( url, windowName="", windowFeatures={} ) =>
             {
-                if( ["_self","_parent","_top"].includes(windowName) )
+                if( ["_self","_parent","_top"].includes(windowName) || this.name === windowName )
                 {   app.src= url;
                     return app.contentWindow;
                 }
@@ -380,6 +380,8 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
         ready()
         {   super.ready();
+            if( !this.name )
+                this.name = "target-frame"+this.instanceNum;
 
             ( this.globalsCsv || '' ).split(',')
                 .filter(k=>k).map( k=> this.globals[k] || (this.globals[k]='') );
