@@ -21,56 +21,30 @@
     </custom-style>
     <style>
         @import "page.css";
+        iframe { width: 100%; }
+        fieldset { display: inline-block; border-bottom: none; border-right: none; }
+        embed-page { box-shadow: inset 0 0 2em #000000;  padding: 1em; }
+        demo-snippet { width: 60rem; display: inline-block;}
+        dl { border-left: 1em solid lightgray; padding-left: 1em; }
 
-        iframe {
-            width: 100%;
-        }
-
-        fieldset {
-            display: inline-block;
-            border-bottom: none;
-            border-right: none;
-        }
-
-        embed-page {
-            box-shadow: inset 0 0 2em #000000;
-            padding: 1em;
-        }
-
-        dl {
-            border-left: 1em solid lightgray;
-            padding-left: 1em;
-        }
-
-        @media (max-width: 500px) {
-            body, fieldset {
-                padding: 0;
-                border-left: none
-            }
+        @media (max-width: 640px) {
+            body, fieldset { padding: 0; border-left: none; }
         }
 
         @media (min-width: 100em) {
-            fieldset {
-                width: 46%
-            }
+            fieldset { width: 46% }
         }
-
-        #purple-color {
-            color: purple;
-        }
-
-        #violet-color {
-            color: violet;
-        }
+        section{ max-width: 40rem; display: inline-block; text-align: justify; padding-right: 2rem;}
     </style>
 </head>
 <body>
 
 
 <embed-page src="demo-menu.html" scope="none"></embed-page>
+<section>
 <h1>Basic &lt;embed-page&gt; demo</h1>
 <i> <a href="https://github.com/EPA-WG/EPA-concept">EPA-WG</a> (Embeddable Progressive Applications Working Group)</i>
-<p> The <code>&lt;embed-page/&gt;</code> is a proof of concept for Embeddable Progressive Application
+<p> The <code>&lt;embed-page/&gt;</code> is an open source (<a href="https://github.com/EPA-WG/embed-page">GitHub</a>) proof of concept for Embeddable Progressive Application
     - a <a href="https://github.com/EPA-WG/EPA-concept/blob/master/microapplication.md">microapplication</a>
     container implemented as WebComponent acting as</p>
 <dl>
@@ -83,6 +57,8 @@
     <dd> With plain html and JS/css injection into page content.
     </dd>
 </dl>
+</section>
+<section>
 <h2>Where to use?</h2>
 <code>&lt;embed-page/&gt;</code> covers 2 extreme cases.
 <ol>
@@ -96,11 +72,29 @@
         support to web page.
     </li>
 </ol>
+</section>
+<section>
+<h2>Is it safe?</h2>
+<p>
+<code>&lt;embed-page/&gt;</code> has been made with security considerations in mind.
+It is definitely safer than exposing the whole page to 3rd part scripts which is a usual practice as of now.
+Within <code>&lt;embed-page/&gt;</code> scripts and CSS are insulated and which makes the container page relatively safe.
+It is not prone for hackers though. IFRAME given some extra safeguard with loosing on integration into web page
+and still having some holes addressed by <code>&lt;embed-page/&gt;</code>.<br/>
+
+The ultimate goal of <code>&lt;embed-page/&gt;</code> is to bring the web 3.0 needs to browser teams attention.
+Eventually making its functionality available on native level, safe and sound. <br/>
+Please comment, file the bug, star <a href="https://github.com/EPA-WG/embed-page">&lt;embed-page/&gt; project</a>
+to support the cause.
+</p>
+</section>
+<section>
 <h2>Demo cases</h2>
 <p>Navigation menu provides links to demo pages with sources, visual and unit tests. Here are some most typical uses:  </p>
-<fieldset>
-    <label>Html as Component <a href="html-events-globals.html">more & test...</a></label>
+</section>
+<hr/>
     <demo-snippet>
+        <h3>Html as Component <a href="html-events-globals.html">more & test...</a></h3>
         <template>
             <embed-page>
                 <template>
@@ -124,21 +118,17 @@
             </embed-page>
         </template>
     </demo-snippet>
-</fieldset>
-
-<fieldset>
-    <label>Navigation by link and form <a href="link-form-navigation.html">more & test...</a></label>
     <demo-snippet>
-        <label>Change <var>src</var> attribute to
+        <h3>Navigation by link and form <a href="link-form-navigation.html">more & test...</a></h3>
+        <div>Change <var>src</var> attribute to
             <select onchange="epa0.src=this.value">
                 <option value="page-violet.html" selected="selected">page-violet.html</option>
                 <option value="page-purple.html">page-purple.html</option>
             </select>
-        </label>
+        </div>
         <template>
             <embed-page src="page-violet.html" id="epa0"></embed-page>
         </template>
     </demo-snippet>
-</fieldset>
 </body>
 </html>

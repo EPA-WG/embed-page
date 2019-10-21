@@ -1,4 +1,12 @@
+* bug: fast change( by inner link click ) leads to double body
+* load optimisation: all vars marshalling is not needed, it is sufficient to marshall only vars from particular script
+* load optimisation: container window sanitizing is not needed if insulation done properly. Make it optional for hacky or suspicious code. Paranoid security mode.
 * load optimisation: simultaneous injection of scripts delays whole page until all scripts are executed
+
+# Release MVP
+* release bundle build
+* CDN deployment
+* JSFiddle/Plunkr publishing, https://www.sitepoint.com/7-code-playgrounds 
 
 * fix SCRIPT type!=module : keep original,do not create wrap, unit test
 * unit test 4 failed to load JS(incorrect syntax & r/t exception)
@@ -49,6 +57,7 @@ Release 1
 * remove the use of cancelled XHRs.     
 
 WishList
+* browser-in-browser show case
 * onerror event
 * "noscript" attribute or scope value to serve content with JS completely disabled
 * include embed-script-legacy.js in package as embed-page.js could be served only via type=module, still eill be handy 
