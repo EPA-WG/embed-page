@@ -1,7 +1,9 @@
+demo/appsList.html unoptimized test time 1100 ms
 * load optimisation: all vars marshalling is not needed, it is sufficient to marshall only vars from particular script
     * use currentScript.EPA_vars in sync code
 * load optimisation: container window sanitizing is not needed if insulation done properly. Make it optional for hacky or suspicious code. Paranoid security mode.
 * load optimisation: simultaneous injection of scripts delays whole page until all scripts are executed
+
 
 # Release MVP
 * release bundle build
