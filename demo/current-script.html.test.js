@@ -76,6 +76,6 @@ suite('embed-page postMessage test ', () =>
     {
         const E = document.getElementById( id );
         assert.notEqual( E, null );
-        return E.promiseNext;
+        return E.promise;
     }
 });

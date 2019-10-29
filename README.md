@@ -15,7 +15,6 @@ Proof of concept for
 2.    Super-<b>complex</b> apps where on same page need to mix UX made with different frameworks and their incompatible otherwise revisions.<br/>
             The JS Context insulation of embed-page provides "evolutionary architecture" support to web page.
     
-    
 ## Security
 * General browser and application [security improvements overview](security.md).
  
@@ -64,7 +63,7 @@ Polymer 3 Element is a base for embed-page. No other dependencies in run time pl
 are not required to use \<embed-page/\>
 
 ## To see in action 
-See the live basic [DEMO on webcomponents.org](https://npm-demos.appspot.com/embed-page@0.0.20/demo/index.html)
+See the live basic [DEMO on CDN](https://cdn.xml4jquery.com/ajax/libs/embed-page/0.0.20/build/esm-unbundled/demo/index.html)
 , or locally run
 ```bash
 $ polymer serve --open
@@ -96,7 +95,7 @@ $ polymer serve
 $ polymer test
 ```
 
-Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
+Demo pages are set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
 
 [npm-image]:      https://img.shields.io/npm/v/embed-page.svg
 [npm-url]:        https://npmjs.org/package/embed-page

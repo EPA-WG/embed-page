@@ -16,16 +16,27 @@
             const transient = {frames:0, innerHeight:0,outerHeight:0}
             ,         props = {} // properties of window before brushing up
             ,    _refWindow = window.frames[0];
-            for( let k in window )
-                if( !k.startsWith('_') // epa poc tools starting w/ underscore, keep them
-                    && !( k in transient )
-                    && !(  k in _refWindow ) )// keep clean window properties
+            forEach(window, (k,w)=>
                 {
                     props[ k ] = window[ k ];
-                    window[k]=undefined;      // delete operator does not work on global variables in window
-                    delete window[k];         // remove other properties
-                }
-            return ()=>Object.keys(props).map( k=> window[k]=props[k] )
+                    w[k]=undefined;      // delete operator does not work on global variables in window
+                    delete w[k];         // remove other properties
+                });
+            return ()=>
+            {   forEach(window, (k,w)=>
+                {   if( !( k in props ) )
+                        delete w[k]; // remove injected in scope window.xxx vars
+                });
+                Object.keys( props ).map( k => window[ k ] = props[ k ] );
+            }
+            function forEach( w, cb )
+            {
+                for( let k in w )
+                    if( !k.startsWith('_') // epa poc tools starting w/ underscore, keep them
+                        && !( k in transient )
+                        && !(  k in _refWindow ) )// keep clean window properties
+                        cb( k, w )
+            }
         }
     </script>
     <script id="scope0">
@@ -58,15 +69,30 @@
         const _restoreGlobals = _clearGlobal();
         import dep from './mod-page-dep.js';
         try
-        {   const scopeEval = code=>eval(code);
-            window._scopes.push( scopeEval);
+        {   let _tempVar;
+            const _scopeEval = code=>eval(code);
+            globalThis._scopes.push( _scopeEval );
+            const window = new Proxy(globalThis,
+                {   set: (target, property, value, receiver) =>
+                    {
+                        // _tempVar=value;
+                        // _scopeEval(`;var ${property}=_tempVar;`); eval does not inject variable into scope
+                        // _tempVar=undefined;
+                        target[property]=value;
+                        return value
+                    }
+                });
+
             var v0;
             var v1="v12";
             // undeclared = "u1"; load error in script type=module
+            window.fromWindow="FW";
             _log( 'v0=', v0 , 'expected undefined');
             _log( 'v1=', v1 , 'expected 1');
             _log( 'typeof undeclared=',typeof undeclared , 'expected undefined' );
             _log( 'typeof global=',typeof global , 'expected undefined' );
+            _log( 'typeof fromWindow=',typeof fromWindow , 'expected string' );
+            _log( 'fromWindow=', fromWindow , 'expected "FW"' );
             v0=dep("v02");
         }finally{ _restoreGlobals(); }
     </script>
@@ -79,6 +105,8 @@
             _log( 'typeof undeclared=', typeof undeclared , 'expected string');
             _log( 'undeclared=', undeclared , 'expected u0' );
             _log( 'global=', global , 'expected gl' );
+            _log( 'typeof fromWindow=',typeof fromWindow , 'expected undefined' );
+
         }
     </script>
     <br/>
@@ -90,8 +118,62 @@
 <button onclick="_scopes[0]('v0=10;')" > v0=10 </button> |
 <button onclick="_scopes[1]('v0=11;')" > v0=11 </button> |
 <button onclick="_scopes[2]('v0=12;')" > v0=12 </button> <hr/>
-    The <code>SCRIPT type=module</code> has proper insulation without the need for recover own context(globals)
-    before running event handler. It also support the 'import' syntax for modules.
+    The <code>SCRIPT type=module</code> (scope 2 here) has proper insulation without the need for recover own context(globals)
+    before running event handler. It also support the 'import' syntax for modules and ability to override <code>window</code>
+    object as local const variable as <code>Proxy</code> trapping the <code>window.XXX</code> assignment and
+    evaluating as variable in local scope.
+<hr/>
+    <h3>Scripts and event handlers</h3>
+    In order to reuse the scope, content of script tags and event handlers should be executed in same scope.
+    Which could be achieved either by
+    <pre>
+* running all code within single SCRIPT tag associated with <b>embed-page</b>.
+* wrapping each script with all pre- post- processing
+    </pre>
+    <h3>Global script handling</h3>
+    <table >
+        <tbody >
+        <tr >
+            <td >
 
+                <ol>
+                    <li>Collect all scripts code, extract all variables as keywords with exception of</li>
+                </ol>
+                <ul>
+                    <li>JS keywords</li>
+                    <li>"clean" window properties from blank iframe window</li>
+                    <li>EPA_ prefixed variables</li>
+                    <li>EpaWindow properties</li>
+                </ul>
+                <ol start="2">
+                    <li>in rendered script declare all collected variables.</li>
+                    <li>clone all EpaWindow properties into variables.<br>
+                        For each script code</li>
+                    <li>temporary clear container window properties to avoid leaking container globals into embed-page scope</li>
+                </ol>
+                <ul>
+                    <li>preserve "unclean" window properties</li>
+                    <li>remove those properties from window</li>
+                </ul>
+                <ol start="5">
+                    <li>in try{ section insert code }</li>
+                    <li>catch(ex){ console.error(ex)} will permit to run following SCRIPTs</li>
+                    <li>finally{}</li>
+                </ol>
+                <ul>
+                    <li>move added to container window properties into EpaWindow ( detect by comparing with reference iframe )</li>
+                    <li>restore container window properties</li>
+                </ul>
+                <ol start="8">
+                    <li>For each onXXX attribute</li>
+                </ol>
+                <ul>
+                    <li>in try section set event handler</li>
+                    <li>in event handler body insert code as in 4-7</li>
+                </ul>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </body>
 </html>

@@ -205,17 +205,20 @@
             <embed-page id="e7" scope="none" >
                 <template>
 <input class="current-script-related"/> expected <b>F</b> <br/>
-expected <b>F</b> mixed in field of sample #0 <hr/>
+<input class="document-selected"     />
+document selected INPUT on sample #0 should have <b>F</b> mixed in.
 <script type="module" title="F">
     import {appendTag} from './appendTag.js';
-    var       cs = document.currentScript
-    , parentNode = cs.parentNode
-    ,          f = parentNode.querySelector('.current-script-related');
-    f.value = f.value + cs.title;
-    appendTag( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
+    var       cs = document.currentScript;
+    if( cs )
+    {   let parentNode = cs.parentNode
+        ,            f = parentNode.querySelector('.current-script-related');
+        f.value = f.value + cs.title;
+        appendTag( 'div', 'called '+ cs.outerHTML.substring(0,50).replace( /</g , '&lt;') );
 
-    f = document.querySelector('.document-selected');
-    f.value = f.value + ( cs ? cs.title : '?' );
+        f = document.querySelector('.document-selected');
+        f.value = f.value + ( cs ? cs.title : '?' );
+    }
 </script>
                 </template>
             </embed-page>

@@ -21,57 +21,32 @@
     </custom-style>
     <style>
         @import "page.css";
+        iframe { width: 100%; }
+        fieldset { display: inline-block; border-bottom: none; border-right: none; }
+        embed-page { box-shadow: inset 0 0 2em #000000;  padding: 1em; }
+        demo-snippet { width: 45rem; display: inline-block;}
+        dl { border-left: 1em solid lightgray; padding-left: 1em; }
 
-        iframe {
-            width: 100%;
-        }
-
-        fieldset {
-            display: inline-block;
-            border-bottom: none;
-            border-right: none;
-        }
-
-        embed-page {
-            box-shadow: inset 0 0 2em #000000;
-            padding: 1em;
-        }
-
-        dl {
-            border-left: 1em solid lightgray;
-            padding-left: 1em;
-        }
-
-        @media (max-width: 500px) {
-            body, fieldset {
-                padding: 0;
-                border-left: none
-            }
+        @media (max-width: 640px) {
+            body, fieldset { padding: 0; border-left: none; }
         }
 
         @media (min-width: 100em) {
-            fieldset {
-                width: 46%
-            }
+            fieldset { width: 46% }
         }
-
-        #purple-color {
-            color: purple;
-        }
-
-        #violet-color {
-            color: violet;
-        }
+        section{ max-width: 40rem; display: inline-block; text-align: justify; padding-right: 2rem;}
     </style>
 </head>
 <body>
 
 
 <embed-page src="demo-menu.html" scope="none"></embed-page>
+<section>
 <h1>Basic &lt;embed-page&gt; demo</h1>
 <i> <a href="https://github.com/EPA-WG/EPA-concept">EPA-WG</a> (Embeddable Progressive Applications Working Group)</i>
-<p> The <code>&lt;embed-page/&gt;</code> is a proof of concept for Embeddable Progressive Application
-    - a microapplication container implemented as WebComponent acting as</p>
+<p> The <code>&lt;embed-page/&gt;</code> is an open source (<a href="https://github.com/EPA-WG/embed-page">GitHub</a>) proof of concept for Embeddable Progressive Application
+    - a <a href="https://github.com/EPA-WG/EPA-concept/blob/master/microapplication.md">microapplication</a>
+    container implemented as WebComponent acting as</p>
 <dl>
     <dt> Seamless IFRAME.</dt>
     <dd> Its content is embedded into page DOM, but insulated on JS, DOM, CSS and browsing context level( A links and
@@ -82,6 +57,8 @@
     <dd> With plain html and JS/css injection into page content.
     </dd>
 </dl>
+</section>
+<section>
 <h2>Where to use?</h2>
 <code>&lt;embed-page/&gt;</code> covers 2 extreme cases.
 <ol>
@@ -90,131 +67,74 @@
     </li>
     <li>Super-<b>complex</b> apps where on same page need to mix UX made with different frameworks and their
         incompatible otherwise revisions.<br/>
-        The JS Context insulation of embed-page provides "evolutionary architecture" support to web page.
+        The JS Context insulation of embed-page provides
+        "<a href="https://en.wikipedia.org/wiki/Continuous_design" >Evolutionary architecture/Continuous Design</a>"
+        support to web page.
     </li>
 </ol>
+</section>
+<section>
+<h2>Is it safe?</h2>
+<p>
+<code>&lt;embed-page/&gt;</code> has been made with security considerations in mind.
+It is definitely safer than exposing the whole page to 3rd part scripts which is a usual practice as of now.
+Within <code>&lt;embed-page/&gt;</code> scripts and CSS are insulated and which makes the container page relatively safe.
+It is not prone for hackers though. IFRAME given some extra safeguard with loosing on integration into web page
+and still having some holes addressed by <code>&lt;embed-page/&gt;</code>.<br/>
+
+The ultimate goal of <code>&lt;embed-page/&gt;</code> is to bring the web 3.0 needs to browser teams attention.
+Eventually making its functionality available on native level, safe and sound. <br/>
+Please comment, file the bug, star <a href="https://github.com/EPA-WG/embed-page">&lt;embed-page/&gt; project</a>
+to support the cause.
+</p>
+</section>
+<section>
+<h2>Try yourself</h2>
+    On <a href="https://jsfiddle.net/suns2015/k2sdfrt1/4/">JsFiddle</a> or
+    within <a href="https://github.com/EPA-WG/microapplications-digest/">Microapplications Digest</a>
 <h2>Demo cases</h2>
-<label>Change <var>src</var> attribute to
-    <select onchange="document.getElementsByTagName('embed-page')[1].src=this.value">
-        <option value="page-violet.html" selected="selected">page-violet.html</option>
-        <option value="page-purple.html">page-purple.html</option>
-    </select>
-</label>
-<demo-snippet>
-    <template>
-        <embed-page src="page-violet.html" id="epa-0"></embed-page>
-    </template>
-</demo-snippet>
-
-<fieldset>
-    <legend><a href="page-purple.html" target="_blank">page-purple.html</a></legend>
-    <legend>as <code>&lt;embed-page&gt;</code></legend>
-    <embed-page src="page-purple.html?a=b#c" id="epa-purple"></embed-page>
-    <legend> in IFRAME</legend>
-    <iframe src="page-purple.html"></iframe>
-    <legend> Source</legend>
-
-    <code src="./page-purple.html"></code>
-</fieldset>
-
-<fieldset>
-    <legend><a href="page-violet.html" target="_blank">page-violet.html</a></legend>
-    <legend>as <code>&lt;embed-page&gt;</code></legend>
-    <embed-page src="page-violet.html?d=e#f" id="epa-violet"></embed-page>
-    <p>&nbsp;</p>
-    <legend> in IFRAME</legend>
-    <iframe src="page-violet.html"></iframe>
-    <legend> Source</legend>
-
-    <code src="./page-violet.html"></code>
-</fieldset>
-<br/>
-<fieldset>
-    <legend>Demo(this) page</legend>
-    <div style="display: inline-block">
-        <h1>Default style header</h1>
-        The content of this section, page-violet.html, and page-purple.html is identical.<br/>
-        Scripts and CSS rules are operating with same IDs and class names.
-        <ul>
-            <li><input id="embedded" class="embedded" type="checkbox">
-                <button for="embedded">Toggle</button>
-                UNchecked by default.
-            </li>
-            <li><input id="external" class="external" type="checkbox">
-                <button for="external">Toggle</button>
-                checked by <var>page.js</var></li>
-        </ul>
-        <br/>
-        <input type="button" value="get"/><input type="button" value="set"/>
-        <label><input type="radio" name="l" value="location" checked> location </label>
-        <label><input type="radio" name="l" value="location.href"> location.href </label>
-        <label><input type="radio" name="l" value="window.location"> window.location </label>
-        <label><input type="radio" name="l" value="document.location"> document.location </label>
-        <textarea></textarea>
-
-        <input type="button" value="other properties"/> &bullet;
-        <input type="button" value="assign()"/>
-        <input type="button" value="reload()"/>
-        <input type="button" value="replace()"/> &bullet;
-        <input type="button" value="location-win-doc"/>
-        <input type="button" value="this===window"/>
-
-        <script src="page.js"></script>
-        <h3>Visual demo</h3>
-        <pre>
-<b>IFRAME</b>s are given as reference to desired behavior. Meaning same actions on IFRAME and <var>embed-page</var>
-    should have identical outcome in own UI.
-
-CSS
-    1. The header above should be intact(default) in color and text size.
-    2. Colors in demo components and IFRAMEs should match the page name: <i id="purple-color">purple</i>, <i
-                id="violet-color">violet</i> .
-
-JS
-    1. Checkboxes on page(in this section) should not be affected by <var>embed-page</var> content
-        and checked as labeled. Click on "Toggle" button from <var>embed-page</var> should trigger
-        checkmark only for own checkbox and not affect similar checkboxes in this section
-        or another <var>embed-page</var>.
-    2. Similarly toggling checkboxes here should not affect the <var>embed-page</var> intestines.
-
-Links
-    1. Click on link will replace the component content with page from <var>href</var> attribute.
-
-Form
-    1. GET and POST will replace content according to FORM <var>action</var> attribute.
-
-location & window.location & document.location
-    1. page in component populates text box with value matching SRC attribute of component.
-    2. clear the text box, click on GET. The full URL matching SRC attribute
-       should be placed in text box
-    3. change text box to <var>page-purple.html</var>, click on SET. The content of component
-       should load the page
-    4. repeat step 1-3 with 'href-get', 'href-set', 'location get', 'location set'
-    5. add URL properties like hash, port#, query parameters, user, password.
-       'other properties' should place matching key-value in text box.
-    6. change URL in text box, press 'assign()' or 'replace(), matching content
-       should be fetched.
-    7. 'reload()' should re-fetch and re-render content. See it in network and UI.
-    8. 'location-win-doc' should give true for identical 'location', 'window.location'
-       , and 'document.location'
-    9. 'this===window' should give true
-Cookies
-    1. set cookies <var>a=b</var>, set cookies <var>c=d</var>
-    2. get cookie should have both key/values presented
-    3. refresh page, get cookies should have both key/values presented
-
-
-</pre>
-    </div>
-    <div style="display: inline-block">
-        <legend><a href="page.  js" target="_blank">page.js</a></legend>
-        <code src="./page.js"></code>
-        When used from <var>embed-page</var>, the <var>document</var> is wrapped to reflect component instance
-        scope.<br/>
-        The click will trigger just own instance checkbox.
-    </div>
-</fieldset>
-<script src="../node_modules/wct-browser-legacy/browser.js"></script>
-<script src="index.html.test.js"></script>
+<p>Navigation menu provides links to demo pages with sources, visual and unit tests. Here are some most typical uses:  </p>
+</section>
+<hr/>
+    <demo-snippet>
+        <h3>Html as Component <a href="html-events-globals.html">more & test...</a></h3>
+        <template>
+            <embed-page>
+                <template>
+                    <style>a{   border-radius: 0.3em; margin: 0.2rem; padding: 0.2em;
+                                cursor: pointer; background: silver;
+                            }
+                    </style>
+                    Set background to:
+                    <a class="green" onclick="setBackground(this)"     tabindex="0"           >green </a>
+                    <a class="yellow" href='javascript:void(0)' onclick="setBackground(this)" >yellow</a>
+                    <a class="blue" href="javascript:setBackground({innerText:'blue'})"       >blue  </a>
+                    <button onclick="byId.value = lastColor" >get last color</button>
+                    <input placeholder="click button to see" id="byId"/>
+                    <a href="html-as-component.html?bla"  id="reload" >reload page</a>
+                    <script>
+                        var lastColor, color ;
+                        document.body.style.background = color;
+                        function setBackground(a)
+                        {
+                            byId.value = byId.style.background = lastColor = a.innerText.trim();
+                        }
+                    </script>
+                </template>
+            </embed-page>
+        </template>
+    </demo-snippet>
+    <demo-snippet>
+        <h3>Navigation by link and form <a href="link-form-navigation.html">more & test...</a></h3>
+        <div>Change <var>src</var> attribute to
+            <select onchange="epa0.src=this.value">
+                <option value="page-violet.html" selected="selected">page-violet.html</option>
+                <option value="page-purple.html">page-purple.html</option>
+            </select>
+        </div>
+        <template>
+            <embed-page src="page-violet.html" id="epa0"></embed-page>
+        </template>
+    </demo-snippet>
 </body>
 </html>

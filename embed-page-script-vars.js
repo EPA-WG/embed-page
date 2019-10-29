@@ -517,10 +517,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 this._extractVars( $( "*[id]", this.$.body ).map( n=>n.id ) );
                 [...this.window.document.querySelectorAll("*[id]")].map( el=> this.globals[ el.id ] = el );
 
-                this._initEventHadlers();
+                this._initEventHadlers($s);
                 return this._loadScriptsCode($s)
                            .then( arr => this._extractImports($s) )
-                           .then( arr => this._extractVars(arr) )
+                           .then( arr => this._extractVars(arr,$s) )
                            .then( x=> EPA_generateInjectScript( this, $s ) );
             }finally
                 {  this.watchHtml(1); }
@@ -563,36 +563,53 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             }
             return ret
         }
-        _extractVars( codeArr )
+        _extractVars( codeArr, scripts )
         {
             const kw = EPA_KEYWORDS
             ,   vars = {};
 
-            for( let c of codeArr )
-            {
+            for( let i=0; i<codeArr.length; i++ )
+            {   let c = codeArr[i]
+                ,   s = scripts ? scripts[i] :{}
+                ,  sv = [];
+
                 let code = c;//.replace( IMPORT_REGEX , ";");
+
                 ( code.match( VAR_REGEX ) || [] )
-                .forEach( w=> !( w in kw || w in vars ) && (vars[w]=this.globals[w]) );
+                .forEach( w=> !( w in kw || w in vars ) && (sv[w]=vars[w]=this.globals[w]) );
+
+                if( scripts )
+                {
+                    if( !('EPA_vars' in s) ) s.EPA_vars = {};
+                    Object.assign( s.EPA_vars, sv );
+                }
             }
             Object.assign( this.globals, vars );
         }
-        _initEventHadlers()
+        _initEventHadlers($s)
         {   const epc = this;
             $( EVENTS_SELECTOR, epc.$.body ).map( node=>
                 node.getAttributeNames().filter(a=>a.startsWith('on')).forEach( a=>
-                {   const code = node.getAttribute( a );
-                    epc._extractVars( [code] );
+                {   enshureScript();
+                    const code = node.getAttribute( a );
+                    epc._extractVars( [code],[ $s[0] ] );
                     node.removeAttribute(a);
                     node.addEventListener( a.substring(2)
                         , ev=> epc._handleEvent.call( node, ev, code, a ) )
                 }) );
             $( HREF_JS_SELECTOR, epc.$.body ).map( node=>
-                {   const code = node.getAttribute( 'href' ).substring( 'javascript:'.length );
-                    epc._extractVars( [code] );
+                {   enshureScript();
+                    const code = node.getAttribute( 'href' ).substring( 'javascript:'.length );
+                    epc._extractVars( [code],[ $s[0] ] );
 
                     node.removeAttribute('href');
                     node.addEventListener( 'click', ev=>( ev.preventDefault(), (code !=='void(0)' && epc._handleEvent.call( node, ev, code, 'href' ) ) ) )
                 });
+                function
+            enshureScript()
+            {   if( !$s.length )
+                    $s.push( el.appendChild( doc.createElement('script') ) );
+            }
         }
         _handleEvent( node, ev, code, eventAttr ){}// stub to be replaced by scoped implementation after _loadHtml
 
@@ -926,6 +943,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             ,   c = doc.createElement('script');
             $s[i] = c;
             c.setAttribute('type','module');
+            c.EPA_vars = s.EPA_vars; delete s.EPA_vars;
             c.textContent = code;
             for( let a of s.attributes )
                 if( !'src|type'.includes(a.name) )
@@ -948,7 +966,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         if( EPA_loadCount === EPA_local.loadCount )
         try
         {
-            EPA_globals2Vars = () => Object.keys( EPA_local.globals )
+            EPA_globals2Vars = () => Object.keys( EPA_currentScript.EPA_vars )
                                              .filter( w => EPA_isVar( w ) )
                                              .forEach(  w=>
                                              {   let gv = EPA_local.globals[w];
@@ -978,7 +996,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                              });
             EPA_vars2globals = () =>
                                 {
-                                    for( let w in EPA_local.globals )
+                                    for( let w in EPA_currentScript.EPA_vars )
                                         if( EPA_isVar(w) )
                                         {   let v = eval( w );
                                             if( v !== undefined )
@@ -996,7 +1014,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             EPA_StartScope   = ()=>
                                 {   const restoreWindowState = EPA_local._sanitizeWindow();
                                     EPA_globals2Vars();
-                                    for( let k in EPA_local.globals )
+                                    for( let k in EPA_currentScript.EPA_vars )
                                         if( k in EPA_local.window )
                                             try
                                             {   if( EPA_isVar(k) && eval( 'typeof ' + k ) !== 'function' )
@@ -1026,7 +1044,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                                                  ? value : eval( `${ property }=value` );
                     }
                 } );
-            Object.keys(EPA_local.globals)// wrap & save local functions 2 globals
+            Object.keys(EPA_currentScript.EPA_vars)// wrap & save local functions 2 globals
                   .forEach( w =>
                   {
                       try

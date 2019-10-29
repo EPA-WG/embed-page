@@ -29,24 +29,53 @@
     "@polymer/polymer": "^3.3.0"
   },
   "devDependencies": {
+    "@polymer/app-layout": "^3.1.0",
+    "@polymer/app-route": "^3.0.2",
+    "@polymer/iron-iconset": "^3.0.1",
+    "@polymer/iron-pages": "^3.0.1",
+    "@polymer/iron-scroll-threshold": "^3.0.1",
+    "@polymer/paper-card": "^3.0.1",
+    "@polymer/paper-fab": "^3.0.1",
+    "@polymer/paper-menu-button": "^3.0.1",
     "@polymer/iron-ajax": "^3.0.1",
+    "@polymer/iron-collapse": "^3.0.1",
     "@polymer/iron-demo-helpers": "^3.1.0",
+    "@polymer/iron-icons": "^3.0.1",
+    "@polymer/iron-image": "^3.0.2",
+    "@polymer/iron-test-helpers": "^3.0.1",
+    "@polymer/iron-validator-behavior": "^3.0.1",
+    "@polymer/marked-element": "^3.0.1",
+    "@polymer/paper-badge": "^3.1.0",
+    "@polymer/paper-button": "^3.0.1",
+    "@polymer/paper-checkbox": "^3.1.0",
+    "@polymer/paper-icon-button": "^3.0.2",
+    "@polymer/paper-input": "^3.0.2",
     "@polymer/paper-item": "^3.0.1",
     "@polymer/paper-listbox": "^3.0.1",
-    "@vaadin/vaadin-combo-box": "^5.0.5",
-    "@webcomponents/webcomponentsjs": "^2.2.10",
-    "codemirror": "^5.48.0",
+    "@polymer/paper-progress": "^3.0.1",
+    "@polymer/paper-spinner": "^3.0.2",
+    "@polymer/paper-tabs": "^3.1.0",
+    "@polymer/paper-toggle-button": "^3.0.1",
+    "@vaadin/vaadin-combo-box": "^5.0.8",
+    "@webcomponents/webcomponentsjs": "^2.3.0",
+    "codemirror": "^5.49.2",
     "growl": "^1.10.5",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.15",
     "marked": "^0.7.0",
-    "mochawesome": "^4.0.1",
-    "wct-browser-legacy": "^1.0.2"
+    "mocha": "^3.4.2",
+    "mochawesome": "^4.1.0",
+    "polymer-cli": "^1.9.11",
+    "wct-browser-legacy": "^1.0.0"
   },
   "directories": {
     "test": "test",
     "demo": "demo"
   },
   "scripts": {
-    "test": "polymer test"
+    "start": "polymer serve",
+    "build": "polymer build",
+    "lint": "polymer lint",
+    "test": "polymer test",
+    "test:integration": "polymer build # test that psk builds without error with the CLI"
   }
 }

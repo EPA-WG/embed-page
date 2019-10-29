@@ -51,4 +51,3 @@ function format( value )
             ).format( value );
 }
 
-export const NumberFormat = format;

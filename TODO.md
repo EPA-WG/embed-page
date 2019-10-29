@@ -1,4 +1,21 @@
-* HTML-as-component, using global event handlers & inline onXXX event script
+demo/appsList.html unoptimized test time 1100 ms
+* load optimisation: all vars marshalling is not needed, it is sufficient to marshall only vars from particular script
+    * use currentScript.EPA_vars in sync code
+* load optimisation: container window sanitizing is not needed if insulation done properly. Make it optional for hacky or suspicious code. Paranoid security mode.
+* load optimisation: simultaneous injection of scripts delays whole page until all scripts are executed
+
+
+# Release MVP
+* release bundle build
+* CDN deployment
+* JSFiddle/Plunkr publishing, https://www.sitepoint.com/7-code-playgrounds 
+
+* fix SCRIPT type!=module : keep original,do not create wrap, unit test
+* unit test 4 failed to load JS(incorrect syntax & r/t exception)
+* URL mapping and relative URLs resolving
+    
+* use    view-source: http schema ( instead of page execution) for fetching targetFrame  and onTargetLoad(), only in browsers which support view-source:(Chrome,FF, does not work in Edge)
+* console methods test
 * window.customElements API
 * move demo to CDN, wc.org does not serve URL params
 * document.head implementation (as script injection node in microapp)
@@ -42,6 +59,7 @@ Release 1
 * remove the use of cancelled XHRs.     
 
 WishList
+* browser-in-browser show case
 * onerror event
 * "noscript" attribute or scope value to serve content with JS completely disabled
 * include embed-script-legacy.js in package as embed-page.js could be served only via type=module, still eill be handy 
