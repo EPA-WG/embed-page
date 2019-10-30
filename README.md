@@ -64,6 +64,7 @@ are not required to use \<embed-page/\>
 
 ## To see in action 
 See the live basic [DEMO on CDN](https://cdn.xml4jquery.com/ajax/libs/embed-page/0.0.20/build/esm-unbundled/demo/index.html)
+, [JSFiddle](https://jsfiddle.net/suns2015/k2sdfrt1/)
 , or locally run
 ```bash
 $ polymer serve --open
