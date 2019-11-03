@@ -63,7 +63,7 @@ Polymer 3 Element is a base for embed-page. No other dependencies in run time pl
 are not required to use \<embed-page/\>
 
 ## To see in action 
-See the live basic [DEMO on CDN](https://cdn.xml4jquery.com/ajax/libs/embed-page/0.0.20/build/esm-unbundled/demo/index.html)
+See the live basic [DEMO on CDN](https://cdn.xml4jquery.com/ajax/libs/embed-page/0.0.21/build/esm-unbundled/demo/index.html)
 , [JSFiddle](https://jsfiddle.net/suns2015/k2sdfrt1/)
 , or locally run
 ```bash

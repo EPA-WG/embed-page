@@ -4,7 +4,10 @@ demo/appsList.html unoptimized test time 1100 ms
 * load optimisation: container window sanitizing is not needed if insulation done properly. Make it optional for hacky or suspicious code. Paranoid security mode.
 * load optimisation: simultaneous injection of scripts delays whole page until all scripts are executed
 
-
+* serviceWorker support
+* URL mapping unit test
+    * async import
+     
 # Release MVP
 * release bundle build
 * CDN deployment

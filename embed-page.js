@@ -8,7 +8,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     ,       EPA_KEYWORDS            = {}
     ,       ABS_URL      = /(^\/)|(^#)|(^[\w-\d]*:)/
     ,       VAR_REGEX    = /[a-zA-Z_\$][0-9a-zA-Z_\$]*/g
-    ,       IMPORT_REGEX = /[\W]import(.*?)(".*?"|'.*?')/g
+    ,       IMPORT_REGEX = /[\W]import([^\(]*?)(".*?"|'.*?')/g
     ,       HREF_JS_SELECTOR = '*[href^=javascript]'
     ,       EVENTS_SELECTOR  = Object.keys(window).filter( k=>k.startsWith('on') ).map(k=>'*['+k+']').join(',')
     ,       SCRIPTS_SELECTOR = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"],script[type="module"]';
@@ -17,7 +17,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
     const createEv = (x,type)=>(x=doc.createEvent(x),x.initEvent(type, false, false),x);
 
-    "Object,Function,Intl,Array,Number,BigInt,String,Boolean,Null,null,Undefined,undefined,Symbol,symbol,get,eval,set,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield,Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,MutationObserver"
+    "Object,Function,Intl,Array,Number,BigInt,String,Boolean,Null,null,Undefined,undefined,Symbol,symbol,get,eval,set,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield,Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,MutationObserver,Element,DocumentFragment"
     .split(',').map( k => EPA_KEYWORDS[k]=k );
     win.EPA_KEYWORDS = EPA_KEYWORDS;
 
@@ -136,6 +136,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             const customElements = //new CustomElementRegistry(win.customElements);
                                      new EpaCustomElementRegistry(win.customElements, app );
             defProperty( this, 'customElements'     , x=> customElements        );
+            defProperty( this, 'WebComponents'      , x=> win.WebComponents     );
             defProperty( this, 'MutationObserver'   , x=> win.MutationObserver  );
             defProperty( this, 'performance'        , x=> win.performance       );
 
@@ -143,6 +144,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
+            defProperty( this, 'navigator',x=> win.navigator );
             defProperty( this, 'closed', x=> closed    );
             defProperty( this, 'name'  , x=> app.name  );
             defProperty( this, 'target', x=> app.target);
