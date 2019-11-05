@@ -26,7 +26,9 @@
     "WebComponent"
   ],
   "dependencies": {
-    "@polymer/polymer": "^3.3.0"
+    "@polymer/polymer": "^3.3.0",
+    "acorn": "^7.1.0",
+    "acorn-loose": "^7.0.0"
   },
   "devDependencies": {
     "@polymer/app-layout": "^3.1.0",
