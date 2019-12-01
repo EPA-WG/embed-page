@@ -476,13 +476,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
         _loadHtml( htmlStr )
         {
-            {   let $b= css=> [ ...this.$.body.querySelectorAll( css ) ];
-                $b( "*[id]"  ).map( el => delete this.globals[ el.id ] );
-                $b( "script" ).map( el =>
-                {
-                    el.textContent=""; el.src=""; el.remove()
-                });
-            }
+            $( "script", this.$.body ).map(  el => el.remove() );
+
+            Object.keys( this.globals_removable ||{} ).forEach( k=>{  delete this.globals_removable[ k ];  delete this.globals[ k ] });
+            epa.globals_removable = {};
+
+
             this.loadCount++;
             try
             {   this.watchHtml(0);
@@ -518,10 +517,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
                 f.lastElementChild ? f.replaceChild( el, f.lastElementChild ).remove() : f.appendChild( el );
                 globalThis[ 'EPA_'+this.uid ] = this;
-                this._extractVars( $( "*[id]", this.$.body ).map( n=>n.id ) );
-                [...this.window.document.querySelectorAll("*[id]")].map( el=> this.globals[ el.id ] = el );
+                $( "*[id]", this.$.body ).map( n=> this.globals[n.id] = this.globals_removable = n );
 
-                this._initEventHadlers();
+                $s.unshift( this._initEventHadlers() );
                 return this._loadScriptsCode($s)
                            .then( arr => this._extractImports($s) )
                            .then( arr => this._extractVars(arr) )
@@ -581,22 +579,24 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             Object.assign( this.globals, vars );
         }
         _initEventHadlers()
-        {   const epc = this;
+        {   const epc = this, codeArr = [];
+
             $( EVENTS_SELECTOR, epc.$.body ).map( node=>
-                node.getAttributeNames().filter(a=>a.startsWith('on')).forEach( a=>
+                node.getAttributeNames().filter( a=>a.startsWith('on') ).forEach( a=>
                 {   const code = node.getAttribute( a );
-                    epc._extractVars( [code] );
+                    codeArr.push( code );
                     node.removeAttribute(a);
-                    node.addEventListener( a.substring(2)
-                        , ev=> epc._handleEvent.call( node, ev, code, a ) )
+                    node.addEventListener( a.substring(2), ev=> epc._handleEvent.call( node, ev, code, a ) )
                 }) );
             $( HREF_JS_SELECTOR, epc.$.body ).map( node=>
                 {   const code = node.getAttribute( 'href' ).substring( 'javascript:'.length );
-                    epc._extractVars( [code] );
-
+                    codeArr.push( code );
                     node.removeAttribute('href');
-                    node.addEventListener( 'click', ev=>( ev.preventDefault(), (code !=='void(0)' && epc._handleEvent.call( node, ev, code, 'href' ) ) ) )
+                    node.addEventListener( 'click', ev=>{ ev.preventDefault(); (code !=='void(0)' && epc._handleEvent.call( node, ev, code, 'href' ) ) } )
                 });
+            let s = doc.createElement('script');
+            s.textContent = codeArr.join(";");
+            return s;
         }
         _handleEvent( node, ev, code, eventAttr ){}// stub to be replaced by scoped implementation after _loadHtml
 
