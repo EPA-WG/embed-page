@@ -479,7 +479,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             $( "script", this.$.body ).map(  el => el.remove() );
 
             Object.keys( this.globals_removable ||{} ).forEach( k=>{  delete this.globals_removable[ k ];  delete this.globals[ k ] });
-            epa.globals_removable = {};
+            this.globals_removable = {};
 
 
             this.loadCount++;
@@ -598,7 +598,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             s.textContent = codeArr.join(";");
             return s;
         }
-        _handleEvent( node, ev, code, eventAttr ){}// stub to be replaced by scoped implementation after _loadHtml
+        _handleEvent( node, ev, code, eventAttr ){debugger}// stub to be replaced by scoped implementation after _loadHtml
 
         fetch()
         {
@@ -924,7 +924,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                             .replace( 'TMPL_LOAD_COUNT', epa.loadCount )
                             .replace( 'TMPL_CUR_SCRIPT', i )
                             .replace( 'TMPL_VARS', varList )
-                            .replace( 'TMPL_HAS_EV', !i )
+                            .replace( 'TMPL_HAS_EV', i==$s.length-1 )
                             .replace( 'TMPL_FINAL', i==$s.length-1 )
                             .replace( 'TMPL_CODE', EPA_PreparseScript(orig_code) )
             ,   c = doc.createElement('script');
@@ -935,7 +935,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 if( !'src|type'.includes(a.name) )
                     c.setAttribute( a.name, a.value );
 
-            s.parentNode.replaceChild(c, s);
+            s.parentNode && s.parentNode.replaceChild(c, s);
         })
     }
         function // todo disable optimisation
@@ -1055,7 +1055,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             EPA_currentScript.EPA_vars2globals = EPA_vars2globals;
             EPA_EndScope = EPA_StartScope();
-
             if( TMPL_HAS_EV )
                 EPA_local._handleEvent = function( ev, code/*, eventAttr */)
                 {
