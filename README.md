@@ -3,9 +3,10 @@ Proof of concept for
 [Embeddable Progressive Application](https://github.com/EPA-WG/EPA-concept)
  - a microapplication container, a WebComponent acting as seamless IFRAME and html include
 
+[![git](https://cdnjs.cloudflare.com/ajax/libs/octicons/8.5.0/svg/mark-github.svg) GitHub](https://github.com/EPA-WG/embed-page) 
+| [demo](https://cdn.xml4jquery.com/ajax/libs/embed-page/0.0.21/build/esm-unbundled/demo/index.html)
 [![NPM version][npm-image]][npm-url]
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/embed-page) 
-[![Join the chat at https://gitter.im/embed-page/Lobby](https://badges.gitter.im/embed-page/Lobby.svg)](https://gitter.im/embed-page/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Where to use?
 <code>&lt;embed-page/&gt;</code>  covers 2 extreme cases.
@@ -63,7 +64,7 @@ Polymer 3 Element is a base for embed-page. No other dependencies in run time pl
 are not required to use \<embed-page/\>
 
 ## To see in action 
-See the live basic [DEMO on CDN](https://cdn.xml4jquery.com/ajax/libs/embed-page/0.0.20/build/esm-unbundled/demo/index.html)
+See the live basic [DEMO on CDN](https://cdn.xml4jquery.com/ajax/libs/embed-page/0.0.21/build/esm-unbundled/demo/index.html)
 , [JSFiddle](https://jsfiddle.net/suns2015/k2sdfrt1/)
 , or locally run
 ```bash

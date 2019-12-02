@@ -8,7 +8,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
     ,       EPA_KEYWORDS            = {}
     ,       ABS_URL      = /(^\/)|(^#)|(^[\w-\d]*:)/
     ,       VAR_REGEX    = /[a-zA-Z_\$][0-9a-zA-Z_\$]*/g
-    ,       IMPORT_REGEX = /[\W]import(.*?)(".*?"|'.*?')/g
+    ,       IMPORT_REGEX = /[\W]import([^\(]*?)(".*?"|'.*?')/g
     ,       HREF_JS_SELECTOR = '*[href^=javascript]'
     ,       EVENTS_SELECTOR  = Object.keys(window).filter( k=>k.startsWith('on') ).map(k=>'*['+k+']').join(',')
     ,       SCRIPTS_SELECTOR = 'script:not([type]),script[type="application/javascript"],script[type="text/javascript"],script[type="module"]';
@@ -17,7 +17,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
     const createEv = (x,type)=>(x=doc.createEvent(x),x.initEvent(type, false, false),x);
 
-    "Object,Function,Intl,Array,Number,BigInt,String,Boolean,Null,null,Undefined,undefined,Symbol,symbol,get,eval,set,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield,Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,MutationObserver"
+    "arguments,Object,Function,Intl,Array,Number,BigInt,String,Boolean,Null,null,Undefined,undefined,Symbol,symbol,get,eval,set,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield,Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,MutationObserver,Element,DocumentFragment"
     .split(',').map( k => EPA_KEYWORDS[k]=k );
     win.EPA_KEYWORDS = EPA_KEYWORDS;
 
@@ -136,6 +136,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             const customElements = //new CustomElementRegistry(win.customElements);
                                      new EpaCustomElementRegistry(win.customElements, app );
             defProperty( this, 'customElements'     , x=> customElements        );
+            defProperty( this, 'WebComponents'      , x=> win.WebComponents     );
+            defProperty( this, 'ShadyDOM'           , x=> win.ShadyDOM          );
+            defProperty( this, 'ShadyCSS'           , x=> win.ShadyCSS          );
             defProperty( this, 'MutationObserver'   , x=> win.MutationObserver  );
             defProperty( this, 'performance'        , x=> win.performance       );
 
@@ -143,6 +146,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             defProperty( this, 'location', x=> h, v=> ( (app.src = v), h ) );
             defProperty( this, 'localStorage'  ,x=> ls );
             defProperty( this, 'sessionStorage',x=> ss );
+            defProperty( this, 'navigator',x=> win.navigator );
             defProperty( this, 'closed', x=> closed    );
             defProperty( this, 'name'  , x=> app.name  );
             defProperty( this, 'target', x=> app.target);
@@ -472,13 +476,12 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
         _loadHtml( htmlStr )
         {
-            {   let $b= css=> [ ...this.$.body.querySelectorAll( css ) ];
-                $b( "*[id]"  ).map( el => delete this.globals[ el.id ] );
-                $b( "script" ).map( el =>
-                {
-                    el.textContent=""; el.src=""; el.remove()
-                });
-            }
+            $( "script", this.$.body ).map(  el => el.remove() );
+
+            Object.keys( this.globals_removable ||{} ).forEach( k=>{  delete this.globals_removable[ k ];  delete this.globals[ k ] });
+            this.globals_removable = {};
+
+
             this.loadCount++;
             try
             {   this.watchHtml(0);
@@ -514,10 +517,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
                 f.lastElementChild ? f.replaceChild( el, f.lastElementChild ).remove() : f.appendChild( el );
                 globalThis[ 'EPA_'+this.uid ] = this;
-                this._extractVars( $( "*[id]", this.$.body ).map( n=>n.id ) );
-                [...this.window.document.querySelectorAll("*[id]")].map( el=> this.globals[ el.id ] = el );
+                $( "*[id]", this.$.body ).map( n=> this.globals[n.id] = this.globals_removable = n );
 
-                this._initEventHadlers();
+                $s.unshift( this._initEventHadlers() );
                 return this._loadScriptsCode($s)
                            .then( arr => this._extractImports($s) )
                            .then( arr => this._extractVars(arr) )
@@ -577,24 +579,26 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             Object.assign( this.globals, vars );
         }
         _initEventHadlers()
-        {   const epc = this;
+        {   const epc = this, codeArr = [];
+
             $( EVENTS_SELECTOR, epc.$.body ).map( node=>
-                node.getAttributeNames().filter(a=>a.startsWith('on')).forEach( a=>
+                node.getAttributeNames().filter( a=>a.startsWith('on') ).forEach( a=>
                 {   const code = node.getAttribute( a );
-                    epc._extractVars( [code] );
+                    codeArr.push( code );
                     node.removeAttribute(a);
-                    node.addEventListener( a.substring(2)
-                        , ev=> epc._handleEvent.call( node, ev, code, a ) )
+                    node.addEventListener( a.substring(2), ev=> epc._handleEvent.call( node, ev, code, a ) )
                 }) );
             $( HREF_JS_SELECTOR, epc.$.body ).map( node=>
                 {   const code = node.getAttribute( 'href' ).substring( 'javascript:'.length );
-                    epc._extractVars( [code] );
-
+                    codeArr.push( code );
                     node.removeAttribute('href');
-                    node.addEventListener( 'click', ev=>( ev.preventDefault(), (code !=='void(0)' && epc._handleEvent.call( node, ev, code, 'href' ) ) ) )
+                    node.addEventListener( 'click', ev=>{ ev.preventDefault(); (code !=='void(0)' && epc._handleEvent.call( node, ev, code, 'href' ) ) } )
                 });
+            let s = doc.createElement('script');
+            s.textContent = codeArr.join(";");
+            return s;
         }
-        _handleEvent( node, ev, code, eventAttr ){}// stub to be replaced by scoped implementation after _loadHtml
+        _handleEvent( node, ev, code, eventAttr ){debugger}// stub to be replaced by scoped implementation after _loadHtml
 
         fetch()
         {
@@ -920,7 +924,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                             .replace( 'TMPL_LOAD_COUNT', epa.loadCount )
                             .replace( 'TMPL_CUR_SCRIPT', i )
                             .replace( 'TMPL_VARS', varList )
-                            .replace( 'TMPL_HAS_EV', !i )
+                            .replace( 'TMPL_HAS_EV', i==$s.length-1 )
                             .replace( 'TMPL_FINAL', i==$s.length-1 )
                             .replace( 'TMPL_CODE', EPA_PreparseScript(orig_code) )
             ,   c = doc.createElement('script');
@@ -931,7 +935,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 if( !'src|type'.includes(a.name) )
                     c.setAttribute( a.name, a.value );
 
-            s.parentNode.replaceChild(c, s);
+            s.parentNode && s.parentNode.replaceChild(c, s);
         })
     }
         function // todo disable optimisation
@@ -1051,7 +1055,6 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
             EPA_currentScript.EPA_vars2globals = EPA_vars2globals;
             EPA_EndScope = EPA_StartScope();
-
             if( TMPL_HAS_EV )
                 EPA_local._handleEvent = function( ev, code/*, eventAttr */)
                 {
