@@ -516,6 +516,9 @@ import EpaParser from "./EpaParser";
                 let $s       = $( SCRIPTS_SELECTOR, el );// skip detach() as code could expect script tags present;
                 $s.map( el => el.getAttribute('src') && el.setAttribute('src',el.src) );// convert to absolute path to honor document.baseURI
 
+                for( let k in w )
+                    if( w[k] !== win[k] )
+                        this.globals[k] = w[k];
                 f.lastElementChild ? f.replaceChild( el, f.lastElementChild ).remove() : f.appendChild( el );
                 globalThis[ 'EPA_'+this.uid ] = this;
                 $( "*[id]", this.$.body ).map( n=> this.globals[n.id] = this.globals_removable = n );
@@ -1049,7 +1052,7 @@ import EpaParser from "./EpaParser";
     }
     function defProperty( obj, name, getter, setter=getter  )
     {
-        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: false, configurable:true } )
+        Object.defineProperty( obj, name,{ get: getter, set: setter, enumerable: true, configurable:true } )
     }
 
     return EmbedPage;
