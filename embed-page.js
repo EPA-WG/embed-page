@@ -1,4 +1,5 @@
 import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
+import EpaParser from "./EpaParser";
 // import('../@polymer/polymer/polymer-element.js').then( ({html, PolymerElement}) =>{
 
 ( function( win, doc )
@@ -545,8 +546,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         }
         _extractImports( $s )
         {
-            const ret = []
-            ,   undef = undefined;
+            const undef = undefined;
             for( let s of $s )
             {   const imports = []
                 , importVars = {};
@@ -561,20 +561,23 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                 s.EPA_code       = noImportsCode;
                 s.EPA_imports    = imports;
                 s.EPA_importVars = importVars;
-                ret.push( noImportsCode );
             }
-            return ret
+            return $s
         }
-        _extractVars( codeArr )
+        _extractVars( $s )
         {
             const kw = EPA_KEYWORDS
-            ,   vars = {};
+            ,   vars = {}
+            ,      u = undefined;
 
-            for( let c of codeArr )
-            {
-                let code = c;//.replace( IMPORT_REGEX , ";");
-                ( code.match( VAR_REGEX ) || [] )
-                .forEach( w=> !( w in kw || w in vars ) && (vars[w]=this.globals[w]) );
+            for( let s of $s )
+            {   let si = s.EPA_skipInit = {}
+                ,  ast = EpaParser( s.EPA_code );
+                ast.vars.forEach( v => vars[v] = this.globals[v] );
+                [...ast.imports,...ast.consts,...ast.lets,...ast.funcs ].forEach( v => si[v] = vars[v] = this.globals[v] );
+                s.EPA_funcs = ast.funcs;
+                // let code = c;//.replace( IMPORT_REGEX , ";");
+                // ( code.match( VAR_REGEX ) || [] ).forEach( w=> !( w in kw || w in vars ) && (vars[w]=this.globals[w]) );
             }
             Object.assign( this.globals, vars );
         }
@@ -913,33 +916,41 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         $s.forEach( (s, i )=>
         {
             const   orig_code = s.EPA_code
-            ,         varList = Object.keys( epa.globals )
-                                  .filter( w=>EPA_isVar( w ) )
-                                  .filter( w=> !(w in s.EPA_importVars) )
-                                  .filter( w=>!orig_code || !new RegExp( "function\\s?"+w+"\\W").test( orig_code ) )
-                                  .join(',')
-            ,   code = s.EPA_imports.join('\n')
+            ,         varList = Object.keys( epa.globals ).filter( w=>EPA_isVar( w ) )
+            ,            vars = varList.filter( w=> !(w in s.EPA_skipInit) ).join(',')
+            ,        varsInit = varList.filter( w=> !(w in s.EPA_skipInit) )
+                                    // .filter( w=>!orig_code || !new RegExp( "function\\s?"+w+"\\W").test( orig_code ) )
+                                    .map( v=> v+'=EPA_local.globals["'+v+'"]' )
+                                    .join(',')
+            , varsSync = varList.map( v=> 'EPA_local.globals["'+v+'"]='+v ).join(',')
+            ,     code = s.EPA_imports.join('\n')
                         + getBodyStr( scriptTemplate )
                             .replace( 'TMPL_EPA', 'EPA_'+epa.uid )
                             .replace( 'TMPL_LOAD_COUNT', epa.loadCount )
                             .replace( 'TMPL_CUR_SCRIPT', i )
-                            .replace( 'TMPL_VARS', varList )
+                            .replace( 'TMPL_VARS', vars || 'EPA_no_VARS' )
+                            .replace( 'TMPL_INIT', varsInit || 0 )
+                            .replace( 'TMPL_SYNC', varsSync || 0 )
                             .replace( 'TMPL_HAS_EV', i==$s.length-1 )
-                            .replace( 'TMPL_FINAL', i==$s.length-1 )
+                            .replace( 'TMPL_FINAL' , i==$s.length-1 )
                             .replace( 'TMPL_CODE', EPA_PreparseScript(orig_code) )
             ,   c = doc.createElement('script');
             $s[i] = c;
             c.setAttribute('type','module');
             c.textContent = code;
             for( let a of s.attributes )
-                if( !'src|type'.includes(a.name) )
+                if( a.name.startsWith('EPA_') || !'src|type'.includes(a.name) )
                     c.setAttribute( a.name, a.value );
+            for( let k in s )
+                if( k.startsWith('EPA_') )
+                    c[k]=s[k];
 
-            s.parentNode && s.parentNode.replaceChild(c, s);
+            if( s.parentNode )
+                {    s.parentNode.replaceChild( c, s ); }
         })
     }
         function // todo disable optimisation
-    scriptTemplate( TMPL_EPA,  TMPL_VARS, TMPL_HAS_EV, TMPL_CODE, TMPL_LOAD_COUNT, TMPL_FINAL )
+    scriptTemplate( TMPL_EPA,  TMPL_VARS, TMPL_INIT, TMPL_SYNC, TMPL_HAS_EV, TMPL_CODE, TMPL_LOAD_COUNT, TMPL_FINAL )
     {   const   EPA_local     = TMPL_EPA
         ,       EPA_loadCount = TMPL_LOAD_COUNT
         ,       EPA_PreparseScript = EPA_local.preparseScript
@@ -952,68 +963,15 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
         if( EPA_loadCount === EPA_local.loadCount )
         try
         {
-            EPA_globals2Vars = () => Object.keys( EPA_local.globals )
-                                             .filter( w => EPA_isVar( w ) )
-                                             .forEach(  w=>
-                                             {   let gv = EPA_local.globals[w];
-                                                 try
-                                                 {   let fl = eval('typeof '+w );
-                                                     if( fl === "function" )
-                                                     {   // do not override local func
-                                                     }else
-                                                     {   if( typeof gv === 'function')
-                                                     {   EPA_wrap_caller.EPA_wrap_caller=1;
-                                                         eval( w + "=EPA_wrap_caller" )
-                                                     }else
-                                                         eval( w + "=gv" )
-                                                     }
-                                                 }catch( ex )
-                                                 {   if( !ex.message.includes('before initialization') && !ex.message.includes('ssignment to const') )// legitimate case "Cannot access 'XXX' before initialization" or "invalid assignment to const XXX"
-                                                        debugger;
-                                                 }
-
-                                                 function EPA_wrap_caller()
-                                                 {   try
-                                                 {   EPA_vars2globals();
-                                                     return gv.apply(this,arguments)
-                                                 }finally
-                                                 { EPA_globals2Vars(); }
-                                                 }
-                                             });
-            EPA_vars2globals = () =>
-                                {
-                                    for( let w in EPA_local.globals )
-                                        if( EPA_isVar(w) )
-                                        {   let v = eval( w );
-                                            if( v !== undefined )
-                                            {   if( v.EPA_wrap_caller ||
-                                                    (EPA_local.globals[w] || {} ).EPA_script_scope_wrapper )
-                                            {
-
-                                            }else
-                                            {
-                                                EPA_local.globals[ w ] = v;
-                                            }
-                                            }
-                                        }
-                                };
+            EPA_globals2Vars = () => TMPL_INIT;
             EPA_StartScope   = ()=>
                                 {   const restoreWindowState = EPA_local._sanitizeWindow();
                                     EPA_globals2Vars();
-                                    for( let k in EPA_local.globals )
-                                        if( k in EPA_local.window )
-                                            try
-                                            {   if( EPA_isVar(k) && eval( 'typeof ' + k ) !== 'function' )
-                                                eval( k + '=EPA_local.window.' + k );
-                                            }catch(ex)
-                                            {   if( !ex.message.includes('before initialization') )// legitimate case "Cannot access 'XXX' before initialization"
-                                                debugger;
-                                            }
                                     let executed = 0;
                                     return function EPA_EndScope()
                                     {
                                         if( executed  )
-                                        { return; }
+                                            { return; }
                                         executed = 1;
 
                                         EPA_vars2globals();
@@ -1030,14 +988,10 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
                                                                                  ? value : eval( `${ property }=value` );
                     }
                 } );
-            Object.keys(EPA_local.globals)// wrap & save local functions 2 globals
-                  .forEach( w =>
+            EPA_currentScript.EPA_funcs.forEach( w =>
                   {
                       try
-                      {   if( eval( `typeof ${ w }` ) !== "function" )
-                          return;
-
-                          function EPA_script_scope_wrapper()
+                      {   function EPA_script_scope_wrapper()
                           {   try
                               {   const EPA_func = eval(w);
                                   EPA_globals2Vars();
@@ -1066,6 +1020,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             document.setCurrentScript(EPA_currentScript);
 //####################################
             TMPL_CODE;
+            EPA_vars2globals = () => TMPL_SYNC;
         }finally
         {
             EPA_EndScope();
