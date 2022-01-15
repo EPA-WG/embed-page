@@ -61,7 +61,7 @@
     "codemirror": "^5.49.2",
     "growl": "^1.10.5",
     "lodash": "^4.17.15",
-    "marked": "^0.7.0",
+    "marked": "^4.0.10",
     "mocha": "^3.5.3",
     "mochawesome": "^4.1.0",
     "polymer-cli": "^1.9.11",
