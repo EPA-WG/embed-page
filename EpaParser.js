@@ -1,8 +1,24 @@
 import {LooseParser} from "acorn-loose";
 export default function parse( code ) /** throws SyntaxError exception */
 {
-    const ret = { imports:[], vars:[], consts:[], lets:[], funcs: [] };
-    const ast = LooseParser.parse( code, {sourceType:"module"} );
+    const ret = { imports:[], vars:[], consts:[], lets:[], funcs: [], win:{} }
+    ,     ast = LooseParser.parse( code, {sourceType:"module"} )
+    ,   sniffGlobals = a=>
+    {
+        try {
+
+
+            for( let k in a)
+                if( a.expression && a.expression.left && 'window' === a.expression.left.object.name )
+                    ret.win[a.expression.left.property.name] = 1;
+                else
+                    a[k] && sniffGlobals(a[k])
+        }catch (e) {
+
+debugger;
+        }
+    };
+    sniffGlobals(ast);
     ast.body.forEach( n=>
     {
         switch( n.type )

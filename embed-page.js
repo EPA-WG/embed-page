@@ -576,6 +576,7 @@ import EpaParser from "./EpaParser";
             for( let s of $s )
             {   let si = s.EPA_skipInit = {}
                 ,  ast = EpaParser( s.EPA_code );
+                for( let k in ast.win ) vars[k]=this.globals[k];
                 ast.vars.forEach( v => vars[v] = this.globals[v] );
                 [...ast.imports,...ast.consts,...ast.lets,...ast.funcs ].forEach( v => si[v] = vars[v] = this.globals[v] );
                 s.EPA_funcs = ast.funcs;
@@ -977,8 +978,9 @@ import EpaParser from "./EpaParser";
                                             { return; }
                                         executed = 1;
 
-                                        EPA_vars2globals();
-                                        [...EPA_local.getElementsByTagName('script')].forEach( s=> s.EPA_vars2globals && s.EPA_vars2globals() );
+                                        // EPA_vars2globals();
+                                        [...document.getElementsByTagName('script')].filter(s=>s!==EPA_currentScript)
+                                            .forEach( s=> s.EPA_vars2globals && s.EPA_vars2globals() );
                                         restoreWindowState();
                                         EPA_local._onScriptDone( EPA_currentScript );
                                     }

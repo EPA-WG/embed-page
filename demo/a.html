@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>embed-page demo - window scope</title>
+
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script type="module">
+        import '@polymer/iron-demo-helpers/demo-pages-shared-styles';
+        import '@polymer/iron-demo-helpers/demo-snippet';
+        import './inline-demo-component.js';
+    </script>
+    <script src="../embed-page.js" type="module"></script>
+    <style>textarea { height: 6em; width:32em;} demo-snippet{ box-shadow: 0 2px 15px 10px grey; }</style>
+</head>
+<body>
+<h1>embed-page demo - window scope</h1>
+<b>embed-page</b> populates <b>window</b> object members as "global" to microapplication variable.
+<p>NOTE: the scope variables are populated in beginning of &lt;<var>script</var>&gt; section. Hence the window object members are not immediately available after assignment.</p>
+
+<demo-snippet>
+    <h3>1. first SCRIPT sets <b>window.abc</b> to "ABC", second SCRIPT reads <b>abc</b> as global variable.</h3>
+    <template>
+        <embed-page  id="e0">
+            <template>
+                <script>console.log( 'abc' in window, "should be",false );</script>
+                <script>
+debugger;
+                    window.abc="ABC";</script>
+                <script>
+                    document.querySelector('.w').value = window.abc;
+                    document.querySelector('.g').value = abc;
+                </script>
+                <input class="w"/> window.abc, "should be","ABC"<br/>
+                <input class="g"/> global abc, "should be","ABC"<br/>
+            </template>
+        </embed-page>
+    </template>
+</demo-snippet>
+
+</body>
+</html>
