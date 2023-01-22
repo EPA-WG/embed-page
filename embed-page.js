@@ -17,7 +17,7 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
 
     const createEv = (x,type)=>(x=doc.createEvent(x),x.initEvent(type, false, false),x);
 
-    "arguments,Object,Function,Intl,Array,Number,BigInt,String,Boolean,Null,null,Undefined,undefined,Symbol,symbol,get,eval,set,break,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield,Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,MutationObserver,Element,DocumentFragment"
+    "arguments,Object,Function,Intl,Array,Number,BigInt,String,Boolean,Null,null,Undefined,undefined,Symbol,symbol,get,eval,set,break,async,await,case,catch,continue,debugger,default,delete,do,else,false,finally,for,function,if,in,instanceof,new,null,return,switch,this,throw,true,try,typeof,var,void,while,with,abstract,boolean,byte,char,class,const,double,enum,export,extends,final,float,goto,implements,import,int,interface,let,long,native,package,private,protected,public,short,static,super,synchronized,throws,transient,volatile,yield,Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,MutationObserver,Element,DocumentFragment"
     .split(',').map( k => EPA_KEYWORDS[k]=k );
     win.EPA_KEYWORDS = EPA_KEYWORDS;
 
@@ -551,7 +551,9 @@ import {html, PolymerElement} from '@polymer/polymer/polymer-element.js';
             {   const imports = []
                 , importVars = {};
                 let code = s.EPA_code;
-                const noImportsCode = code.replace( IMPORT_REGEX, (match, vars, url, offset, string) =>
+                const noImportsCode = !code.includes('import(') // regex is not reliable
+                                    ? code
+                                    : code.replace( IMPORT_REGEX, (match, vars, url, offset, string) =>
                 {
                     ( vars.match( VAR_REGEX ) || [] )
                         .forEach( w=>  (importVars[w]=undef) );
